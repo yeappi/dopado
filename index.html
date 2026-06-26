@@ -16,42 +16,55 @@
 @import url('https://fonts.googleapis.com/css2?family=Reggae+One&family=Orbitron:wght@700;900&display=swap');
 
 :root{
+  --app-top:0px;
+  --app-h:100vh;
   --kb:0px;
+
   --safe-top:env(safe-area-inset-top,0px);
   --safe-bottom:env(safe-area-inset-bottom,0px);
+
   --header-h:46px;
   --dock-h:158px;
   --input-h:58px;
   --habit-h:100px;
 }
 
-*{box-sizing:border-box}
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
 
-html,body{
+html,
+body{
   margin:0;
   width:100%;
   height:100%;
-  background:#020208;
   overflow:hidden;
+  background:#020208;
   font-family:system-ui,sans-serif;
   -webkit-text-size-adjust:100%;
   overscroll-behavior:none;
 }
 
 body{
-  touch-action:manipulation;
   position:fixed;
   inset:0;
+  touch-action:manipulation;
 }
 
+/*
+  App frame:
+  iOSがキーボード表示時にvisualViewportをずらしても、
+  JSで --app-top を合わせて、見た目上ヘッダーが動かないようにする。
+*/
 #sf8{
   position:fixed;
-  top:0;
+  top:var(--app-top);
   left:50%;
   transform:translateX(-50%);
   width:100%;
   max-width:430px;
-  height:100vh;
+  height:var(--app-h);
   background:#07070f;
   color:#c8d8f0;
   overflow:hidden;
@@ -65,7 +78,7 @@ body{
   top:0;
   left:0;
   right:0;
-  z-index:20;
+  z-index:30;
   height:calc(var(--safe-top) + var(--header-h));
   padding:var(--safe-top) 16px 0;
   display:flex;
@@ -112,41 +125,51 @@ body{
   letter-spacing:2px;
 }
 
-/* screen stays fixed */
+/* fixed task area */
 #ta{
   position:absolute;
   top:calc(var(--safe-top) + var(--header-h));
-  bottom:var(--dock-h);
+  bottom:calc(var(--dock-h) + var(--safe-bottom));
   left:0;
   right:0;
   overflow-y:auto;
   padding:12px 14px;
   -webkit-overflow-scrolling:touch;
+  z-index:5;
 }
 
+/*
+  Praise layer:
+  bottomを0にして、浮いたdock付近から出ても隠れないようにする。
+  pointer-events:noneなので入力操作は邪魔しない。
+*/
 #pc{
   position:absolute;
   top:calc(var(--safe-top) + var(--header-h));
-  bottom:var(--dock-h);
+  bottom:0;
   left:0;
   right:0;
   pointer-events:none;
   overflow:hidden;
-  z-index:15;
+  z-index:40;
   transform:translateZ(0);
 }
 
-/* only this dock floats above the keyboard */
+/*
+  Floating dock:
+  画面本体は動かさず、ここだけキーボード分だけ上に浮く。
+*/
 #bottomDock{
   position:absolute;
   left:0;
   right:0;
   bottom:0;
   height:calc(var(--dock-h) + var(--safe-bottom));
-  z-index:30;
-  transform:translateY(calc(var(--kb) * -1));
+  z-index:35;
+  transform:translate3d(0,calc(var(--kb) * -1),0);
   transition:transform .18s ease-out;
   will-change:transform;
+  background:#07070f;
 }
 
 #habitRow{
@@ -166,7 +189,7 @@ body{
   right:0;
   bottom:0;
   height:calc(var(--input-h) + var(--safe-bottom));
-  padding:0 12px var(--safe-bottom);
+  padding:8px 12px calc(8px + var(--safe-bottom));
   border-top:1px solid #1e1e38;
   background:#07070f;
   display:flex;
@@ -243,7 +266,8 @@ body{
   align-items:center;
 }
 
-.dot-on,.dot-off{
+.dot-on,
+.dot-off{
   width:9px;
   height:9px;
   border-radius:50%;
@@ -372,7 +396,7 @@ body{
   position:absolute;
   left:12px;
   right:12px;
-  bottom:calc(var(--dock-h) + 8px);
+  bottom:calc(var(--dock-h) + var(--safe-bottom) + 8px);
   background:#0f0f20;
   border:1px solid #1e1e38;
   border-left:3px solid #c8a020;
@@ -383,7 +407,7 @@ body{
   font-weight:500;
   text-align:center;
   line-height:1.8;
-  z-index:40;
+  z-index:50;
   pointer-events:none;
 }
 
@@ -462,6 +486,7 @@ body{
         spellcheck="false"
         enterkeyhint="done"
         oninput="onIn(event)"
+        onbeforeinput="onBeforeInput(event)"
         onkeydown="onKey(event)"
         oncompositionstart="onCompStart(event)"
         oncompositionupdate="onCompUpdate(event)"
@@ -513,16 +538,19 @@ const DONE_PR=[
 ];
 
 let tasks=[];
+
 let isComposing=false;
+let compBaseLen=0;
 let compText="";
-let lastValueLen=0;
-let lastCompLen=0;
+let observedLen=0;
 let praiseMeter=0;
 let lastPraiseAt=0;
+
 let livePraise=0;
 let busyLanes=new Set();
 let activePraise=new Set();
-let baseViewportHeight=window.innerHeight;
+
+let baseViewportHeight=0;
 
 const NS="http://www.w3.org/2000/svg";
 const FF="'Reggae One', system-ui, sans-serif";
@@ -547,6 +575,63 @@ function newId(){
 
 function shuffle(a){
   return a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(v=>v[1]);
+}
+
+function isStandalone(){
+  return window.navigator.standalone===true ||
+    window.matchMedia("(display-mode: standalone)").matches;
+}
+
+function viewportHeight(){
+  return window.visualViewport ? window.visualViewport.height : window.innerHeight;
+}
+
+function viewportTop(){
+  return window.visualViewport ? window.visualViewport.offsetTop : 0;
+}
+
+function initBaseViewport(force){
+  const h=Math.max(window.innerHeight, viewportHeight());
+
+  if(force || !baseViewportHeight){
+    baseViewportHeight=h;
+    return;
+  }
+
+  const inputFocused=document.activeElement===document.getElementById("mi");
+
+  if(!inputFocused && h>baseViewportHeight){
+    baseViewportHeight=h;
+  }
+}
+
+/*
+  Core viewport sync:
+  - #sf8 follows visualViewport top, so iOS viewport panning is visually cancelled.
+  - app height stays based on the largest non-keyboard viewport.
+  - only bottomDock is lifted by keyboard amount.
+*/
+function syncViewport(){
+  initBaseViewport(false);
+
+  const vvTop=viewportTop();
+  const vvH=viewportHeight();
+  const inputFocused=document.activeElement===document.getElementById("mi");
+
+  const rawLift=baseViewportHeight-vvH;
+  const lift=inputFocused ? Math.max(0,Math.round(rawLift)) : 0;
+
+  document.documentElement.style.setProperty("--app-top", Math.round(vvTop)+"px");
+  document.documentElement.style.setProperty("--app-h", Math.round(baseViewportHeight)+"px");
+  document.documentElement.style.setProperty("--kb", lift+"px");
+
+  lockScroll();
+}
+
+function lockScroll(){
+  if(window.scrollX!==0 || window.scrollY!==0){
+    window.scrollTo(0,0);
+  }
 }
 
 function isSideMark(ch){
@@ -632,45 +717,7 @@ function drawPraiseText(svg,item,groups,box,fs){
   });
 }
 
-/* keyboard only moves bottomDock */
-function refreshBaseViewportHeight(){
-  const vv=window.visualViewport;
-  const h=vv?vv.height:window.innerHeight;
-  if(h>baseViewportHeight)baseViewportHeight=h;
-}
-
-function keyboardInset(){
-  const vv=window.visualViewport;
-  if(!vv)return 0;
-
-  const byInner=window.innerHeight-(vv.height+vv.offsetTop);
-  const byBase=baseViewportHeight-vv.height-vv.offsetTop;
-  const inset=Math.max(byInner,byBase,0);
-
-  return Math.max(0,Math.round(inset));
-}
-
-function syncDock(){
-  document.documentElement.style.setProperty("--kb",keyboardInset()+"px");
-}
-
-function onInputFocus(){
-  setTimeout(()=>{
-    refreshBaseViewportHeight();
-    syncDock();
-    resetPraiseInput();
-  },60);
-
-  setTimeout(syncDock,180);
-  setTimeout(syncDock,360);
-  setTimeout(syncDock,700);
-}
-
-function onInputBlur(){
-  setTimeout(syncDock,80);
-}
-
-/* praise origin follows floating dock */
+/* praise origin follows floating bottom dock */
 function getPraiseOrigin(){
   const pc=document.getElementById("pc");
   const dock=document.getElementById("bottomDock");
@@ -759,7 +806,7 @@ function pickPraisePosition(w,h){
 function spawnPraise(mode="input",forcedItem=null){
   if(livePraise>=MAX_PRAISE)return;
 
-  syncDock();
+  syncViewport();
 
   const pc=document.getElementById("pc");
   if(!pc)return;
@@ -826,8 +873,8 @@ function updateInputButtons(v){
 }
 
 function resetPraiseInput(){
-  lastValueLen=charLen(rawValue());
-  lastCompLen=0;
+  observedLen=charLen(rawValue());
+  compBaseLen=observedLen;
   compText="";
   praiseMeter=0;
   lastPraiseAt=0;
@@ -849,82 +896,109 @@ function addPraiseProgress(amount,force){
 
   praiseMeter+=amount;
 
-  if(praiseMeter>=PRAISE_STEP&&now-lastPraiseAt>=PRAISE_COOLDOWN){
+  if(praiseMeter>=PRAISE_STEP && now-lastPraiseAt>=PRAISE_COOLDOWN){
     spawnPraise("input");
     lastPraiseAt=now;
     praiseMeter=0;
   }
 }
 
+function observeTypingLength(len){
+  if(len<observedLen){
+    if(!isComposing){
+      observedLen=len;
+    }
+    return;
+  }
+
+  if(len>observedLen){
+    addPraiseProgress(len-observedLen,false);
+    observedLen=len;
+  }
+}
+
+function onBeforeInput(e){
+  syncViewport();
+
+  /*
+    beforeinputは保険。
+    直接ここでは加算せず、直後のvalueを読みにいく。
+    これでoninputとの二重カウントを避ける。
+  */
+  if(!isComposing){
+    setTimeout(()=>{
+      observeTypingLength(charLen(rawValue()));
+    },0);
+  }
+}
+
 function onCompStart(){
+  syncViewport();
   isComposing=true;
+  compBaseLen=charLen(rawValue());
+  observedLen=compBaseLen;
   compText="";
-  lastCompLen=0;
 }
 
 function onCompUpdate(e){
-  syncDock();
+  syncViewport();
 
   compText=e&&typeof e.data==="string"?e.data:"";
-  const compLen=charLen(compText);
+  const composedLen=compBaseLen+charLen(compText);
 
-  if(compLen>lastCompLen){
-    addPraiseProgress(compLen-lastCompLen,false);
-  }
-
-  lastCompLen=compLen;
+  observeTypingLength(composedLen);
   updateInputButtons(rawValue().trim()||compText);
 }
 
 function onCompEnd(e){
-  syncDock();
-
-  const endText=e&&typeof e.data==="string"?e.data:"";
-  const endLen=charLen(endText);
-
-  if(endLen>lastCompLen){
-    addPraiseProgress(endLen-lastCompLen,false);
-  }
+  syncViewport();
 
   isComposing=false;
   compText="";
-  lastCompLen=0;
 
-  const currentLen=charLen(rawValue());
-  if(currentLen>lastValueLen){
-    addPraiseProgress(currentLen-lastValueLen,false);
-  }
-
-  lastValueLen=currentLen;
+  observeTypingLength(charLen(rawValue()));
   updateInputButtons(vl());
 }
 
 function onIn(e){
-  syncDock();
+  syncViewport();
 
   const raw=rawValue();
   updateInputButtons(raw.trim());
 
-  if(!raw&&!isComposing){
+  if(!raw && !isComposing){
     resetPraiseInput();
     return;
   }
 
-  if(isComposing||(e&&e.isComposing)){
+  if(isComposing || (e&&e.isComposing)){
     return;
   }
 
-  const currentLen=charLen(raw);
+  observeTypingLength(charLen(raw));
+}
 
-  if(currentLen>lastValueLen){
-    addPraiseProgress(currentLen-lastValueLen,false);
-  }
+function onInputFocus(){
+  setTimeout(()=>{
+    initBaseViewport(false);
+    syncViewport();
+    resetPraiseInput();
+  },40);
 
-  lastValueLen=currentLen;
+  setTimeout(syncViewport,120);
+  setTimeout(syncViewport,260);
+  setTimeout(syncViewport,520);
+}
+
+function onInputBlur(){
+  setTimeout(()=>{
+    initBaseViewport(false);
+    syncViewport();
+  },120);
 }
 
 function onKey(e){
-  if(e.key==="Enter"&&!isComposing){
+  if(e.key==="Enter" && !isComposing){
     e.preventDefault();
     doInst();
   }
@@ -1020,6 +1094,7 @@ function render(){
     s.className="completed";
     s.innerHTML="<p>COMPLETED "+done.length+"</p>";
     a.appendChild(s);
+
     done.forEach(t=>a.appendChild(mkC(t)));
   }
 }
@@ -1069,9 +1144,9 @@ function mkC(task){
 }
 
 function handleViewportChange(){
-  syncDock();
-  setTimeout(syncDock,60);
-  setTimeout(syncDock,180);
+  syncViewport();
+  setTimeout(syncViewport,60);
+  setTimeout(syncViewport,180);
 }
 
 if(window.visualViewport){
@@ -1080,19 +1155,28 @@ if(window.visualViewport){
 }
 
 window.addEventListener("resize",()=>{
-  refreshBaseViewportHeight();
-  syncDock();
+  initBaseViewport(false);
+  syncViewport();
 });
 
 window.addEventListener("orientationchange",()=>{
   setTimeout(()=>{
-    refreshBaseViewportHeight();
-    syncDock();
-  },250);
+    initBaseViewport(true);
+    syncViewport();
+  },300);
+
+  setTimeout(syncViewport,700);
 });
 
-refreshBaseViewportHeight();
-syncDock();
+window.addEventListener("scroll",lockScroll,{passive:true});
+
+document.addEventListener("touchmove",e=>{
+  if(e.target.closest("#ta"))return;
+  e.preventDefault();
+},{passive:false});
+
+initBaseViewport(true);
+syncViewport();
 render();
 </script>
 </body>

@@ -9,8 +9,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="DOPAON" />
 <meta name="mobile-web-app-capable" content="yes" />
-<link rel="manifest" href="./manifest.webmanifest?v=5" />
-<link rel="apple-touch-icon" href="./icon.png?v=5" />
+<link rel="manifest" href="./manifest.webmanifest?v=6" />
+<link rel="apple-touch-icon" href="./icon.png?v=6" />
 
 <title>DOPAON TASK SYSTEM</title>
 
@@ -101,37 +101,20 @@ body{position:fixed;inset:0;touch-action:manipulation}
 #habitRow{touch-action:manipulation}
 #taskDueInput:disabled{opacity:.4}
 
-/* ===== v5 RIGHT MINI CHARGE ===== */
+/* ===== v6 RIGHT CHARGE: original charge.html wrapped as scaled iframe ===== */
 #habitRow{gap:0}
 #habitRow .habit-main{min-width:0}
-#chargeMeter.charge-mini{
-  --charge-pct:0%;
+#chargeMeter.charge-frame-shell{
   width:104px;height:100px;border-left:1px solid #1e1e38;
-  background:radial-gradient(circle at 50% 34%,#151526 0,#080811 72%);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
-  position:relative;overflow:hidden;touch-action:manipulation;
+  background:#0a0a0f;display:block;position:relative;overflow:hidden;flex-shrink:0;
+  touch-action:manipulation;cursor:pointer;
 }
-#chargeMeter.charge-mini::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.04),transparent 50%,rgba(0,0,0,.26));pointer-events:none}
-.charge-ticket-badge{position:absolute;right:7px;top:7px;z-index:5;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#111122;border:1px solid #2a2a50;color:#6070a0;font-family:'Orbitron',monospace;font-size:9px;font-weight:900;display:flex;align-items:center;justify-content:center}
-#chargeMeter.ready .charge-ticket-badge{color:#07070f;background:#00ffcc;border-color:#00ffcc;box-shadow:0 0 16px rgba(0,255,204,.55)}
-.charge-core{position:relative;width:72px;height:72px;display:flex;align-items:center;justify-content:center;z-index:2}
-.charge-ring{position:absolute;inset:0;border-radius:50%;background:conic-gradient(#00e5bc 0 var(--charge-pct),rgba(0,229,188,.12) var(--charge-pct) 100%);border:1.5px solid rgba(0,229,188,.7);box-shadow:0 0 10px rgba(0,229,188,.18)}
-#chargeMeter.ready .charge-ring{animation:miniChargeReady 1.1s ease-in-out infinite;box-shadow:0 0 16px rgba(0,255,204,.5)}
-#chargeMeter.peka .charge-ring{--charge-pct:100%;box-shadow:0 0 24px rgba(0,255,204,.9),0 0 40px rgba(0,200,165,.4)}
-#chargeMeter.bonus .charge-ring{background:conic-gradient(#ff073a 0 100%,rgba(255,7,58,.15) 100%);border-color:#ff073a;animation:miniBonusFlash .16s linear infinite}
-#chargeMeter.white .charge-ring{background:conic-gradient(#b8793a 0 100%,rgba(184,121,58,.15) 100%);border-color:#b8793a;box-shadow:0 0 14px rgba(184,121,58,.45)}
-@keyframes miniChargeReady{0%,100%{filter:brightness(1)}50%{filter:brightness(1.7)}}
-@keyframes miniBonusFlash{0%,100%{filter:brightness(1.6)}50%{filter:brightness(.55)}}
-.charge-bezel{position:relative;width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#888,#222);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 1px 2px rgba(255,255,255,.4),0 4px 10px rgba(0,0,0,.55)}
-.charge-screen{width:50px;height:50px;border-radius:50%;background:#000;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;border:1px solid #111}
-.charge-logo{font-family:'Orbitron',monospace;font-size:9px;font-weight:900;letter-spacing:.4px;color:#00ffcc;text-shadow:0 0 6px rgba(0,255,204,.9);z-index:2;transform:scaleX(.86)}
-#chargeMeter.peka .charge-logo{background:#00c8a5;color:#fff;padding:4px 3px;border-radius:2px;text-shadow:1px 1px 0 #000;box-shadow:0 0 14px rgba(0,255,204,.85)}
-.charge-reel,.charge-result{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:3;background:#000}
-.charge-reel-strip{position:absolute;top:0;left:0;width:100%;font-family:'Orbitron',monospace;font-weight:900;font-size:8px;color:#fff;text-align:center}
-.charge-reel-strip span{height:50px;display:flex;align-items:center;justify-content:center}.charge-reel-strip span:nth-child(odd){color:#ff2038}.charge-reel-strip span:nth-child(even){color:#fff4df;background:#5d2b14}
-#chargeMeter.spinning .charge-logo{display:none}#chargeMeter.spinning .charge-reel{display:flex}.charge-reel-strip.spin{animation:miniReelSpin .12s linear infinite}@keyframes miniReelSpin{from{transform:translateY(0)}to{transform:translateY(-100px)}}
-#chargeMeter.result .charge-logo,#chargeMeter.result .charge-reel{display:none}#chargeMeter.result .charge-result{display:flex;font-family:'Orbitron',monospace;font-size:8px;font-weight:900;text-align:center;line-height:1.1;padding:4px;color:#fff}.charge-result.bonus-txt{color:#ff073a;text-shadow:0 0 8px rgba(255,7,58,.9)}.charge-result.white-txt{color:#fff4df;text-shadow:0 0 8px rgba(184,121,58,.8)}
-.charge-mini-label{z-index:2;font-family:'Orbitron',monospace;font-size:7px;letter-spacing:.8px;color:#4a6080;line-height:1;min-height:8px}#chargeMeter.ready .charge-mini-label{color:#00ffcc}#chargeMeter.peka .charge-mini-label{color:#ffd24a}#chargeMeter.bonus .charge-mini-label{color:#ff3b5c}#chargeMeter.white .charge-mini-label{color:#d8b080}
+#chargeFrame{
+  position:absolute;left:50%;top:50%;width:310px;height:430px;border:0;background:#0a0a0f;
+  transform:translate(-50%,-50%) scale(.245);transform-origin:center center;
+}
+#chargeMeter.charge-busy{box-shadow:inset 0 0 18px rgba(0,229,188,.12)}
+#chargeMeter.charge-off{filter:brightness(.72) saturate(.82)}
 #goBonusGate{position:absolute;inset:0;z-index:160;display:none;align-items:center;justify-content:center;background:rgba(50,50,55,.78);backdrop-filter:grayscale(1) blur(1px);-webkit-backdrop-filter:grayscale(1) blur(1px);touch-action:manipulation}
 #goBonusGate.show{display:flex}.go-bonus-card{text-align:center;font-family:'Orbitron',monospace;transform:rotate(-4deg);animation:goPop .38s cubic-bezier(.12,1.6,.3,1) both}.go-bonus-main{font-size:58px;letter-spacing:2px;font-weight:900;color:#fff;text-shadow:4px 4px 0 #000,0 0 26px rgba(255,255,255,.75)}.go-bonus-sub{font-size:12px;letter-spacing:4px;color:#ffd24a;text-shadow:2px 2px 0 #000;margin-top:8px}@keyframes goPop{from{opacity:0;transform:scale(2.4) rotate(-18deg)}to{opacity:1;transform:scale(1) rotate(-4deg)}}
 #bonusFrameOverlay{position:absolute;inset:0;z-index:170;background:#000;display:none;overflow:hidden}#bonusFrameOverlay.show{display:block}#bonusFrame{width:100%;height:100%;border:0;display:block;background:#000}
@@ -152,21 +135,8 @@ body{position:fixed;inset:0;touch-action:manipulation}
   <div id="bottomDock">
     <div id="habitRow" onclick="toggleMainMode()">
       <div class="habit-main"><span class="habit-title">パチスロをしない</span><div class="habit-status"><span class="dot-on"></span><span class="dot-off"></span><span class="dot-off"></span><span class="counter">1/3</span><span style="font-size:13px;color:#3a5070;margin-left:auto;">›</span></div></div>
-      <div class="meter charge-mini" id="chargeMeter" onclick="tapChargeMini(event)" aria-label="チャージ抽選窓">
-        <div class="charge-ticket-badge" id="chargeTicketBadge">0</div>
-        <div class="charge-core">
-          <div class="charge-ring"></div>
-          <div class="charge-bezel">
-            <div class="charge-screen">
-              <div class="charge-logo">DODO</div>
-              <div class="charge-reel" aria-hidden="true">
-                <div class="charge-reel-strip"><span>BONUS</span><span>Tia白</span><span>Tia白</span><span>BONUS</span></div>
-              </div>
-              <div class="charge-result" id="chargeResultMini"></div>
-            </div>
-          </div>
-        </div>
-        <div class="charge-mini-label" id="chargeMiniLabel">OFF</div>
+      <div class="meter charge-frame-shell charge-off" id="chargeMeter" aria-label="チャージ抽選窓">
+        <iframe id="chargeFrame" src="./charge.html?v=6" title="DOPAON CHARGE"></iframe>
       </div>
     </div>
     <div id="inputBar">
@@ -219,7 +189,7 @@ body{position:fixed;inset:0;touch-action:manipulation}
   </div>
 
   <div id="bonusFrameOverlay">
-    <iframe id="bonusFrame" src="./bonus.html?v=5" title="DOPAON BONUS"></iframe>
+    <iframe id="bonusFrame" src="./bonus.html?v=6" title="DOPAON BONUS"></iframe>
   </div>
 </div>
 
@@ -542,7 +512,7 @@ function doDopa(){const v=vl();if(!v)return;showDopaonMessage(v);doQuickAdd()}
 function deleteTask(id,fromMenu=false){const t=state.tasks.find(x=>x.id===id);if(!t)return;if(!confirm('「'+t.name+'」を削除する？'))return;state.tasks=state.tasks.filter(x=>x.id!==id);saveState();render();if(fromMenu)closeTaskMenu();showToast('削除した')}
 function deleteHabit(id,fromMenu=false){const h=state.habits.find(x=>x.id===id);if(!h)return;if(!confirm('習慣「'+h.name+'」を削除する？\n記録も消える。'))return;state.habits=state.habits.filter(x=>x.id!==id);delete state.habitLogs[id];saveState();render();if(fromMenu)closeTaskMenu();showToast('習慣を削除した')}
 function undoTask(id){const t=state.tasks.find(x=>x.id===id);if(!t)return;t.state='idle';t.doneAt=null;taskChargingId=null;saveState();render();spawnPraise('add',{t:'戻した！',c:'#00ffcc'});showToast('完了を取り消した。再完了しても再抽選なし')}
-function tap(id){if(chargeBusy)return;const t=state.tasks.find(x=>x.id===id);if(!t)return;if(t.state==='idle'){t.state='charging';taskChargingId=id;saveState();render()}else if(t.state==='charging'){t.state='done';t.doneAt=Date.now();const shouldReward=!t.rewardDone;t.rewardDone=true;taskChargingId=null;if(shouldReward)issueChargeTicket(t);saveState();render();setTimeout(()=>spawnPraise('done'),60)}}
+function tap(id){if(chargeBusy)return;const t=state.tasks.find(x=>x.id===id);if(!t)return;if(t.state==='idle'){t.state='charging';taskChargingId=id;saveState();render()}else if(t.state==='charging'){t.state='done';t.doneAt=Date.now();const shouldReward=!t.rewardDone;t.rewardDone=true;taskChargingId=null;if(shouldReward)issueChargeTicket(t);saveState();render();setTimeout(()=>spawnPraise('done'),60);if(shouldReward)setTimeout(()=>startNextChargeTicket(true),160)}}
 function formatDateLabel(s){if(!s)return '';const d=new Date(s+'T00:00:00');if(Number.isNaN(d.getTime()))return s;return (d.getMonth()+1)+'/'+d.getDate()+'('+WEEKDAYS[d.getDay()]+')'}
 function taskMeta(t){const tags=[];if(t.dueDate){const overdue=t.state!=='done'&&t.dueDate<todayStr();tags.push({cls:'due '+(overdue?'warn':''),txt:(overdue?'期限超過 ':'期限 ')+formatDateLabel(t.dueDate)})}else if(t.state!=='done')tags.push({cls:'',txt:'未整理'});if(t.scheduledAwarded)tags.push({cls:'reward',txt:'整理済'});if(t.rewardDone)tags.push({cls:'reward',txt:'抽選済'});return tags}
 function sortTasks(list){const today=todayStr();return list.slice().sort((a,b)=>{const ba=a.dueDate===today?0:!a.dueDate?1:2,bb=b.dueDate===today?0:!b.dueDate?1:2;if(ba!==bb)return ba-bb;if(ba===2&&a.dueDate!==b.dueDate)return a.dueDate.localeCompare(b.dueDate);return (b.createdAt||0)-(a.createdAt||0)})}
@@ -625,89 +595,61 @@ function renderBottomBar(){
 function toggleMainMode(){if(chargeBusy)return;state.ui.mode=currentMode()==='tasks'?'habits':'tasks';taskChargingId=null;habitChargingId=null;saveState();render();showToast(currentMode()==='habits'?'習慣画面':'日常タスク画面')}
 
 
-/* ===== v5 CHARGE MINI + BONUS IFRAME BRIDGE ===== */
+/* ===== v6 CHARGE BRIDGE: original charge.html is untouched visually ===== */
 function issueChargeTicket(task){
   if(!Array.isArray(state.chargeTickets))state.chargeTickets=[];
   state.chargeTickets.push({id:newId(),type:'task',sourceId:task.id,name:task.name,createdAt:Date.now()});
-  showToast('チャージ抽選権 +1');
 }
-function chargeEl(){return document.getElementById('chargeMeter')}
-function chargeLabel(){return document.getElementById('chargeMiniLabel')}
-function chargeBadge(){return document.getElementById('chargeTicketBadge')}
-function chargeResultEl(){return document.getElementById('chargeResultMini')}
-function setChargePct(p){const el=chargeEl();if(el)el.style.setProperty('--charge-pct',clamp(p,0,100)+'%')}
-function setChargeLabel(t){const el=chargeLabel();if(el)el.textContent=t}
-function setChargeClasses(list){const el=chargeEl();if(!el)return;el.classList.remove('ready','rolling','peka','spinning','result','white','bonus','miss');list.forEach(c=>el.classList.add(c))}
+function chargeFrame(){return document.getElementById('chargeFrame')}
+function chargeShell(){return document.getElementById('chargeMeter')}
 function renderChargeMini(){
-  const el=chargeEl(),badge=chargeBadge();if(!el)return;
-  const n=Array.isArray(state.chargeTickets)?state.chargeTickets.length:0;
-  if(badge)badge.textContent=String(n);
-  if(chargeBusy)return;
-  setChargePct(0);setChargeClasses(n>0?['ready']:[]);setChargeLabel(n>0?'PUSH':'OFF');
-  const r=chargeResultEl();if(r){r.textContent='';r.className='charge-result'}
+  const el=chargeShell();
+  if(!el)return;
+  el.classList.toggle('charge-busy',!!chargeBusy);
+  el.classList.toggle('charge-off',!chargeBusy);
 }
-function cLater(fn,ms){const t=setTimeout(fn,ms);chargeTimers.push(t);return t}
-function clearChargeTimers(){chargeTimers.forEach(clearTimeout);chargeTimers=[];if(chargeRaf){cancelAnimationFrame(chargeRaf);chargeRaf=null}}
-function animateChargeTo(target,duration,done){
-  if(chargeRaf)cancelAnimationFrame(chargeRaf);let st=null;const ease=t=>1-Math.pow(1-t,3);
-  const frame=ts=>{if(!st)st=ts;const p=Math.min(1,(ts-st)/duration);setChargePct(target*ease(p));if(p<1)chargeRaf=requestAnimationFrame(frame);else{chargeRaf=null;done&&done()}};
-  chargeRaf=requestAnimationFrame(frame);
-}
-function animateChargeDown(from,duration,done){
-  if(chargeRaf)cancelAnimationFrame(chargeRaf);let st=null;const ease=t=>Math.pow(t,2.8);
-  const frame=ts=>{if(!st)st=ts;const p=Math.min(1,(ts-st)/duration);setChargePct(from*(1-ease(p)));if(p<1)chargeRaf=requestAnimationFrame(frame);else{chargeRaf=null;setChargePct(0);done&&done()}};
-  chargeRaf=requestAnimationFrame(frame);
-}
-function decideMiniChargePattern(){const r=Math.random();if(r<0.20)return'hit';if(r<0.55)return'fakeMiss';return'normalMiss'}
 function tapChargeMini(e){
   if(e){e.preventDefault();e.stopPropagation()}
-  if(chargeState==='PEKA'){startMiniSpin();return}
-  if(chargeState==='SPINNING'){stopMiniSpin();return}
-  if(chargeBusy)return;
-  if(!state.chargeTickets||!state.chargeTickets.length){showToast('抽選権なし');return}
-  const ticket=state.chargeTickets.shift();saveState();renderChargeMini();runChargeRewardFlow(ticket);
+  // iframe内の元チャージがクリックを処理する。親側では何もしない。
 }
-async function runChargeRewardFlow(ticket){
+function postToCharge(msg,tries=0){
+  const fr=chargeFrame();
+  if(fr&&fr.contentWindow){
+    try{fr.contentWindow.postMessage(msg,'*');return true}catch(e){}
+  }
+  if(tries<20)setTimeout(()=>postToCharge(msg,tries+1),100);
+  return false;
+}
+function resetChargeFrame(){postToCharge({type:'DOPAON_CHARGE_RESET'})}
+function startNextChargeTicket(auto=false){
+  if(chargeBusy)return false;
+  if(!state.chargeTickets||!state.chargeTickets.length)return false;
+  const ticket=state.chargeTickets.shift();
+  saveState();
   chargeBusy=true;
+  renderChargeMini();
+  postToCharge({type:'DOPAON_CHARGE_START',ticketId:ticket.id});
+  return true;
+}
+async function handleChargeResult(kind){
   try{
-    const result=await playChargeMini(ticket);
-    if(result.kind==='miss')return;
-    if(result.kind==='white'){
+    if(kind==='miss')return;
+    if(kind==='white'){
       const reward=grantReward('white');saveState();renderHeader();showReward(reward,'Tia白');return;
     }
-    if(result.kind==='bonus'){
+    if(kind==='bonus'){
       await showGoBonusGate();
       const tier=await playBonusFrame();
       const reward=grantReward(tier||rollBonusTier());saveState();renderHeader();showReward(reward,'BONUS RESULT');return;
     }
   }finally{
-    chargeBusy=false;chargeState='OFF';chargePendingOutcome=null;clearChargeTimers();setChargePct(0);setChargeClasses([]);renderChargeMini();saveState();
+    chargeBusy=false;
+    resetChargeFrame();
+    renderChargeMini();
+    saveState();
+    if(state.chargeTickets&&state.chargeTickets.length)setTimeout(()=>startNextChargeTicket(true),260);
   }
 }
-function playChargeMini(){
-  return new Promise(resolve=>{
-    clearChargeTimers();chargeResolve=resolve;chargeState='ROLLING';setChargeClasses(['rolling']);setChargeLabel('CHARGE');setChargePct(0);
-    const pattern=decideMiniChargePattern();
-    if(pattern==='hit'){
-      chargePendingOutcome=Math.random()<1/3?'bonus':'white';
-      animateChargeTo(100,700,()=>{setChargePct(100);setChargeLabel('MAX...');cLater(()=>triggerMiniPeka(),1000)});
-    }else if(pattern==='fakeMiss'){
-      animateChargeTo(100,700,()=>{setChargePct(100);setChargeLabel('MAX...');cLater(()=>{setChargeLabel('DROP');animateChargeDown(100,650,()=>finishMiniCharge({kind:'miss'}))},1000)});
-    }else{
-      const peak=Math.random()*72+8;
-      animateChargeTo(peak,780,()=>{setChargeLabel('DROP');animateChargeDown(peak,520,()=>finishMiniCharge({kind:'miss'}))});
-    }
-  })
-}
-function triggerMiniPeka(){if(chargeState!=='ROLLING')return;chargeState='PEKA';setChargeClasses(['peka']);setChargePct(100);setChargeLabel('PUSH');if(navigator.vibrate)navigator.vibrate([150])}
-function startMiniSpin(){if(chargeState!=='PEKA')return;chargeState='SPINNING';setChargeClasses(['spinning']);setChargeLabel('STOP');const strip=document.querySelector('#chargeMeter .charge-reel-strip');if(strip)strip.classList.add('spin');if(navigator.vibrate)navigator.vibrate([60])}
-function stopMiniSpin(){
-  if(chargeState!=='SPINNING')return;chargeState='STOPPED';const strip=document.querySelector('#chargeMeter .charge-reel-strip');if(strip)strip.classList.remove('spin');
-  if(chargePendingOutcome==='bonus')showMiniChargeBonus();else showMiniChargeWhite();
-}
-function showMiniChargeWhite(){const r=chargeResultEl();setChargeClasses(['result','white']);setChargeLabel('Tia白');if(r){r.className='charge-result white-txt';r.textContent='Tia白'}if(navigator.vibrate)navigator.vibrate([40]);cLater(()=>finishMiniCharge({kind:'white'}),900)}
-function showMiniChargeBonus(){const r=chargeResultEl();setChargeClasses(['result','bonus']);setChargeLabel('BONUS');if(r){r.className='charge-result bonus-txt';r.textContent='BONUS\n確定'}if(navigator.vibrate)navigator.vibrate([100,50,100,50,200]);cLater(()=>finishMiniCharge({kind:'bonus'}),950)}
-function finishMiniCharge(result){const resolve=chargeResolve;chargeResolve=null;if(result.kind==='miss'){setChargeClasses(['miss']);setChargeLabel('MISS');cLater(()=>resolve&&resolve(result),350);return}resolve&&resolve(result)}
 function showGoBonusGate(){
   return new Promise(resolve=>{goBonusResolve=resolve;const el=document.getElementById('goBonusGate');if(el)el.classList.add('show');if(navigator.vibrate)navigator.vibrate([80,40,160])})
 }
@@ -722,10 +664,17 @@ function playBonusFrame(){
   })
 }
 window.addEventListener('message',e=>{
-  const d=e.data||{};if(d.type!=='DOPAON_BONUS_RESULT')return;
-  const tier=TIER_ORDER.includes(d.tier)?d.tier:rollBonusTier();
-  const ov=document.getElementById('bonusFrameOverlay');if(ov)ov.classList.remove('show');
-  const r=bonusResolve;bonusResolve=null;r&&r(tier);
+  const d=e.data||{};
+  if(d.type==='DOPAON_CHARGE_RESULT'){
+    const kind=['miss','white','bonus'].includes(d.kind)?d.kind:'miss';
+    handleChargeResult(kind);
+    return;
+  }
+  if(d.type==='DOPAON_BONUS_RESULT'){
+    const tier=TIER_ORDER.includes(d.tier)?d.tier:rollBonusTier();
+    const ov=document.getElementById('bonusFrameOverlay');if(ov)ov.classList.remove('show');
+    const r=bonusResolve;bonusResolve=null;r&&r(tier);
+  }
 });
 
 function handleViewportChange(){syncViewport();setTimeout(syncViewport,60);setTimeout(syncViewport,180)}

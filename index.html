@@ -9,6 +9,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="DOPAON" />
 <meta name="mobile-web-app-capable" content="yes" />
+<link rel="manifest" href="./manifest.webmanifest?v=3" />
+<link rel="apple-touch-icon" href="./icon.png?v=3" />
 
 <title>DOPAON TASK SYSTEM</title>
 
@@ -19,1895 +21,292 @@
   --app-top:0px;
   --app-h:100vh;
   --kb:0px;
-
   --safe-top:env(safe-area-inset-top,0px);
   --safe-bottom:env(safe-area-inset-bottom,0px);
-
   --header-h:60px;
   --dock-h:158px;
   --input-h:58px;
   --habit-h:100px;
 }
-
-*{
-  box-sizing:border-box;
-  -webkit-tap-highlight-color:transparent;
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{
+  margin:0;width:100%;height:100%;overflow:hidden;background:#020208;
+  font-family:system-ui,sans-serif;-webkit-text-size-adjust:100%;overscroll-behavior:none;
 }
-
-html,
-body{
-  margin:0;
-  width:100%;
-  height:100%;
-  overflow:hidden;
-  background:#020208;
-  font-family:system-ui,sans-serif;
-  -webkit-text-size-adjust:100%;
-  overscroll-behavior:none;
-}
-
-body{
-  position:fixed;
-  inset:0;
-  touch-action:manipulation;
-}
-
+body{position:fixed;inset:0;touch-action:manipulation}
 #sf8{
-  position:fixed;
-  top:var(--app-top);
-  left:50%;
-  transform:translateX(-50%);
-  width:100%;
-  max-width:430px;
-  height:var(--app-h);
-  background:#07070f;
-  color:#c8d8f0;
-  overflow:hidden;
-  border-left:1px solid #1e1e38;
-  border-right:1px solid #1e1e38;
+  position:fixed;top:var(--app-top);left:50%;transform:translateX(-50%);
+  width:100%;max-width:430px;height:var(--app-h);background:#07070f;color:#c8d8f0;
+  overflow:hidden;border-left:1px solid #1e1e38;border-right:1px solid #1e1e38;
 }
-
-/* ============ HEADER ============ */
 .header{
-  position:absolute;
-  top:0;
-  left:0;
-  right:0;
-  z-index:30;
-  height:calc(var(--safe-top) + var(--header-h));
-  padding:var(--safe-top) 12px 0 14px;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  background:#07070f;
-  border-bottom:1px solid #1e1e38;
+  position:absolute;top:0;left:0;right:0;z-index:30;
+  height:calc(var(--safe-top) + var(--header-h));padding:var(--safe-top) 12px 0 14px;
+  display:flex;align-items:center;gap:10px;background:#07070f;border-bottom:1px solid #1e1e38;
 }
-
-.brand{
-  display:flex;
-  flex-direction:column;
-  gap:2px;
-  flex-shrink:0;
-}
-
-.logo{
-  font-family:'Orbitron',monospace;
-  font-size:13px;
-  font-weight:900;
-  letter-spacing:2.5px;
-  color:#00ffcc;
-  line-height:1;
-}
-
-.sub{
-  font-family:'Orbitron',monospace;
-  font-size:6px;
-  color:#00ffcc44;
-  letter-spacing:3px;
-}
-
-.identity{
-  flex:1;
-  min-width:0;
-  display:flex;
-  align-items:center;
-  gap:8px;
-  justify-content:flex-end;
-  cursor:pointer;
-  padding:6px 4px;
-  border-radius:10px;
-  transition:background .15s;
-}
+.brand{display:flex;flex-direction:column;gap:2px;flex-shrink:0}
+.logo{font-family:'Orbitron',monospace;font-size:13px;font-weight:900;letter-spacing:2.5px;color:#00ffcc;line-height:1}
+.sub{font-family:'Orbitron',monospace;font-size:6px;color:#00ffcc44;letter-spacing:3px}
+.identity{flex:1;min-width:0;display:flex;align-items:center;gap:8px;justify-content:flex-end;cursor:pointer;padding:6px 4px;border-radius:10px;transition:background .15s}
 .identity:active{background:#0f0f20}
-
-.id-text{
-  min-width:0;
-  display:flex;
-  flex-direction:column;
-  align-items:flex-end;
-  gap:3px;
-}
-
-.id-name{
-  font-size:13px;
-  font-weight:600;
-  line-height:1;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  max-width:170px;
-}
+.id-text{min-width:0;display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.id-name{font-size:13px;font-weight:600;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px}
 .id-name .ttl{font-weight:500}
-
-.id-lv{
-  font-family:'Orbitron',monospace;
-  font-size:8px;
-  letter-spacing:1px;
-  color:#4a6080;
-  display:flex;
-  align-items:center;
-  gap:5px;
-}
-.id-lv b{color:#ffd24a;font-weight:700}
-.id-lv .free{color:#00ffcc}
-
-.id-avatar{
-  width:34px;
-  height:34px;
-  border-radius:50%;
-  border:1.5px solid #2a2a50;
-  background:#0f0f20;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:16px;
-  flex-shrink:0;
-}
-
-/* ============ TASK AREA ============ */
-#ta{
-  position:absolute;
-  top:calc(var(--safe-top) + var(--header-h));
-  bottom:calc(var(--dock-h) + var(--safe-bottom));
-  left:0;
-  right:0;
-  overflow-y:auto;
-  padding:12px 14px;
-  -webkit-overflow-scrolling:touch;
-  z-index:5;
-}
-
-#pc{
-  position:absolute;
-  top:calc(var(--safe-top) + var(--header-h));
-  bottom:0;
-  left:0;
-  right:0;
-  pointer-events:none;
-  overflow:hidden;
-  z-index:40;
-  transform:translateZ(0);
-}
-
-/* ============ DOCK ============ */
-#bottomDock{
-  position:absolute;
-  left:0;
-  right:0;
-  bottom:0;
-  height:calc(var(--dock-h) + var(--safe-bottom));
-  z-index:35;
-  transform:translate3d(0,calc(var(--kb) * -1),0);
-  transition:transform .18s ease-out;
-  will-change:transform;
-  background:#07070f;
-}
-
-#habitRow{
-  position:absolute;
-  top:0;
-  left:0;
-  right:0;
-  height:var(--habit-h);
-  border-top:1px solid #1e1e38;
-  display:flex;
-  background:#07070f;
-}
-
-#inputBar{
-  position:absolute;
-  left:0;
-  right:0;
-  bottom:0;
-  height:calc(var(--input-h) + var(--safe-bottom));
-  padding:8px 12px calc(8px + var(--safe-bottom));
-  border-top:1px solid #1e1e38;
-  background:#07070f;
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-#mi{
-  flex:1;
-  min-width:0;
-  height:38px;
-  border:1px solid #1e1e38;
-  border-radius:19px;
-  background:#0f0f20;
-  padding:0 14px;
-  font-size:16px;
-  color:#c8d8f0;
-  font-family:system-ui,sans-serif;
-  letter-spacing:.5px;
-}
-#mi::placeholder{color:#2a3a55}
-#mi:focus{outline:none}
-
-.roundBtn{
-  width:38px;
-  height:38px;
-  border-radius:50%;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  flex-shrink:0;
-  transition:all .15s;
-  font-size:18px;
-  line-height:1;
-}
-.bolt{border:1.5px solid #2a2a50;background:transparent;color:#6070a0}
+.id-lv{font-family:'Orbitron',monospace;font-size:8px;letter-spacing:1px;color:#4a6080;display:flex;align-items:center;gap:5px}
+.id-lv b{color:#ffd24a;font-weight:700}.id-lv .free{color:#00ffcc}
+.id-avatar{width:34px;height:34px;border-radius:50%;border:1.5px solid #2a2a50;background:#0f0f20;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+#ta{position:absolute;top:calc(var(--safe-top) + var(--header-h));bottom:calc(var(--dock-h) + var(--safe-bottom));left:0;right:0;overflow-y:auto;padding:12px 14px;-webkit-overflow-scrolling:touch;z-index:5}
+#pc{position:absolute;top:calc(var(--safe-top) + var(--header-h));bottom:0;left:0;right:0;pointer-events:none;overflow:hidden;z-index:40;transform:translateZ(0)}
+#bottomDock{position:absolute;left:0;right:0;bottom:0;height:calc(var(--dock-h) + var(--safe-bottom));z-index:35;transform:translate3d(0,calc(var(--kb) * -1),0);transition:transform .18s ease-out;will-change:transform;background:#07070f}
+#habitRow{position:absolute;top:0;left:0;right:0;height:var(--habit-h);border-top:1px solid #1e1e38;display:flex;background:#07070f}
+#inputBar{position:absolute;left:0;right:0;bottom:0;height:calc(var(--input-h) + var(--safe-bottom));padding:8px 12px calc(8px + var(--safe-bottom));border-top:1px solid #1e1e38;background:#07070f;display:flex;align-items:center;gap:10px}
+#mi{flex:1;min-width:0;height:38px;border:1px solid #1e1e38;border-radius:19px;background:#0f0f20;padding:0 14px;font-size:16px;color:#c8d8f0;font-family:system-ui,sans-serif;letter-spacing:.5px}
+#mi::placeholder{color:#2a3a55}#mi:focus{outline:none}
+.roundBtn{width:38px;height:38px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;font-size:18px;line-height:1}
+.bolt{border:1.5px solid #2a2a50;background:transparent;color:#6070a0}.bolt.ready{color:#00ffcc;border-color:#00ffcc55}
 .dopa{border:none;background:#c8a020;color:#07070f;opacity:.4}
-
-.habit-main{
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  padding:0 18px;
-  gap:10px;
-  overflow:hidden;
-  cursor:pointer;
-}
-.habit-title{
-  font-size:14px;
-  color:#ddeeff;
-  font-weight:500;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-.habit-status{display:flex;gap:7px;align-items:center}
-.dot-on,.dot-off{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0}
-.dot-on{background:#00ffcc}
-.dot-off{background:transparent;border:1.5px solid #2a3a55}
+.habit-main{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 18px;gap:10px;overflow:hidden;cursor:pointer}
+.habit-title{font-size:14px;color:#ddeeff;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.habit-status{display:flex;gap:7px;align-items:center}.dot-on,.dot-off{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0}.dot-on{background:#00ffcc}.dot-off{background:transparent;border:1.5px solid #2a3a55}
 .counter{font-family:'Orbitron',monospace;font-size:8px;color:#4a6080;margin-left:4px;letter-spacing:1px}
-
-.meter{
-  width:100px;
-  height:100px;
-  border-left:1px solid #1e1e38;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  flex-shrink:0;
-  cursor:pointer;
-  position:relative;
-}
-
-/* ============ TASK CARDS ============ */
-.empty{text-align:center;padding:80px 20px;color:#2a3a55}
-.empty-icon{font-size:24px;margin-bottom:10px}
-.empty-text{font-size:14px}
-
-.task{
-  background:#0f0f20;
-  border:1px solid #1e1e38;
-  border-radius:10px;
-  padding:12px 14px;
-  display:flex;
-  align-items:center;
-  gap:12px;
-  margin-bottom:8px;
-}
-.task.charging{border-color:#ffd700}
-.task.done{opacity:.35}
-
-.task-name{flex:1;font-size:14px;line-height:1.4;color:#c8d8f0;word-break:break-word}
-.task.done .task-name{color:#3a4060;text-decoration:line-through}
-
-.task-action{display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0}
-.task-btn{
-  width:40px;height:40px;border-radius:50%;
-  border:1.5px solid #2a2a50;background:transparent;color:#3a3a65;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;
-}
-.task.charging .task-btn{border:2px solid #ffd700;background:rgba(255,215,0,.1);color:#ffd700}
-.push{font-family:'Orbitron',monospace;font-size:7px;color:#ffd700;letter-spacing:.5px}
-.done-mark{font-size:16px;color:#39ff14;flex-shrink:0}
-
-.completed{margin-top:12px;padding-top:10px;border-top:1px solid #111122}
-.completed p{font-family:'Orbitron',monospace;font-size:8px;color:#2a3a55;letter-spacing:2px;margin:0 0 8px}
-
-.dream{
-  position:absolute;
-  left:12px;right:12px;
-  bottom:calc(var(--dock-h) + var(--safe-bottom) + 8px);
-  background:#0f0f20;
-  border:1px solid #1e1e38;
-  border-left:3px solid #c8a020;
-  border-radius:10px;
-  padding:12px 16px;
-  font-size:13px;color:#ddeeff;font-weight:500;
-  text-align:center;line-height:1.8;
-  z-index:50;pointer-events:none;
-  box-shadow:0 10px 32px rgba(0,0,0,.45);
-}
-.dream-time{
-  display:block;
-  font-family:'Orbitron',monospace;
-  font-size:8px;
-  letter-spacing:2px;
-  color:#c8a020;
-  margin-bottom:4px;
-}
-.dream-quote{
-  display:block;
-}
-
-@keyframes tslide{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
-@keyframes cpulse{0%,100%{opacity:1}50%{opacity:.5}}
-.tnew{animation:tslide .2s ease-out}
-.cbtn{animation:cpulse 1s ease-in-out infinite}
-
-/* ============ OVERLAY / POPUP ============ */
-.overlay{
-  position:absolute;
-  inset:0;
-  z-index:60;
-  background:rgba(2,2,8,.72);
-  backdrop-filter:blur(3px);
-  -webkit-backdrop-filter:blur(3px);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:calc(var(--safe-top) + 16px) 16px calc(var(--safe-bottom) + 16px);
-  opacity:0;
-  pointer-events:none;
-  transition:opacity .2s ease-out;
-}
-.overlay.show{opacity:1;pointer-events:auto}
-
-.popup{
-  width:100%;
-  max-width:380px;
-  max-height:100%;
-  overflow-y:auto;
-  background:#0b0b18;
-  border:1px solid #23234a;
-  border-radius:18px;
-  box-shadow:0 0 0 1px #000, 0 20px 60px rgba(0,0,0,.7);
-  transform:translateY(12px) scale(.97);
-  transition:transform .22s cubic-bezier(.2,.8,.2,1);
-  -webkit-overflow-scrolling:touch;
-}
-.overlay.show .popup{transform:translateY(0) scale(1)}
-
-.popup-head{
-  position:sticky;
-  top:0;
-  background:#0b0b18;
-  display:flex;
-  align-items:center;
-  padding:16px 16px 12px;
-  border-bottom:1px solid #181835;
-  z-index:2;
-}
-.popup-title{
-  font-family:'Orbitron',monospace;
-  font-size:11px;
-  letter-spacing:3px;
-  color:#00ffcc;
-  font-weight:700;
-  flex:1;
-}
-.popup-close{
-  width:30px;height:30px;border-radius:50%;
-  border:1px solid #23234a;background:transparent;color:#6070a0;
-  font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;
-}
-.popup-body{padding:16px}
-
-/* profile */
-.field-label{
-  font-family:'Orbitron',monospace;
-  font-size:8px;letter-spacing:2px;color:#4a6080;
-  margin:0 0 8px;text-transform:uppercase;
-}
-.section{margin-bottom:22px}
-
-.name-input{
-  width:100%;height:42px;
-  border:1px solid #23234a;border-radius:10px;
-  background:#06060e;color:#eaf2ff;
-  padding:0 14px;font-size:16px;letter-spacing:.5px;
-  font-family:system-ui,sans-serif;
-}
-.name-input:focus{outline:none;border-color:#00ffcc55}
-
-.stat-row{display:flex;gap:10px}
-.stat-box{
-  flex:1;
-  background:#06060e;
-  border:1px solid #1a1a35;
-  border-radius:10px;
-  padding:12px 10px;
-  text-align:center;
-}
-.stat-num{font-family:'Orbitron',monospace;font-size:20px;font-weight:900;line-height:1}
-.stat-num.lv{color:#ffd24a}
-.stat-num.free{color:#00ffcc}
-.stat-cap{font-family:'Orbitron',monospace;font-size:7px;letter-spacing:1.5px;color:#4a6080;margin-top:6px}
-
-.free-note{
-  margin-top:10px;
-  background:#06130f;
-  border:1px solid #00ffcc22;
-  border-radius:10px;
-  padding:10px 12px;
-  text-align:center;
-  color:#00ffcc;
-  font-size:13px;
-  font-weight:700;
-}
-
-.preview-name{
-  text-align:center;
-  font-size:17px;
-  padding:14px;
-  background:#06060e;
-  border:1px solid #1a1a35;
-  border-radius:10px;
-  line-height:1.5;
-}
-.preview-name .pv-ttl{font-weight:500}
-.preview-name .pv-nm{font-weight:700;color:#eaf2ff}
-.preview-name .pv-empty{color:#3a4060;font-size:13px}
-
-/* title chips */
-.title-grid{display:flex;flex-wrap:wrap;gap:7px}
-.title-chip{
-  font-size:12px;
-  padding:7px 11px;
-  border-radius:999px;
-  border:1px solid #23234a;
-  background:#06060e;
-  color:#56607e;
-  cursor:default;
-  transition:all .12s;
-  white-space:nowrap;
-}
-.title-chip.owned{cursor:pointer;color:#c8d8f0}
-.title-chip.owned:active{transform:scale(.95)}
-.title-chip.locked{opacity:.4}
-.title-chip.sel{
-  border-width:1.5px;
-  font-weight:600;
-  box-shadow:0 0 10px -2px currentColor;
-}
-.title-none{
-  font-size:12px;color:#56607e;
-  border:1px dashed #23234a;border-radius:999px;
-  padding:7px 11px;cursor:pointer;background:#06060e;
-}
-.title-none.sel{border-style:solid;border-color:#00ffcc;color:#00ffcc}
-
-/* illust grid */
-.illust-grid{
-  display:grid;
-  grid-template-columns:repeat(5,1fr);
-  gap:7px;
-}
-.illust-cell{
-  position:relative;
-  aspect-ratio:1;
-  border-radius:10px;
-  border:1px solid #1a1a35;
-  background:#06060e;
-  overflow:hidden;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.illust-cell.locked{opacity:.85}
-.illust-cell .lockmark{
-  font-size:15px;color:#2a3550;
-}
-.illust-cell svg{width:100%;height:100%;display:block}
-.illust-cap{
-  font-family:'Orbitron',monospace;
-  font-size:6px;letter-spacing:1px;
-  text-align:center;margin-top:4px;color:#4a6080;
-}
-
-/* ============ REWARD POPUP ============ */
-#rewardOverlay .popup{
-  max-width:300px;
-  text-align:center;
-  border-color:#23234a;
-}
-.rw-stage{
-  padding:30px 22px 26px;
-  position:relative;
-}
-.rw-tier-label{
-  font-family:'Orbitron',monospace;
-  font-size:10px;letter-spacing:4px;font-weight:700;
-  margin-bottom:18px;
-}
-.rw-icon{
-  width:108px;height:108px;margin:0 auto 18px;
-  display:flex;align-items:center;justify-content:center;
-}
-.rw-icon svg{width:100%;height:100%}
-.rw-reward-type{
-  font-family:'Orbitron',monospace;
-  font-size:8px;letter-spacing:2px;color:#4a6080;margin-bottom:8px;
-}
-.rw-reward-main{
-  font-size:22px;font-weight:700;line-height:1.4;color:#eaf2ff;
-  margin-bottom:6px;
-}
-.rw-reward-sub{font-size:13px;color:#8898b8}
-.rw-tap{
-  font-family:'Orbitron',monospace;
-  font-size:8px;letter-spacing:2px;color:#3a4565;
-  margin-top:22px;
-}
-
-@keyframes rwpop{
-  0%{transform:scale(.3);opacity:0}
-  60%{transform:scale(1.08)}
-  100%{transform:scale(1);opacity:1}
-}
-@keyframes rwglow{
-  0%,100%{filter:drop-shadow(0 0 6px currentColor)}
-  50%{filter:drop-shadow(0 0 20px currentColor)}
-}
-.rw-icon.animate{animation:rwpop .5s cubic-bezier(.2,.9,.3,1.3),rwglow 1.6s ease-in-out infinite .5s}
+.meter{width:100px;height:100px;border-left:1px solid #1e1e38;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;position:relative}
+.empty{text-align:center;padding:80px 20px;color:#2a3a55}.empty-icon{font-size:24px;margin-bottom:10px}.empty-text{font-size:14px}
+.task{background:#0f0f20;border:1px solid #1e1e38;border-radius:10px;padding:11px 12px;display:flex;align-items:center;gap:10px;margin-bottom:8px;position:relative}
+.task.charging{border-color:#ffd700}.task.done{opacity:.42}.task.habit{border-left:3px solid #00ffcc}.task.overdue{border-color:#ff336666}
+.task-main{flex:1;min-width:0}.task-name{font-size:14px;line-height:1.4;color:#c8d8f0;word-break:break-word}.task.done .task-name{color:#3a4060;text-decoration:line-through}
+.task-meta{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.tag{font-family:'Orbitron',monospace;font-size:7px;letter-spacing:.8px;color:#7890b8;border:1px solid #24304d;background:#090917;border-radius:999px;padding:3px 6px}.tag.due{color:#66ccff}.tag.habit{color:#00ffcc}.tag.warn{color:#ff8c8c;border-color:#ff336655}.tag.reward{color:#ffd24a;border-color:#ffd24a44}
+.task-action{display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0}.task-btn{width:40px;height:40px;border-radius:50%;border:1.5px solid #2a2a50;background:transparent;color:#3a3a65;cursor:pointer;display:flex;align-items:center;justify-content:center}.task.charging .task-btn{border:2px solid #ffd700;background:rgba(255,215,0,.1);color:#ffd700}.push{font-family:'Orbitron',monospace;font-size:7px;color:#ffd700;letter-spacing:.5px}.done-mark{font-size:16px;color:#39ff14;flex-shrink:0}
+.task-tools{display:flex;flex-direction:column;gap:5px;flex-shrink:0}.mini-btn{width:28px;height:28px;border-radius:8px;border:1px solid #23234a;background:#070712;color:#6070a0;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer}.mini-btn:active{transform:scale(.95)}.mini-btn.danger{color:#ff6f8c;border-color:#ff336633}.mini-btn.undo{color:#00ffcc;border-color:#00ffcc33}
+.completed{margin-top:12px;padding-top:10px;border-top:1px solid #111122}.completed-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}.completed-title{font-family:'Orbitron',monospace;font-size:8px;color:#2a3a55;letter-spacing:2px;flex:1}.completed-btn{font-size:11px;border:1px solid #23234a;background:#06060e;color:#6070a0;border-radius:999px;padding:5px 8px;cursor:pointer}
+.dream{position:absolute;left:12px;right:12px;bottom:calc(var(--dock-h) + var(--safe-bottom) + 8px);background:#0f0f20;border:1px solid #1e1e38;border-left:3px solid #c8a020;border-radius:10px;padding:12px 16px;font-size:13px;color:#ddeeff;font-weight:500;text-align:center;line-height:1.8;z-index:50;pointer-events:none;box-shadow:0 10px 32px rgba(0,0,0,.45)}
+.dream-time{display:block;font-family:'Orbitron',monospace;font-size:8px;letter-spacing:2px;color:#c8a020;margin-bottom:4px}.dream-quote{display:block}
+@keyframes tslide{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}@keyframes cpulse{0%,100%{opacity:1}50%{opacity:.5}}.tnew{animation:tslide .2s ease-out}.cbtn{animation:cpulse 1s ease-in-out infinite}
+.overlay{position:absolute;inset:0;z-index:60;background:rgba(2,2,8,.72);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:calc(var(--safe-top) + 16px) 16px calc(var(--safe-bottom) + 16px);opacity:0;pointer-events:none;transition:opacity .2s ease-out}.overlay.show{opacity:1;pointer-events:auto}
+.popup{width:100%;max-width:380px;max-height:100%;overflow-y:auto;background:#0b0b18;border:1px solid #23234a;border-radius:18px;box-shadow:0 0 0 1px #000,0 20px 60px rgba(0,0,0,.7);transform:translateY(12px) scale(.97);transition:transform .22s cubic-bezier(.2,.8,.2,1);-webkit-overflow-scrolling:touch}.overlay.show .popup{transform:translateY(0) scale(1)}
+.popup-head{position:sticky;top:0;background:#0b0b18;display:flex;align-items:center;padding:16px 16px 12px;border-bottom:1px solid #181835;z-index:2}.popup-title{font-family:'Orbitron',monospace;font-size:11px;letter-spacing:3px;color:#00ffcc;font-weight:700;flex:1}.popup-close{width:30px;height:30px;border-radius:50%;border:1px solid #23234a;background:transparent;color:#6070a0;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}.popup-body{padding:16px}
+.field-label{font-family:'Orbitron',monospace;font-size:8px;letter-spacing:2px;color:#4a6080;margin:0 0 8px;text-transform:uppercase}.section{margin-bottom:22px}.name-input,.form-input,.form-select{width:100%;height:42px;border:1px solid #23234a;border-radius:10px;background:#06060e;color:#eaf2ff;padding:0 14px;font-size:16px;letter-spacing:.5px;font-family:system-ui,sans-serif}.name-input:focus,.form-input:focus,.form-select:focus{outline:none;border-color:#00ffcc55}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.form-help{font-size:11px;color:#56607e;line-height:1.6;margin-top:8px}.weekday-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}.weekday-chip{height:34px;border-radius:10px;border:1px solid #23234a;background:#06060e;color:#6070a0;font-size:12px;cursor:pointer}.weekday-chip.on{border-color:#00ffcc;color:#00ffcc;background:#06130f}.form-actions{display:flex;gap:10px;margin-top:18px}.primary-btn,.danger-btn,.ghost-btn{height:42px;border-radius:12px;border:1px solid #23234a;padding:0 14px;font-weight:700;cursor:pointer}.primary-btn{flex:1;background:#00ffcc;color:#07100f;border:none}.ghost-btn{background:#06060e;color:#9ab0d0}.danger-btn{background:#16070c;color:#ff6f8c;border-color:#ff336655}
+.stat-row{display:flex;gap:10px}.stat-box{flex:1;background:#06060e;border:1px solid #1a1a35;border-radius:10px;padding:12px 10px;text-align:center}.stat-num{font-family:'Orbitron',monospace;font-size:20px;font-weight:900;line-height:1}.stat-num.lv{color:#ffd24a}.stat-num.free{color:#00ffcc}.stat-cap{font-family:'Orbitron',monospace;font-size:7px;letter-spacing:1.5px;color:#4a6080;margin-top:6px}.free-note{margin-top:10px;background:#06130f;border:1px solid #00ffcc22;border-radius:10px;padding:10px 12px;text-align:center;color:#00ffcc;font-size:13px;font-weight:700}.level-bar{height:8px;border-radius:999px;background:#111124;overflow:hidden;margin-top:12px;border:1px solid #202044}.level-fill{height:100%;width:0%;background:#ffd24a;transition:width .25s}.level-note{text-align:center;font-family:'Orbitron',monospace;font-size:8px;letter-spacing:1px;color:#6d789b;margin-top:7px}
+.preview-name{text-align:center;font-size:17px;padding:14px;background:#06060e;border:1px solid #1a1a35;border-radius:10px;line-height:1.5}.preview-name .pv-ttl{font-weight:500}.preview-name .pv-nm{font-weight:700;color:#eaf2ff}.preview-name .pv-empty{color:#3a4060;font-size:13px}.title-grid{display:flex;flex-wrap:wrap;gap:7px}.title-chip{font-size:12px;padding:7px 11px;border-radius:999px;border:1px solid #23234a;background:#06060e;color:#56607e;cursor:default;transition:all .12s;white-space:nowrap}.title-chip.owned{cursor:pointer;color:#c8d8f0}.title-chip.owned:active{transform:scale(.95)}.title-chip.locked{opacity:.4}.title-chip.sel{border-width:1.5px;font-weight:600;box-shadow:0 0 10px -2px currentColor}.title-none{font-size:12px;color:#56607e;border:1px dashed #23234a;border-radius:999px;padding:7px 11px;cursor:pointer;background:#06060e}.title-none.sel{border-style:solid;border-color:#00ffcc;color:#00ffcc}.illust-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}.illust-cell{position:relative;aspect-ratio:1;border-radius:10px;border:1px solid #1a1a35;background:#06060e;overflow:hidden;display:flex;align-items:center;justify-content:center}.illust-cell.locked{opacity:.85}.illust-cell .lockmark{font-size:15px;color:#2a3550}.illust-cell svg{width:100%;height:100%;display:block}.illust-cap{font-family:'Orbitron',monospace;font-size:6px;letter-spacing:1px;text-align:center;margin-top:4px;color:#4a6080}
+#rewardOverlay .popup{max-width:300px;text-align:center;border-color:#23234a}.rw-stage{padding:30px 22px 26px;position:relative}.rw-tier-label{font-family:'Orbitron',monospace;font-size:10px;letter-spacing:4px;font-weight:700;margin-bottom:18px}.rw-icon{width:108px;height:108px;margin:0 auto 18px;display:flex;align-items:center;justify-content:center}.rw-icon svg{width:100%;height:100%}.rw-reward-type{font-family:'Orbitron',monospace;font-size:8px;letter-spacing:2px;color:#4a6080;margin-bottom:8px}.rw-reward-main{font-size:22px;font-weight:700;line-height:1.4;color:#eaf2ff;margin-bottom:6px}.rw-reward-sub{font-size:13px;color:#8898b8}.rw-tap{font-family:'Orbitron',monospace;font-size:8px;letter-spacing:2px;color:#3a4565;margin-top:22px}
+@keyframes rwpop{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}@keyframes rwglow{0%,100%{filter:drop-shadow(0 0 6px currentColor)}50%{filter:drop-shadow(0 0 20px currentColor)}}.rw-icon.animate{animation:rwpop .5s cubic-bezier(.2,.9,.3,1.3),rwglow 1.6s ease-in-out infinite .5s}
+.toast{position:absolute;left:50%;bottom:calc(var(--dock-h) + var(--safe-bottom) + 16px);transform:translateX(-50%);z-index:80;background:#0f0f20;border:1px solid #23234a;border-radius:999px;color:#c8d8f0;padding:9px 14px;font-size:12px;box-shadow:0 10px 30px rgba(0,0,0,.5);pointer-events:none;opacity:0}
 </style>
 </head>
-
 <body>
 <div id="sf8">
   <div id="pc"></div>
-
-  <!-- HEADER -->
   <div class="header">
-    <div class="brand">
-      <span class="logo">DOPAON</span>
-      <span class="sub">TASK SYS</span>
-    </div>
+    <div class="brand"><span class="logo">DOPAON</span><span class="sub">TASK SYS</span></div>
     <div class="identity" id="identity" onclick="openProfile()">
-      <div class="id-text">
-        <div class="id-name" id="hdName"></div>
-        <div class="id-lv">
-          <span>Lv.<b id="hdLv">0</b></span>
-          <span class="free" id="hdFree">+0日</span>
-        </div>
-      </div>
+      <div class="id-text"><div class="id-name" id="hdName"></div><div class="id-lv"><span>Lv.<b id="hdLv">0</b></span><span class="free" id="hdFree">+0日</span></div></div>
       <div class="id-avatar">👤</div>
     </div>
   </div>
-
-  <!-- TASKS -->
   <div id="ta"></div>
-
-  <!-- DOCK -->
   <div id="bottomDock">
     <div id="habitRow">
-      <div class="habit-main">
-        <span class="habit-title">パチスロをしない</span>
-        <div class="habit-status">
-          <span class="dot-on"></span>
-          <span class="dot-off"></span>
-          <span class="dot-off"></span>
-          <span class="counter">1/3</span>
-          <span style="font-size:13px;color:#3a5070;margin-left:auto;">›</span>
-        </div>
-      </div>
-
+      <div class="habit-main"><span class="habit-title">パチスロをしない</span><div class="habit-status"><span class="dot-on"></span><span class="dot-off"></span><span class="dot-off"></span><span class="counter">1/3</span><span style="font-size:13px;color:#3a5070;margin-left:auto;">›</span></div></div>
       <div class="meter" id="chargeMeter">
         <svg width="82" height="82" viewBox="0 0 82 82" aria-hidden="true">
-          <circle cx="41" cy="41" r="36" fill="none" stroke="#181830" stroke-width="5" stroke-dasharray="3.5 2.2"/>
-          <circle cx="41" cy="41" r="36" fill="none" stroke="#39ff14" stroke-width="5" stroke-dasharray="143 83" transform="rotate(-90 41 41)"/>
-          <circle cx="41" cy="41" r="28" fill="#0e0e1c" stroke="#252545" stroke-width="1.5"/>
-          <circle cx="41" cy="41" r="24" fill="#06060e"/>
-          <line x1="31" y1="31" x2="35" y2="31" stroke="#00ffcc" stroke-width="1.5"/>
-          <line x1="31" y1="31" x2="31" y2="35" stroke="#00ffcc" stroke-width="1.5"/>
-          <line x1="51" y1="31" x2="47" y2="31" stroke="#00ffcc" stroke-width="1.5"/>
-          <line x1="51" y1="31" x2="51" y2="35" stroke="#00ffcc" stroke-width="1.5"/>
-          <line x1="31" y1="51" x2="35" y2="51" stroke="#00ffcc" stroke-width="1.5"/>
-          <line x1="31" y1="51" x2="31" y2="47" stroke="#00ffcc" stroke-width="1.5"/>
-          <line x1="51" y1="51" x2="47" y2="51" stroke="#00ffcc" stroke-width="1.5"/>
-          <line x1="51" y1="51" x2="51" y2="47" stroke="#00ffcc" stroke-width="1.5"/>
-          <text x="41" y="39" text-anchor="middle" font-family="monospace" font-size="9" font-weight="bold" fill="#00ffcc">DO</text>
-          <text x="41" y="50" text-anchor="middle" font-family="monospace" font-size="7" font-weight="bold" fill="#00ffcc" opacity=".7">DO!!</text>
+          <circle cx="41" cy="41" r="36" fill="none" stroke="#181830" stroke-width="5" stroke-dasharray="3.5 2.2"/><circle cx="41" cy="41" r="36" fill="none" stroke="#39ff14" stroke-width="5" stroke-dasharray="143 83" transform="rotate(-90 41 41)"/><circle cx="41" cy="41" r="28" fill="#0e0e1c" stroke="#252545" stroke-width="1.5"/><circle cx="41" cy="41" r="24" fill="#06060e"/>
+          <line x1="31" y1="31" x2="35" y2="31" stroke="#00ffcc" stroke-width="1.5"/><line x1="31" y1="31" x2="31" y2="35" stroke="#00ffcc" stroke-width="1.5"/><line x1="51" y1="31" x2="47" y2="31" stroke="#00ffcc" stroke-width="1.5"/><line x1="51" y1="31" x2="51" y2="35" stroke="#00ffcc" stroke-width="1.5"/>
+          <line x1="31" y1="51" x2="35" y2="51" stroke="#00ffcc" stroke-width="1.5"/><line x1="31" y1="51" x2="31" y2="47" stroke="#00ffcc" stroke-width="1.5"/><line x1="51" y1="51" x2="47" y2="51" stroke="#00ffcc" stroke-width="1.5"/><line x1="51" y1="51" x2="51" y2="47" stroke="#00ffcc" stroke-width="1.5"/>
+          <text x="41" y="39" text-anchor="middle" font-family="monospace" font-size="9" font-weight="bold" fill="#00ffcc">DO</text><text x="41" y="50" text-anchor="middle" font-family="monospace" font-size="7" font-weight="bold" fill="#00ffcc" opacity=".7">DO!!</text>
         </svg>
       </div>
     </div>
-
     <div id="inputBar">
-      <button id="ib" class="roundBtn bolt" onclick="doInst()" aria-label="即タスク化">⚡</button>
-      <input
-        id="mi" type="text" placeholder="タスクを入力..."
-        autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="done"
-        oninput="onIn(event)" onbeforeinput="onBeforeInput(event)" onkeydown="onKey(event)"
-        oncompositionstart="onCompStart(event)" oncompositionupdate="onCompUpdate(event)" oncompositionend="onCompEnd(event)"
-        onfocus="onInputFocus()" onblur="onInputBlur()"
-      />
+      <button id="ib" class="roundBtn bolt" onclick="openTaskMenu()" aria-label="タスク設定">☰</button>
+      <input id="mi" type="text" placeholder="タスクを入力..." autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" oninput="onIn(event)" onbeforeinput="onBeforeInput(event)" onkeydown="onKey(event)" oncompositionstart="onCompStart(event)" oncompositionupdate="onCompUpdate(event)" oncompositionend="onCompEnd(event)" onfocus="onInputFocus()" onblur="onInputBlur()" />
       <button id="db" class="roundBtn dopa" onclick="doDopa()" aria-label="DOPAON!">✦</button>
     </div>
   </div>
 
-  <!-- PROFILE POPUP -->
   <div class="overlay" id="profileOverlay">
     <div class="popup">
-      <div class="popup-head">
-        <span class="popup-title">PROFILE</span>
-        <button class="popup-close" onclick="closeProfile()" aria-label="閉じる">✕</button>
-      </div>
+      <div class="popup-head"><span class="popup-title">PROFILE</span><button class="popup-close" onclick="closeProfile()" aria-label="閉じる">✕</button></div>
       <div class="popup-body">
-
+        <div class="section"><div class="preview-name" id="namePreview"></div></div>
+        <div class="section"><p class="field-label">名前</p><input class="name-input" id="nameInput" type="text" maxlength="12" placeholder="名前を入力" oninput="onNameInput()" autocomplete="off" /></div>
         <div class="section">
-          <div class="preview-name" id="namePreview"></div>
+          <div class="stat-row"><div class="stat-box"><div class="stat-num lv" id="pfLv">0</div><div class="stat-cap">LEVEL</div></div><div class="stat-box"><div class="stat-num free" id="pfFree">+0日</div><div class="stat-cap">FREE BONUS</div></div></div>
+          <div class="level-bar"><div class="level-fill" id="pfLevelFill"></div></div><div class="level-note" id="pfLevelNote">NEXT +6 XP</div><div class="free-note" id="pfFreeNote">現在無料期間 +0日 追加！</div>
         </div>
-
-        <div class="section">
-          <p class="field-label">名前</p>
-          <input class="name-input" id="nameInput" type="text" maxlength="12"
-            placeholder="名前を入力" oninput="onNameInput()" autocomplete="off" />
-        </div>
-
-        <div class="section">
-          <div class="stat-row">
-            <div class="stat-box">
-              <div class="stat-num lv" id="pfLv">0</div>
-              <div class="stat-cap">LEVEL</div>
-            </div>
-            <div class="stat-box">
-              <div class="stat-num free" id="pfFree">+0日</div>
-              <div class="stat-cap">FREE BONUS</div>
-            </div>
-          </div>
-          <div class="free-note" id="pfFreeNote">現在無料期間 +0日 追加！</div>
-        </div>
-
-        <div class="section">
-          <p class="field-label">肩書き <span id="titleCount" style="color:#2a3a55"></span></p>
-          <div class="title-grid" id="titleGrid"></div>
-        </div>
-
-        <div class="section" style="margin-bottom:6px">
-          <p class="field-label">イラスト</p>
-          <div class="illust-grid" id="illustGrid"></div>
-        </div>
-
+        <div class="section"><p class="field-label">肩書き <span id="titleCount" style="color:#2a3a55"></span></p><div class="title-grid" id="titleGrid"></div></div>
+        <div class="section" style="margin-bottom:6px"><p class="field-label">イラスト</p><div class="illust-grid" id="illustGrid"></div></div>
       </div>
     </div>
   </div>
 
-  <!-- REWARD POPUP -->
   <div class="overlay" id="rewardOverlay" onclick="closeReward()">
-    <div class="popup" onclick="event.stopPropagation()">
-      <div class="rw-stage">
-        <div class="rw-tier-label" id="rwTierLabel"></div>
-        <div class="rw-icon" id="rwIcon"></div>
-        <div class="rw-reward-type" id="rwType"></div>
-        <div class="rw-reward-main" id="rwMain"></div>
-        <div class="rw-reward-sub" id="rwSub"></div>
-        <div class="rw-tap">TAP TO CLOSE</div>
+    <div class="popup" onclick="event.stopPropagation()"><div class="rw-stage"><div class="rw-tier-label" id="rwTierLabel"></div><div class="rw-icon" id="rwIcon"></div><div class="rw-reward-type" id="rwType"></div><div class="rw-reward-main" id="rwMain"></div><div class="rw-reward-sub" id="rwSub"></div><div class="rw-tap">TAP TO CLOSE</div></div></div>
+  </div>
+
+  <div class="overlay" id="taskOverlay">
+    <div class="popup">
+      <div class="popup-head"><span class="popup-title" id="taskPopupTitle">TASK MENU</span><button class="popup-close" onclick="closeTaskMenu()" aria-label="閉じる">✕</button></div>
+      <div class="popup-body">
+        <div class="section"><p class="field-label">タスク名</p><input class="form-input" id="taskNameInput" type="text" maxlength="60" placeholder="タスク名" autocomplete="off" /></div>
+        <div class="section"><div class="form-row"><div><p class="field-label">種別</p><select class="form-select" id="taskTypeInput" onchange="syncTaskMenuFields()"><option value="normal">通常タスク</option><option value="habit">習慣タスク</option></select></div><div><p class="field-label">日付</p><input class="form-input" id="taskDueInput" type="date" /></div></div></div>
+        <div class="section" id="habitFields">
+          <div class="form-row"><div><p class="field-label">チェック内容</p><select class="form-select" id="habitKindInput"><option value="do">やること</option><option value="avoid">やらないこと</option></select></div><div><p class="field-label">管理方式</p><select class="form-select" id="repeatTypeInput" onchange="syncTaskMenuFields()"><option value="daily">毎日</option><option value="interval">何日起き</option><option value="weekdays">曜日管理</option></select></div></div>
+          <div id="intervalBox" style="margin-top:14px"><p class="field-label">何日起き</p><input class="form-input" id="intervalDaysInput" type="number" min="1" max="30" value="1" /></div>
+          <div id="weekdayBox" style="margin-top:14px"><p class="field-label">曜日</p><div class="weekday-grid" id="weekdayGrid"></div></div>
+          <div class="form-help">習慣タスクは、あとでタスク右側の⚙から同じ設定を変更できる。</div>
+        </div>
+        <div class="form-actions"><button class="primary-btn" onclick="saveTaskMenu()" id="taskSaveBtn">追加する</button><button class="ghost-btn" onclick="closeTaskMenu()">閉じる</button></div>
+        <div class="form-actions" id="taskDangerRow" style="display:none"><button class="danger-btn" onclick="deleteEditingTask()">このタスクを削除</button></div>
       </div>
     </div>
   </div>
-
 </div>
 
 <script>
-/* ===================================================================
-   DOPAON TASK SYSTEM
-   仕上げ版:
-   - 重複宣言整理
-   - localStorage永続化
-   - 報酬抽選
-   - ハズレは完全サイレント
-   - 甘やかし1文字1回キュー式
-   - DOPAON文言大幅追加
-   - 無料期間 +表示
-=================================================================== */
+const APP_VERSION=3;
+const STORAGE_KEY='dopaon_state_v3';
+const BACKUP_KEY='dopaon_state_v3_backup';
+const LEGACY_KEYS=['dopaon_state_v2','dopaon_state_v1'];
 
-/* ---------- マスターデータ ---------- */
-const TIERS={
-  white :{key:'white', jp:'白', color:'#e8e8f5', xp:2,  days:3 },
-  blue  :{key:'blue',  jp:'青', color:'#3b9eff', xp:3,  days:7 },
-  green :{key:'green', jp:'緑', color:'#39ff88', xp:6,  days:14},
-  purple:{key:'purple',jp:'紫', color:'#b96bff', xp:12, days:21},
-  red   :{key:'red',   jp:'赤', color:'#ff3b5c', xp:30, days:30},
-  gold  :{key:'gold',  jp:'金', color:'#ffd24a', xp:60, days:45}
-};
+const TIERS={white:{key:'white',jp:'白',color:'#e8e8f5',xp:2,days:3},blue:{key:'blue',jp:'青',color:'#3b9eff',xp:3,days:7},green:{key:'green',jp:'緑',color:'#39ff88',xp:6,days:14},purple:{key:'purple',jp:'紫',color:'#b96bff',xp:12,days:21},red:{key:'red',jp:'赤',color:'#ff3b5c',xp:30,days:30},gold:{key:'gold',jp:'金',color:'#ffd24a',xp:60,days:45}};
 const TIER_ORDER=['white','blue','green','purple','red','gold'];
-
-const TITLES=[
-  {id:'t01',text:'今はただの',tier:'white'},
-  {id:'t02',text:'これでも',tier:'white'},
-  {id:'t03',text:'ただの',tier:'white'},
-  {id:'t04',text:'やたらと',tier:'white'},
-  {id:'t05',text:'なんとなく',tier:'white'},
-  {id:'t06',text:'迷える',tier:'white'},
-  {id:'t07',text:'しがない',tier:'white'},
-  {id:'t08',text:'野良の',tier:'blue'},
-  {id:'t09',text:'紛れ込んだ',tier:'blue'},
-  {id:'t10',text:'ひっそりした',tier:'blue'},
-  {id:'t11',text:'気まぐれな',tier:'blue'},
-  {id:'t12',text:'ふらりと来た',tier:'blue'},
-  {id:'t13',text:'思いつきの',tier:'blue'},
-  {id:'t14',text:'曲がった',tier:'blue'},
-  {id:'t15',text:'手の込んだ',tier:'green'},
-  {id:'t16',text:'一途な',tier:'green'},
-  {id:'t17',text:'根拠のない',tier:'green'},
-  {id:'t18',text:'風変わりな',tier:'green'},
-  {id:'t19',text:'うっすらとした',tier:'green'},
-  {id:'t20',text:'不器用な',tier:'green'},
-  {id:'t21',text:'調教済みの',tier:'purple'},
-  {id:'t22',text:'純然たる',tier:'purple'},
-  {id:'t23',text:'果てしなく',tier:'purple'},
-  {id:'t24',text:'底知れない',tier:'purple'},
-  {id:'t25',text:'本物の',tier:'purple'},
-  {id:'t26',text:'抗えない',tier:'red'},
-  {id:'t27',text:'逃げ場のない',tier:'red'},
-  {id:'t28',text:'選ばれた',tier:'red'},
-  {id:'t29',text:'唯一無二の',tier:'gold'},
-  {id:'t30',text:'伝説の',tier:'gold'}
-];
-
+const TITLES=[{id:'t01',text:'今はただの',tier:'white'},{id:'t02',text:'これでも',tier:'white'},{id:'t03',text:'ただの',tier:'white'},{id:'t04',text:'やたらと',tier:'white'},{id:'t05',text:'なんとなく',tier:'white'},{id:'t06',text:'迷える',tier:'white'},{id:'t07',text:'しがない',tier:'white'},{id:'t08',text:'野良の',tier:'blue'},{id:'t09',text:'紛れ込んだ',tier:'blue'},{id:'t10',text:'ひっそりした',tier:'blue'},{id:'t11',text:'気まぐれな',tier:'blue'},{id:'t12',text:'ふらりと来た',tier:'blue'},{id:'t13',text:'思いつきの',tier:'blue'},{id:'t14',text:'曲がった',tier:'blue'},{id:'t15',text:'手の込んだ',tier:'green'},{id:'t16',text:'一途な',tier:'green'},{id:'t17',text:'根拠のない',tier:'green'},{id:'t18',text:'風変わりな',tier:'green'},{id:'t19',text:'うっすらとした',tier:'green'},{id:'t20',text:'不器用な',tier:'green'},{id:'t21',text:'調教済みの',tier:'purple'},{id:'t22',text:'純然たる',tier:'purple'},{id:'t23',text:'果てしなく',tier:'purple'},{id:'t24',text:'底知れない',tier:'purple'},{id:'t25',text:'本物の',tier:'purple'},{id:'t26',text:'抗えない',tier:'red'},{id:'t27',text:'逃げ場のない',tier:'red'},{id:'t28',text:'選ばれた',tier:'red'},{id:'t29',text:'唯一無二の',tier:'gold'},{id:'t30',text:'伝説の',tier:'gold'}];
 const ILLUST_TIERS=['blue','green','purple','red','gold'];
+const WEEKDAYS=['日','月','火','水','木','金','土'];
 
-const PR=[
-  {t:"えらい！",c:"#00ffcc"},{t:"最高！！",c:"#39ff14"},{t:"天才！！",c:"#ffd700"},
-  {t:"すごい！！",c:"#00ff99"},{t:"神！！！",c:"#ff3366"},{t:"無敵！！",c:"#ffd700"},
-  {t:"できる！！",c:"#00ffcc"},{t:"やばい！！",c:"#ff8c00"},{t:"完璧！！",c:"#ffd700"},
-  {t:"キュン！",c:"#66ccff"},{t:"いいぞ！",c:"#00ffcc"},{t:"前進！！",c:"#39ff14"},
-  {t:"ナイス！",c:"#ffd700"},{t:"強い！！",c:"#ff3366"},{t:"優勝！！",c:"#ffd700"},
-  {t:"勝ち！！",c:"#39ff14"},{t:"尊い！！",c:"#66ccff"},{t:"えっら！",c:"#00ffcc"},
-  {t:"爆進！！",c:"#ff8c00"},{t:"覚醒！！",c:"#ffd700"},{t:"成長！！",c:"#39ff14"},
-  {t:"進んだ！",c:"#00ffcc"},{t:"偉業！！",c:"#ffd700"},{t:"革命！！",c:"#ff3366"},
-  {t:"拍手！！",c:"#66ccff"},{t:"いける！",c:"#39ff14"},{t:"良すぎ！",c:"#ffd700"},
-  {t:"えぐい！",c:"#ff8c00"},{t:"光ってる！",c:"#00ffcc"},{t:"優秀！！",c:"#39ff14"},
-  {t:"大正解！",c:"#ffd700"},{t:"つよつよ！",c:"#ff3366"},{t:"神速！！",c:"#00ff99"},
-  {t:"よすぎ！",c:"#66ccff"},{t:"激アツ！",c:"#ff8c00"},{t:"前のめり！",c:"#00ffcc"},
-  {t:"できてる！",c:"#39ff14"},{t:"積んでる！",c:"#ffd700"},{t:"勝者！！",c:"#ff3366"},
-  {t:"天才か！",c:"#00ffcc"},{t:"センス！",c:"#66ccff"},{t:"伸びてる！",c:"#39ff14"},
-  {t:"すばら！",c:"#ffd700"},{t:"本物！！",c:"#ff3366"},{t:"継続！！",c:"#00ff99"},
-  {t:"奇跡！！",c:"#ffd700"},{t:"気合い！",c:"#ff8c00"},{t:"えらすぎ！",c:"#00ffcc"},
-  {t:"助かる！",c:"#66ccff"},{t:"完璧か！",c:"#ffd700"},{t:"誇れ！！",c:"#39ff14"},
-  {t:"伝説！！",c:"#ffd700"},{t:"神ムーブ！",c:"#ff3366"},{t:"大勝利！",c:"#39ff14"},
-  {t:"才気！！",c:"#00ffcc"},{t:"着火！！",c:"#ff8c00"},{t:"集中！！",c:"#66ccff"},
-  {t:"丁寧！！",c:"#00ff99"},{t:"偉すぎる！",c:"#ffd700"},{t:"尊敬！！",c:"#39ff14"},
-  {t:"動いた！",c:"#00ffcc"},{t:"進化！！",c:"#ffd700"},{t:"熱い！！",c:"#ff8c00"},
-  {t:"いい手！",c:"#66ccff"},{t:"勝機！！",c:"#39ff14"},{t:"突破！！",c:"#ff3366"},
-  {t:"神入力！",c:"#00ffcc"},{t:"冴えてる！",c:"#ffd700"},{t:"流れ来た！",c:"#39ff14"},
-  {t:"やるね！",c:"#66ccff"},{t:"美しい！",c:"#00ff99"},{t:"一歩！！",c:"#ffd700"},
-  {t:"豪運！！",c:"#ff8c00"},{t:"希望！！",c:"#00ffcc"},{t:"未来！！",c:"#39ff14"},
-  {t:"燃えてる！",c:"#ff3366"},{t:"手が早い！",c:"#66ccff"},{t:"よくやった！",c:"#ffd700"},
-  {t:"キレてる！",c:"#00ffcc"},{t:"王道！！",c:"#39ff14"},{t:"優勝です！",c:"#ffd700"},
-  {t:"もう強い！",c:"#ff3366"},{t:"今日も勝ち！",c:"#00ff99"},{t:"積み上げ！",c:"#66ccff"},
-  {t:"その調子！",c:"#ffd700"},{t:"まぶしい！",c:"#00ffcc"},{t:"すごすぎ！",c:"#ff8c00"},
-  {t:"大丈夫！",c:"#39ff14"},{t:"才能！！",c:"#ffd700"},{t:"行動力！",c:"#00ff99"},
-  {t:"えら王！",c:"#ff3366"},{t:"勝ち筋！",c:"#66ccff"},{t:"抜群！！",c:"#ffd700"},
-  {t:"いい波！",c:"#00ffcc"},{t:"圧倒！！",c:"#ff8c00"},{t:"冴えた！",c:"#39ff14"}
-];
+const PR=['えらい！','最高！！','天才！！','すごい！！','神！！！','無敵！！','できる！！','やばい！！','完璧！！','キュン！','いいぞ！','前進！！','ナイス！','強い！！','優勝！！','勝ち！！','尊い！！','えっら！','爆進！！','覚醒！！','成長！！','進んだ！','偉業！！','革命！！','拍手！！','いける！','良すぎ！','えぐい！','光ってる！','優秀！！','大正解！','つよつよ！','神速！！','よすぎ！','激アツ！','前のめり！','できてる！','積んでる！','勝者！！','天才か！','センス！','伸びてる！','すばら！','本物！！','継続！！','奇跡！！','気合い！','えらすぎ！','助かる！','完璧か！','誇れ！！','伝説！！','神ムーブ！','大勝利！','才気！！','着火！！','集中！！','丁寧！！','偉すぎる！','尊敬！！','動いた！','進化！！','熱い！！','いい手！','勝機！！','突破！！','神入力！','冴えてる！','流れ来た！','やるね！','美しい！','一歩！！','豪運！！','希望！！','未来！！','燃えてる！','手が早い！','よくやった！','キレてる！','王道！！','優勝です！','もう強い！','今日も勝ち！','積み上げ！','その調子！','まぶしい！','すごすぎ！','大丈夫！','才能！！','行動力！','えら王！','勝ち筋！','抜群！！','いい波！','圧倒！！','冴えた！'].map((t,i)=>({t,c:['#00ffcc','#39ff14','#ffd700','#ff3366','#66ccff','#ff8c00','#00ff99'][i%7]}));
+const ADD_PR=['よし！！','起動！！','いいね！！','登録！！','仕込んだ！','やる気！！','開始！！','任務発生！','勝負！！'].map((t,i)=>({t,c:['#00ffcc','#39ff14','#ffd700','#66ccff','#ff8c00','#00ff99','#ffd700','#00ffcc','#ff3366'][i]}));
+const DONE_PR=['完了！！','確定！！','神！！！','撃破！！','制覇！！','勝利！！','任務完了！','えらすぎ！','大成功！'].map((t,i)=>({t,c:['#ffd700','#ff3366','#ffd700','#39ff14','#00ffcc','#ff8c00','#66ccff','#ffd700','#00ff99'][i]}));
+const DOPAON_AFTER=[['3分後','終わらせた自分、ちょっと好きになっていた。'],['5分後','終わったおかげで、頭の中が少し静かになっていた。'],['10分後','やる前より、自分を信用できるようになっていた。'],['15分後','逃げなかったことが、静かに自信へ変わっていた。'],['30分後','やっておいてよかったと、本気で思っていた。'],['1時間後','小さい勝ちが、ちゃんと自信になっていた。'],['2時間後','自分との約束を一つ守れて、少し強くなっていた。'],['夜','今日の自分、意外と悪くなかったと思えていた。'],['明日の朝','昨日の自分が片付けてくれていて、かなり助かっていた。'],['未来','あの小さい完了が、地味に人生の流れを変えていた。'],['5分後','自分を責める理由が、一つ減っていた。'],['10分後','完了した事実が、静かに背中を押していた。'],['30分後','終わらせたから、次の自分がラクをしていた。'],['夜','ちゃんとやった自分を、寝る前に少し誇れていた。'],['明日','昨日の一歩が、今日の自分を助けていた。']].map(x=>({time:x[0],text:x[1]}));
+const DOPAON_QUOTES=['やる気を待つより、手を動かした方が早い。','一歩は小さくていい。止まらない方が強い。','完璧じゃなくていい。完了が強い。','未来の自分は、今の小さい一手に救われる。','自信は先に来ない。終わらせた後についてくる。','小さい完了をなめるな。あれが人生を押す。','気分が乗らない日にも、進めた一歩は本物だ。'].map(t=>({time:'今',text:t}));
 
-const ADD_PR=[
-  {t:"よし！！",c:"#00ffcc"},{t:"起動！！",c:"#39ff14"},{t:"いいね！！",c:"#ffd700"},
-  {t:"登録！！",c:"#66ccff"},{t:"仕込んだ！",c:"#ff8c00"},{t:"やる気！！",c:"#00ff99"},
-  {t:"開始！！",c:"#ffd700"},{t:"任務発生！",c:"#00ffcc"},{t:"勝負！！",c:"#ff3366"}
-];
-
-const DONE_PR=[
-  {t:"完了！！",c:"#ffd700"},{t:"確定！！",c:"#ff3366"},{t:"神！！！",c:"#ffd700"},
-  {t:"撃破！！",c:"#39ff14"},{t:"制覇！！",c:"#00ffcc"},{t:"勝利！！",c:"#ff8c00"},
-  {t:"任務完了！",c:"#66ccff"},{t:"えらすぎ！",c:"#ffd700"},{t:"大成功！",c:"#00ff99"}
-];
-
-const DOPAON_AFTER=[
-  {time:"3分後",text:"終わらせた自分、ちょっと好きになっていた。"},
-  {time:"5分後",text:"終わったおかげで、頭の中が少し静かになっていた。"},
-  {time:"10分後",text:"やる前より、自分を信用できるようになっていた。"},
-  {time:"15分後",text:"終わらせた事実が、じわじわ効いてきていた。"},
-  {time:"30分後",text:"あれを片付けたから、次の一手が軽くなっていた。"},
-  {time:"1時間後",text:"終わらせた自分のおかげで、今日は少し勝っていた。"},
-  {time:"2時間後",text:"後回しにしなかったことが、ちゃんと誇りになっていた。"},
-  {time:"夜",text:"あの時やったから、寝る前の自分が少し救われていた。"},
-  {time:"明日の朝",text:"昨日の自分が片付けてくれていて、かなり助かっていた。"},
-  {time:"未来",text:"あの小さい完了が、地味に人生の流れを変えていた。"},
-
-  {time:"3分後",text:"終わった瞬間、心の中で小さくガッツポーズしていた。"},
-  {time:"5分後",text:"終わらせたぶんだけ、自己嫌悪が一枚はがれていた。"},
-  {time:"10分後",text:"あれを終えた自分は、ちゃんと前に進んでいた。"},
-  {time:"15分後",text:"片付けたから、気分のノイズが減っていた。"},
-  {time:"30分後",text:"やっておいてよかったと、本気で思っていた。"},
-  {time:"1時間後",text:"終わらせた余韻で、次もいけそうな気がしていた。"},
-  {time:"2時間後",text:"自分との約束を一つ守れて、少し強くなっていた。"},
-  {time:"夜",text:"今日の自分、意外と悪くなかったと思えていた。"},
-  {time:"明日",text:"昨日やった分だけ、スタート地点が前になっていた。"},
-  {time:"未来",text:"その完了が、あとからちゃんと効いていた。"},
-
-  {time:"3分後",text:"終わった。思ってたより、自分は動ける奴だった。"},
-  {time:"5分後",text:"やった後の安心感が、じんわり広がっていた。"},
-  {time:"10分後",text:"終わった事実が、妙に頼もしく見えていた。"},
-  {time:"15分後",text:"先延ばしの重さから、少し自由になっていた。"},
-  {time:"30分後",text:"あれを倒したことで、今日の流れが変わっていた。"},
-  {time:"1時間後",text:"小さい勝ちが、ちゃんと自信になっていた。"},
-  {time:"2時間後",text:"終わらせた自分を、少し信じられるようになっていた。"},
-  {time:"夜",text:"やり切った自分のおかげで、心が少し軽くなっていた。"},
-  {time:"明日の朝",text:"終わったタスクがないだけで、朝が少し優しくなっていた。"},
-  {time:"未来",text:"あの時の一押しが、自分の味方になっていた。"},
-
-  {time:"3分後",text:"終わらせた瞬間、ちゃんと世界が一ミリ明るくなっていた。"},
-  {time:"5分後",text:"やった自分が、少しだけかっこよく見えていた。"},
-  {time:"10分後",text:"完了の余韻で、呼吸がちょっと深くなっていた。"},
-  {time:"15分後",text:"逃げなかったことが、静かに自信へ変わっていた。"},
-  {time:"30分後",text:"終わらせたおかげで、余計な不安が一つ消えていた。"},
-  {time:"1時間後",text:"ちゃんと片付けた自分に、少し拍手したくなっていた。"},
-  {time:"2時間後",text:"行動した事実が、思ったより効いていた。"},
-  {time:"夜",text:"あれを終えた自分、かなり偉かったと気づいていた。"},
-  {time:"明日",text:"昨日の一歩が、今日の自分を助けていた。"},
-  {time:"未来",text:"小さい完了を積んだ分だけ、ちゃんと強くなっていた。"},
-
-  {time:"3分後",text:"終わった。もう少しだけ自分を大事にできそうだった。"},
-  {time:"5分後",text:"やった後の静けさが、ちょっと気持ちよかった。"},
-  {time:"10分後",text:"自分で流れを変えられた感じがしていた。"},
-  {time:"15分後",text:"一つ終わっただけで、思ったより景色が変わっていた。"},
-  {time:"30分後",text:"終わらせたから、次の自分がラクをしていた。"},
-  {time:"1時間後",text:"あの一手が、ちゃんと今日の勝ちになっていた。"},
-  {time:"2時間後",text:"やる前の不安が、過去のものになっていた。"},
-  {time:"夜",text:"ちゃんとやった自分を、寝る前に少し誇れていた。"},
-  {time:"明日の朝",text:"昨日の自分、なかなかやるじゃんと思っていた。"},
-  {time:"未来",text:"その完了は、思っているより大きな布石になっていた。"},
-
-  {time:"3分後",text:"終わらせたことで、胸の奥が少し軽くなっていた。"},
-  {time:"5分後",text:"自分を責める理由が、一つ減っていた。"},
-  {time:"10分後",text:"完了した事実が、静かに背中を押していた。"},
-  {time:"15分後",text:"面倒を越えた自分が、ちゃんと残っていた。"},
-  {time:"30分後",text:"やった分だけ、今日の自分に説得力が出ていた。"},
-  {time:"1時間後",text:"一つ終えたことで、思考の渋滞が少し解けていた。"},
-  {time:"2時間後",text:"終わった安心感で、次のことを考えられるようになっていた。"},
-  {time:"夜",text:"今日を少しでも進めた自分が、ちゃんといた。"},
-  {time:"明日",text:"昨日の完了が、朝の自分を少し助けていた。"},
-  {time:"未来",text:"そのタスクを倒した記憶が、自信の証拠になっていた。"}
-];
-
-const DOPAON_QUOTES=[
-  {time:"今",text:"やる気を待つより、手を動かした方が早い。"},
-  {time:"今",text:"一歩は小さくていい。止まらない方が強い。"},
-  {time:"今",text:"完璧じゃなくていい。完了が強い。"},
-  {time:"今",text:"未来の自分は、今の小さい一手に救われる。"},
-  {time:"今",text:"迷いながら動いた奴だけが、ちゃんと前に出る。"},
-  {time:"今",text:"タスクは敵じゃない。倒せるサイズに切ればいい。"},
-  {time:"今",text:"今日の一個は、明日の自信になる。"},
-  {time:"今",text:"重い時ほど、最初の一手だけでいい。"},
-  {time:"今",text:"終わらせる力は、才能より習慣に宿る。"},
-  {time:"今",text:"やった事実は、ちゃんと自分の味方になる。"},
-  {time:"今",text:"小さい完了をなめるな。あれが人生を押す。"},
-  {time:"今",text:"気分が乗らない日にも、進めた一歩は本物だ。"},
-  {time:"今",text:"やらない理由より、終わった後の軽さを見ろ。"},
-  {time:"今",text:"自信は先に来ない。終わらせた後についてくる。"},
-  {time:"今",text:"一つ片付けるだけで、世界は少し扱いやすくなる。"}
-];
-
-/* ---------- 状態 ---------- */
-const STORAGE_KEY='dopaon_state_v2';
-
-let state={
-  profile:{name:'',titleId:null},
-  xp:0,
-  freeDays:0,
-  ownedTitles:[],
-  ownedIllusts:[],
-  tasks:[]
-};
-
-function levelFromXp(xp){return Math.floor((Number(xp)||0)/6)}
-
-function normalizeState(s){
-  const base={
-    profile:{name:'',titleId:null},
-    xp:0,
-    freeDays:0,
-    ownedTitles:[],
-    ownedIllusts:[],
-    tasks:[]
-  };
-
-  const out=Object.assign({},base,s||{});
-  out.profile=Object.assign({},base.profile,(s&&s.profile)||{});
-  out.xp=Number(out.xp)||0;
-  out.freeDays=Number(out.freeDays)||0;
-  out.ownedTitles=Array.isArray(out.ownedTitles)?out.ownedTitles:[];
-  out.ownedIllusts=Array.isArray(out.ownedIllusts)?out.ownedIllusts:[];
-  out.tasks=Array.isArray(out.tasks)?out.tasks:[];
-
-  out.tasks=out.tasks
-    .filter(t=>t&&typeof t.name==='string')
-    .map(t=>({
-      id:t.id||newId(),
-      name:t.name,
-      state:['idle','charging','done'].includes(t.state)?t.state:'idle'
-    }));
-
-  return out;
-}
-
-function loadState(){
-  try{
-    const rawV2=localStorage.getItem(STORAGE_KEY);
-    const rawV1=localStorage.getItem('dopaon_state_v1');
-    const raw=rawV2||rawV1;
-    if(!raw)return;
-    state=normalizeState(JSON.parse(raw));
-    saveState();
-  }catch(e){
-    state=normalizeState(null);
-  }
-}
-
-function saveState(){
-  try{
-    localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
-  }catch(e){}
-}
-
-/* ---------- 汎用 ---------- */
-const NS="http://www.w3.org/2000/svg";
-const FF="'Reggae One', system-ui, sans-serif";
+let state={version:APP_VERSION,profile:{name:'',titleId:null},xp:0,freeDays:0,ownedTitles:[],ownedIllusts:[],tasks:[],ui:{completedOpen:false}};
+let saveTimer=null;
+let editingTaskId=null;
+let menuWeekdays=[];
 
 function clamp(n,min,max){return Math.max(min,Math.min(max,n))}
 function rnd(a){return a[Math.floor(Math.random()*a.length)]}
-function charLen(t){return Array.from(String(t||"")).length}
-function rawValue(){return document.getElementById("mi").value}
+function charLen(t){return Array.from(String(t||'')).length}
+function rawValue(){return document.getElementById('mi').value}
 function vl(){return rawValue().trim()}
-function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-}
-function newId(){
-  return window.crypto&&typeof window.crypto.randomUUID==="function"
-    ? window.crypto.randomUUID()
-    : String(Date.now())+"_"+String(Math.random()).slice(2);
-}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function newId(){return window.crypto&&crypto.randomUUID?crypto.randomUUID():String(Date.now())+'_'+String(Math.random()).slice(2)}
 function shuffle(a){return a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(v=>v[1])}
-
-/* ---------- 抽選 ---------- */
-function rollTier(){
-  const r=Math.random();
-  if(r<0.47)return null;
-  if(r<0.80)return 'white';
-
-  const b=Math.random();
-  if(b<0.15)return 'white';
-  if(b<0.45)return 'blue';
-  if(b<0.70)return 'green';
-  if(b<0.88)return 'purple';
-  if(b<0.97)return 'red';
-  return 'gold';
-}
-
-function grantReward(tier){
-  const T=TIERS[tier];
-  const canIllust=tier!=='white' && !state.ownedIllusts.includes(tier);
-
-  const pool=['title','days'];
-  if(canIllust)pool.push('illust');
-
-  const type=rnd(pool);
-
-  if(type==='illust'){
-    state.ownedIllusts.push(tier);
-    return {kind:'illust',tier};
-  }
-
-  if(type==='days'){
-    state.freeDays+=T.days;
-    return {kind:'days',tier,days:T.days};
-  }
-
-  const avail=TITLES.filter(t=>t.tier===tier && !state.ownedTitles.includes(t.id));
-  if(avail.length){
-    const got=rnd(avail);
-    state.ownedTitles.push(got.id);
-    if(!state.profile.titleId)state.profile.titleId=got.id;
-    return {kind:'title',tier,title:got};
-  }
-
-  state.xp+=T.xp;
-  return {kind:'levelup',tier,xp:T.xp};
-}
-
-function runReward(){
-  const tier=rollTier();
-
-  /* ハズレは完全サイレント。結果報告もバイブもなし。 */
-  if(!tier)return;
-
-  const result=grantReward(tier);
-  saveState();
-  renderHeader();
-  showReward(result);
-}
-
-/* ---------- リザルト表示 ---------- */
-function tierIconSVG(tier){
-  const c=TIERS[tier].color;
-  return '<svg viewBox="0 0 100 100" style="color:'+c+'">'+
-    '<polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="none" stroke="'+c+'" stroke-width="3"/>'+
-    '<polygon points="50,20 78,36 78,64 50,80 22,64 22,36" fill="'+c+'" opacity="0.14"/>'+
-    '<text x="50" y="50" text-anchor="middle" dominant-baseline="central" font-family="Reggae One,sans-serif" font-size="30" font-weight="900" fill="'+c+'">'+TIERS[tier].jp+'</text>'+
-    '</svg>';
-}
-
-function showReward(res){
-  const ov=document.getElementById('rewardOverlay');
-  const icon=document.getElementById('rwIcon');
-  const tierLabel=document.getElementById('rwTierLabel');
-  const typeEl=document.getElementById('rwType');
-  const mainEl=document.getElementById('rwMain');
-  const subEl=document.getElementById('rwSub');
-
-  const T=TIERS[res.tier];
-
-  tierLabel.textContent=T.jp+' TIER';
-  tierLabel.style.color=T.color;
-  icon.innerHTML=tierIconSVG(res.tier);
-
-  mainEl.style.color='';
-  mainEl.innerHTML='';
-  subEl.textContent='';
-
-  if(res.kind==='title'){
-    typeEl.textContent='称号 GET';
-    mainEl.innerHTML='「<span style="color:'+T.color+'">'+escapeHtml(res.title.text)+'</span>」';
-    subEl.textContent='肩書きに追加された';
-  }else if(res.kind==='days'){
-    typeEl.textContent='無料期間 GET';
-    mainEl.textContent='+'+res.days+'日';
-    mainEl.style.color=T.color;
-    subEl.textContent='現在無料期間 +'+state.freeDays+'日 追加！';
-  }else if(res.kind==='illust'){
-    typeEl.textContent='イラスト GET';
-    mainEl.textContent=T.jp+'の一枚';
-    mainEl.style.color=T.color;
-    subEl.textContent='プロフィールで見られる';
-  }else if(res.kind==='levelup'){
-    typeEl.textContent='レベルアップ';
-    mainEl.textContent='+'+res.xp+' XP';
-    mainEl.style.color=T.color;
-    subEl.textContent='Lv.'+levelFromXp(state.xp);
-  }
-
-  ov.classList.add('show');
-  icon.classList.remove('animate');
-  void icon.offsetWidth;
-  icon.classList.add('animate');
-
-  if(navigator.vibrate){
-    if(res.tier==='gold'||res.tier==='red')navigator.vibrate([60,40,60,40,140]);
-    else navigator.vibrate(50);
-  }
-}
-
-function closeReward(){
-  document.getElementById('rewardOverlay').classList.remove('show');
-}
-
-/* ===================================================================
-   PROFILE
-=================================================================== */
+function todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function levelFromXp(xp){return Math.floor((Number(xp)||0)/6)}
 function titleById(id){return TITLES.find(t=>t.id===id)||null}
 
-function renderNamePreview(){
-  const el=document.getElementById('namePreview');
-  const nm=state.profile.name;
-  const t=titleById(state.profile.titleId);
-
-  if(!nm){
-    el.innerHTML='<span class="pv-empty">名前を入力すると<br>ここに表示される</span>';
-    return;
-  }
-
-  let html='';
-  if(t){
-    html+='<span class="pv-ttl" style="color:'+TIERS[t.tier].color+'">'+escapeHtml(t.text)+'</span> ';
-  }
-  html+='<span class="pv-nm">'+escapeHtml(nm)+'</span>';
-  el.innerHTML=html;
+function normalizeTask(t){
+  const stateDone=t&&t.state==='done';
+  return {id:(t&&t.id)||newId(),name:String((t&&t.name)||'').trim()||'無題タスク',state:['idle','charging','done'].includes(t&&t.state)?t.state:'idle',rewardDone:Boolean(t&&t.rewardDone)||(stateDone&&!(t&&Object.prototype.hasOwnProperty.call(t,'rewardDone'))),createdAt:(t&&t.createdAt)||Date.now(),doneAt:(t&&t.doneAt)||null,dueDate:(t&&t.dueDate)||'',taskType:(t&&t.taskType)||((t&&t.type)==='habit'?'habit':'normal'),habitKind:(t&&t.habitKind)||((t&&t.habit&&t.habit.mode)||'do'),repeatType:(t&&t.repeatType)||((t&&t.habit&&t.habit.schedule)||'daily'),intervalDays:clamp(Number((t&&t.intervalDays)||((t&&t.habit&&t.habit.interval)||1))||1,1,30),weekdays:Array.isArray(t&&t.weekdays)?t.weekdays:(Array.isArray(t&&t.habit&&t.habit.weekdays)?t.habit.weekdays:[])};
 }
-
-function renderTitleGrid(){
-  const grid=document.getElementById('titleGrid');
-  const cnt=document.getElementById('titleCount');
-
-  grid.innerHTML='';
-  cnt.textContent='('+state.ownedTitles.length+'/'+TITLES.length+')';
-
-  const none=document.createElement('div');
-  none.className='title-none'+(state.profile.titleId?'':' sel');
-  none.textContent='なし';
-  none.onclick=()=>{
-    state.profile.titleId=null;
-    saveState();
-    renderTitleGrid();
-    renderNamePreview();
-    renderHeader();
-  };
-  grid.appendChild(none);
-
-  const sorted=TITLES.slice().sort((a,b)=>TIER_ORDER.indexOf(a.tier)-TIER_ORDER.indexOf(b.tier));
-
-  sorted.forEach(t=>{
-    const owned=state.ownedTitles.includes(t.id);
-    const sel=state.profile.titleId===t.id;
-    const chip=document.createElement('div');
-
-    chip.className='title-chip'+(owned?' owned':' locked')+(sel?' sel':'');
-    chip.textContent=owned?t.text:'？？？';
-
-    if(owned){
-      chip.style.color=sel?TIERS[t.tier].color:'#c8d8f0';
-      if(sel){
-        chip.style.borderColor=TIERS[t.tier].color;
-        chip.style.color=TIERS[t.tier].color;
-      }
-
-      chip.onclick=()=>{
-        state.profile.titleId=sel?null:t.id;
-        saveState();
-        renderTitleGrid();
-        renderNamePreview();
-        renderHeader();
-      };
-    }
-
-    grid.appendChild(chip);
-  });
+function normalizeState(s){
+  const out={version:APP_VERSION,profile:{name:'',titleId:null},xp:0,freeDays:0,ownedTitles:[],ownedIllusts:[],tasks:[],ui:{completedOpen:false}};
+  if(s&&typeof s==='object')Object.assign(out,s);
+  out.profile=Object.assign({name:'',titleId:null},(s&&s.profile)||{});
+  out.xp=Number(out.xp)||0;out.freeDays=Number(out.freeDays)||0;
+  out.ownedTitles=Array.isArray(out.ownedTitles)?[...new Set(out.ownedTitles)]:[];
+  out.ownedIllusts=Array.isArray(out.ownedIllusts)?[...new Set(out.ownedIllusts)]:[];
+  out.tasks=Array.isArray(out.tasks)?out.tasks.map(normalizeTask):[];
+  out.ui=Object.assign({completedOpen:false},(s&&s.ui)||{});
+  out.version=APP_VERSION;
+  return out;
 }
-
-function illustPlaceholderSVG(tier){
-  const c=TIERS[tier].color;
-  return '<svg viewBox="0 0 100 100">'+
-    '<defs><radialGradient id="g'+tier+'" cx="50%" cy="42%" r="62%">'+
-    '<stop offset="0%" stop-color="'+c+'" stop-opacity="0.55"/>'+
-    '<stop offset="100%" stop-color="'+c+'" stop-opacity="0.05"/></radialGradient></defs>'+
-    '<rect width="100" height="100" fill="#06060e"/>'+
-    '<rect width="100" height="100" fill="url(#g'+tier+')"/>'+
-    '<polygon points="50,22 72,38 72,64 50,80 28,64 28,38" fill="none" stroke="'+c+'" stroke-width="2.5" opacity="0.9"/>'+
-    '<circle cx="50" cy="51" r="9" fill="'+c+'" opacity="0.85"/>'+
-    '</svg>';
+function safeParse(raw){try{return raw?JSON.parse(raw):null}catch(e){return null}}
+function loadState(){
+  const keys=[STORAGE_KEY,...LEGACY_KEYS,BACKUP_KEY];
+  for(const k of keys){const parsed=safeParse(localStorage.getItem(k));if(parsed){state=normalizeState(parsed);saveNow();return}}
+  state=normalizeState(null);
 }
-
-function renderIllustGrid(){
-  const grid=document.getElementById('illustGrid');
-  grid.innerHTML='';
-
-  ILLUST_TIERS.forEach(tier=>{
-    const owned=state.ownedIllusts.includes(tier);
-    const wrap=document.createElement('div');
-    const cell=document.createElement('div');
-
-    cell.className='illust-cell'+(owned?'':' locked');
-    cell.innerHTML=owned?illustPlaceholderSVG(tier):'<span class="lockmark">🔒</span>';
-
-    const cap=document.createElement('div');
-    cap.className='illust-cap';
-    cap.textContent=TIERS[tier].jp;
-    cap.style.color=owned?TIERS[tier].color:'#4a6080';
-
-    wrap.appendChild(cell);
-    wrap.appendChild(cap);
-    grid.appendChild(wrap);
-  });
+function saveNow(){
+  try{const old=localStorage.getItem(STORAGE_KEY);if(old)localStorage.setItem(BACKUP_KEY,old);localStorage.setItem(STORAGE_KEY,JSON.stringify(normalizeState(state)))}
+  catch(e){showToast('保存に失敗。空き容量を確認して')}
 }
-
-function onNameInput(){
-  state.profile.name=document.getElementById('nameInput').value;
-  renderNamePreview();
-  renderHeader();
-  saveState();
-}
-
-function renderProfileStats(){
-  document.getElementById('pfLv').textContent=levelFromXp(state.xp);
-  document.getElementById('pfFree').textContent='+'+state.freeDays+'日';
-  document.getElementById('pfFreeNote').textContent='現在無料期間 +'+state.freeDays+'日 追加！';
-}
-
-function openProfile(){
-  document.getElementById('mi').blur();
-
-  document.getElementById('nameInput').value=state.profile.name||'';
-  renderProfileStats();
-  renderNamePreview();
-  renderTitleGrid();
-  renderIllustGrid();
-
-  document.getElementById('profileOverlay').classList.add('show');
-  syncViewport();
-}
-
-function closeProfile(){
-  document.getElementById('profileOverlay').classList.remove('show');
-}
-
-/* ---------- ヘッダー ---------- */
-function renderHeader(){
-  const nm=state.profile.name;
-  const t=titleById(state.profile.titleId);
-  const nameEl=document.getElementById('hdName');
-
-  if(!nm){
-    nameEl.innerHTML='<span style="color:#56607e;font-weight:500">名前未設定</span>';
-  }else{
-    let html='';
-    if(t)html+='<span class="ttl" style="color:'+TIERS[t.tier].color+'">'+escapeHtml(t.text)+'</span>';
-    html+='<span> '+escapeHtml(nm)+'</span>';
-    nameEl.innerHTML=html;
-  }
-
-  document.getElementById('hdLv').textContent=levelFromXp(state.xp);
-  document.getElementById('hdFree').textContent='+'+state.freeDays+'日';
-}
-
-/* ===================================================================
-   DOPAON メッセージ
-=================================================================== */
-function makeDopaonMessage(taskName){
-  const isAfter=Math.random()<0.8;
-  const item=isAfter?rnd(DOPAON_AFTER):rnd(DOPAON_QUOTES);
-  const clean=taskName?taskName.trim():'そのタスク';
-
-  let text=item.text.replaceAll('{task}',clean);
-  if(taskName && isAfter && Math.random()<0.35){
-    text='「'+clean+'」を終わらせた後、'+text;
-  }
-
-  return{
-    time:item.time,
-    text
-  };
-}
-
-function showDopaonMessage(taskName){
-  const msg=makeDopaonMessage(taskName);
-  const el=document.createElement("div");
-
-  el.className="dream";
-  el.innerHTML=
-    '<span class="dream-time">'+escapeHtml(msg.time)+'</span>'+
-    '<span class="dream-quote">「'+escapeHtml(msg.text)+'」</span>';
-
-  document.getElementById("sf8").appendChild(el);
-
-  el.animate(
-    [
-      {opacity:0,transform:"translateY(6px) scale(.98)"},
-      {opacity:1,transform:"translateY(0) scale(1)",offset:.1},
-      {opacity:1,offset:.82},
-      {opacity:0,transform:"translateY(-8px) scale(.98)"}
-    ],
-    {duration:3600,fill:"forwards",easing:"cubic-bezier(.18,.8,.22,1)"}
-  ).onfinish=()=>{
-    if(el.parentNode)el.parentNode.removeChild(el);
-  };
-}
-
-/* ===================================================================
-   甘やかし演出 + 入力まわり
-=================================================================== */
-let isComposing=false;
-let compBaseLen=0;
-let compText="";
-let observedLen=0;
-
-let livePraise=0;
-let praiseQueue=0;
-let praiseDrainTimer=null;
-let busyLanes=new Set();
-let activePraise=new Set();
-
-let baseViewportHeight=0;
-
-const PRAISE_LIFE=2000;
-const MAX_PRAISE=4;
-const PRAISE_COOLDOWN=95;
-const MAX_PRAISE_QUEUE=12;
-const P_MARGIN=10;
-
-function viewportHeight(){return window.visualViewport?window.visualViewport.height:window.innerHeight}
-function viewportTop(){return window.visualViewport?window.visualViewport.offsetTop:0}
-
-function initBaseViewport(force){
-  const h=Math.max(window.innerHeight,viewportHeight());
-
-  if(force||!baseViewportHeight){
-    baseViewportHeight=h;
-    return;
-  }
-
-  const inputFocused=document.activeElement===document.getElementById("mi");
-
-  if(!inputFocused&&h>baseViewportHeight){
-    baseViewportHeight=h;
-  }
-}
-
-function syncViewport(){
-  initBaseViewport(false);
-
-  const vvTop=viewportTop();
-  const vvH=viewportHeight();
-  const inputFocused=document.activeElement===document.getElementById("mi");
-  const rawLift=baseViewportHeight-vvH;
-  const lift=inputFocused?Math.max(0,Math.round(rawLift)):0;
-
-  document.documentElement.style.setProperty("--app-top",Math.round(vvTop)+"px");
-  document.documentElement.style.setProperty("--app-h",Math.round(baseViewportHeight)+"px");
-  document.documentElement.style.setProperty("--kb",lift+"px");
-
-  lockScroll();
-}
-
-function lockScroll(){
-  if(window.scrollX!==0||window.scrollY!==0)window.scrollTo(0,0);
-}
-
-function isSideMark(ch){
-  return /[！!？?‼⁉⁈♡♥❤★☆♪♫♬〜ー…‥・。、,.，．]/.test(ch);
-}
-
-function grps(txt){
-  const cs=Array.from(txt);
-  const gs=[];
-  let i=0;
-
-  while(i<cs.length){
-    if(isSideMark(cs[i])){
-      let j=i;
-      while(j<cs.length&&isSideMark(cs[j]))j++;
-      gs.push({side:true,t:cs.slice(i,j).join("")});
-      i=j;
-    }else{
-      gs.push({side:false,t:cs[i]});
-      i++;
-    }
-  }
-
-  return gs;
-}
-
-function textSize(mode){
-  if(mode==="done")return 26+Math.floor(Math.random()*7);
-  if(mode==="add")return 22+Math.floor(Math.random()*7);
-  return 17+Math.floor(Math.random()*8);
-}
-
-function getTextBox(groups,fs){
-  const pad=Math.ceil(fs*.55);
-  const lh=Math.ceil(fs*1.34);
-  const maxMark=groups.reduce((m,g)=>g.side?Math.max(m,charLen(g.t)):m,1);
-
-  return{
-    w:Math.ceil(Math.max(fs,maxMark*fs*.62)+pad*2),
-    h:Math.ceil(groups.length*lh+pad),
-    pad,
-    lh
-  };
-}
-
-function txPair(svg,x,y,fs,txt,col){
-  const outer=Math.max(4,fs*.24);
-  const inner=Math.max(2,fs*.11);
-
-  [["none","white",outer],[col,"#111",inner]].forEach(([fill,stroke,sw])=>{
-    const t=document.createElementNS(NS,"text");
-    t.setAttribute("x",x);
-    t.setAttribute("y",y);
-    t.setAttribute("text-anchor","middle");
-    t.setAttribute("dominant-baseline","central");
-    t.setAttribute("font-family",FF);
-    t.setAttribute("font-size",fs);
-    t.setAttribute("font-weight","900");
-    t.setAttribute("fill",fill);
-    t.setAttribute("stroke",stroke);
-    t.setAttribute("stroke-width",sw);
-    t.setAttribute("stroke-linejoin","round");
-    if(fill!=="none")t.setAttribute("paint-order","stroke");
-    t.textContent=txt;
-    svg.appendChild(t);
-  });
-}
-
-function drawPraiseText(svg,item,groups,box,fs){
-  let cy=box.pad/2+box.lh/2;
-
-  groups.forEach(g=>{
-    const len=Math.max(1,charLen(g.t));
-    const fitFs=g.side?Math.min(fs,Math.max(10,(box.w-box.pad*.65)/(len*.62))):fs;
-
-    txPair(svg,box.w/2,cy,fitFs,g.t,item.c);
-    cy+=box.lh;
-  });
-}
-
-function getPraiseOrigin(){
-  const pc=document.getElementById("pc");
-  const dock=document.getElementById("bottomDock");
-
-  if(!pc||!dock)return{x:180,y:360};
-
-  const pcRect=pc.getBoundingClientRect();
-  const dockRect=dock.getBoundingClientRect();
-
-  return{
-    x:clamp(dockRect.left+dockRect.width/2-pcRect.left,48,pc.clientWidth-48),
-    y:clamp(dockRect.top-pcRect.top+20,pc.clientHeight*.55,pc.clientHeight+86)
-  };
-}
-
-function getLanes(origin){
-  const pc=document.getElementById("pc");
-  const count=pc.clientWidth<360?5:7;
-  const topY=18;
-  const minX=38;
-  const maxX=pc.clientWidth-38;
-  const lanes=[];
-
-  for(let i=0;i<count;i++){
-    const targetX=count===1?pc.clientWidth/2:minX+(maxX-minX)*(i/(count-1));
-    const dx=targetX-origin.x;
-    const dy=topY-origin.y;
-
-    lanes.push({
-      index:i,
-      angle:Math.atan2(dy,dx)*180/Math.PI,
-      len:Math.hypot(dx,dy)
-    });
-  }
-
-  return lanes;
-}
-
-function getPointOnLane(origin,lane,d){
-  const r=lane.angle*Math.PI/180;
-  return{
-    x:origin.x+Math.cos(r)*d,
-    y:origin.y+Math.sin(r)*d
-  };
-}
-
-function fitsInPraiseArea(x,y,w,h){
-  const pc=document.getElementById("pc");
-  return(
-    x-w/2>P_MARGIN &&
-    x+w/2<pc.clientWidth-P_MARGIN &&
-    y-h/2>P_MARGIN &&
-    y+h/2<pc.clientHeight-P_MARGIN
-  );
-}
-
-function pickPraisePosition(w,h){
-  const pc=document.getElementById("pc");
-  const origin=getPraiseOrigin();
-  const lanes=getLanes(origin);
-  const free=lanes.filter(l=>!busyLanes.has(l.index));
-  const pool=shuffle(free.length?free:lanes);
-
-  for(const lane of pool){
-    const minD=88;
-    const maxD=Math.max(minD+20,Math.min(lane.len-54,340));
-
-    for(let i=0;i<9;i++){
-      const d=minD+Math.random()*(maxD-minD);
-      const p=getPointOnLane(origin,lane,d);
-
-      if(fitsInPraiseArea(p.x,p.y,w,h)){
-        return{lane,x:p.x,y:p.y,angle:lane.angle};
-      }
-    }
-  }
-
-  const fb=pool[0]||lanes[0]||{index:0,angle:-90};
-  const p=getPointOnLane(origin,fb,150);
-
-  return{
-    lane:fb,
-    x:clamp(p.x,w/2+P_MARGIN,pc.clientWidth-w/2-P_MARGIN),
-    y:clamp(p.y,h/2+P_MARGIN,pc.clientHeight-h/2-P_MARGIN),
-    angle:fb.angle
-  };
-}
-
-function spawnPraise(mode="input",forcedItem=null){
-  if(livePraise>=MAX_PRAISE)return false;
-
-  syncViewport();
-
-  const pc=document.getElementById("pc");
-  if(!pc)return false;
-
-  const item=forcedItem||rnd(mode==="done"?DONE_PR:mode==="add"?ADD_PR:PR);
-  const groups=grps(item.t);
-  const fs=textSize(mode);
-  const box=getTextBox(groups,fs);
-  const pos=pickPraisePosition(box.w,box.h);
-  const rot=clamp(pos.angle+90,-34,34);
-
-  busyLanes.add(pos.lane.index);
-  livePraise++;
-
-  const svg=document.createElementNS(NS,"svg");
-  svg.setAttribute("width",box.w);
-  svg.setAttribute("height",box.h);
-  svg.setAttribute("viewBox","0 0 "+box.w+" "+box.h);
-  svg.style.cssText=
-    "position:absolute;" +
-    "left:"+(pos.x-box.w/2).toFixed(1)+"px;" +
-    "top:"+(pos.y-box.h/2).toFixed(1)+"px;" +
-    "transform:rotate("+rot.toFixed(1)+"deg) scale(.96);" +
-    "opacity:0;" +
-    "pointer-events:none;" +
-    "filter:drop-shadow(0 2px 5px rgba(0,0,0,.45));";
-
-  drawPraiseText(svg,item,groups,box,fs);
-  pc.appendChild(svg);
-  activePraise.add(svg);
-
-  const scale=mode==="input"?1:1.06;
-
-  const anim=svg.animate(
-    [
-      {opacity:0,transform:"rotate("+rot.toFixed(1)+"deg) translateY(8px) scale(.9)"},
-      {opacity:1,transform:"rotate("+rot.toFixed(1)+"deg) translateY(0) scale("+scale+")",offset:.12},
-      {opacity:1,transform:"rotate("+rot.toFixed(1)+"deg) translateY(-8px) scale(1)",offset:.78},
-      {opacity:0,transform:"rotate("+rot.toFixed(1)+"deg) translateY(-18px) scale(.96)"}
-    ],
-    {duration:PRAISE_LIFE,easing:"cubic-bezier(.18,.8,.22,1)",fill:"forwards"}
-  );
-
-  anim.onfinish=()=>releasePraise(svg,pos.lane.index);
-  return true;
-}
-
-function releasePraise(svg,laneIndex){
-  if(!activePraise.has(svg))return;
-
-  activePraise.delete(svg);
-  busyLanes.delete(laneIndex);
-  livePraise=Math.max(0,livePraise-1);
-
-  if(svg.parentNode)svg.parentNode.removeChild(svg);
-
-  if(praiseQueue>0)drainPraiseQueue();
-}
-
-/* 1文字1回: 入力数ぶんキューに積んで順番に出す */
-function enqueuePraise(amount){
-  if(amount<=0)return;
-  praiseQueue=clamp(praiseQueue+amount,0,MAX_PRAISE_QUEUE);
-  drainPraiseQueue();
-}
-
-function drainPraiseQueue(){
-  if(praiseDrainTimer)return;
-
-  const run=()=>{
-    praiseDrainTimer=null;
-
-    if(praiseQueue<=0)return;
-
-    if(livePraise>=MAX_PRAISE){
-      praiseDrainTimer=setTimeout(run,140);
-      return;
-    }
-
-    praiseQueue--;
-    spawnPraise("input");
-
-    if(praiseQueue>0){
-      praiseDrainTimer=setTimeout(run,PRAISE_COOLDOWN);
-    }
-  };
-
-  run();
-}
-
-function clearPraiseQueue(){
-  praiseQueue=0;
-  if(praiseDrainTimer){
-    clearTimeout(praiseDrainTimer);
-    praiseDrainTimer=null;
-  }
-}
-
-function updateInputButtons(v){
-  const db=document.getElementById("db");
-  const ib=document.getElementById("ib");
-
-  db.style.opacity=v?"1":".4";
-  ib.style.color=v?"#00ffcc":"#6070a0";
-  ib.style.borderColor=v?"#00ffcc55":"#2a2a50";
-}
-
-function resetPraiseInput(){
-  observedLen=charLen(rawValue());
-  compBaseLen=observedLen;
-  compText="";
-  clearPraiseQueue();
-}
-
-function observeTypingLength(len){
-  if(len<observedLen){
-    if(!isComposing)observedLen=len;
-    return;
-  }
-
-  if(len>observedLen){
-    enqueuePraise(len-observedLen);
-    observedLen=len;
-  }
-}
-
-function onBeforeInput(e){
-  syncViewport();
-
-  if(!isComposing){
-    setTimeout(()=>observeTypingLength(charLen(rawValue())),0);
-  }
-}
-
-function onCompStart(){
-  syncViewport();
-  isComposing=true;
-  compBaseLen=charLen(rawValue());
-  observedLen=compBaseLen;
-  compText="";
-}
-
-function onCompUpdate(e){
-  syncViewport();
-
-  compText=e&&typeof e.data==="string"?e.data:"";
-  observeTypingLength(compBaseLen+charLen(compText));
-  updateInputButtons(rawValue().trim()||compText);
-}
-
-function onCompEnd(e){
-  syncViewport();
-
-  isComposing=false;
-  compText="";
-
-  observeTypingLength(charLen(rawValue()));
-  updateInputButtons(vl());
-}
-
-function onIn(e){
-  syncViewport();
-
-  const raw=rawValue();
-  updateInputButtons(raw.trim());
-
-  if(!raw&&!isComposing){
-    resetPraiseInput();
-    return;
-  }
-
-  if(isComposing||(e&&e.isComposing))return;
-
-  observeTypingLength(charLen(raw));
-}
-
-function onInputFocus(){
-  setTimeout(()=>{
-    initBaseViewport(false);
-    syncViewport();
-    resetPraiseInput();
-  },40);
-
-  setTimeout(syncViewport,120);
-  setTimeout(syncViewport,260);
-  setTimeout(syncViewport,520);
-}
-
-function onInputBlur(){
-  setTimeout(()=>{
-    initBaseViewport(false);
-    syncViewport();
-  },120);
-}
-
-function onKey(e){
-  if(e.key==="Enter"&&!isComposing){
-    e.preventDefault();
-    doInst();
-  }
-}
-
-/* ===================================================================
-   TASKS
-=================================================================== */
-function doInst(){
-  const v=vl();
-  if(v)addT(v,"add");
-}
-
-function doDopa(){
-  const v=vl();
-  if(!v)return;
-
-  showDopaonMessage(v);
-  addT(v,"add");
-}
-
-function addT(name,praiseMode){
-  state.tasks.unshift({
-    id:newId(),
-    name,
-    state:"idle"
-  });
-
-  document.getElementById("mi").value="";
-  updateInputButtons("");
-  resetPraiseInput();
-
-  render();
-  saveState();
-
-  const ta=document.getElementById("ta");
-  if(ta)ta.scrollTop=0;
-
-  if(praiseMode)setTimeout(()=>spawnPraise(praiseMode),80);
-}
-
-function tap(id){
-  const t=state.tasks.find(x=>x.id===id);
-  if(!t)return;
-
-  if(t.state==="idle"){
-    t.state="charging";
-    saveState();
-    render();
-  }else if(t.state==="charging"){
-    t.state="done";
-    saveState();
-    render();
-
-    setTimeout(()=>spawnPraise("done"),60);
-    setTimeout(runReward,260);
-  }
-}
-
-function render(){
-  const a=document.getElementById("ta");
-  a.innerHTML="";
-
-  if(!state.tasks.length){
-    a.innerHTML='<div class="empty"><div class="empty-icon">⚡</div><div class="empty-text">タスクを入力して追加しよう</div></div>';
-    return;
-  }
-
-  const act=state.tasks.filter(t=>t.state!=="done");
-  const done=state.tasks.filter(t=>t.state==="done");
-
-  act.forEach((t,i)=>{
-    const c=mkC(t);
-    if(i===0)c.classList.add("tnew");
-    a.appendChild(c);
-  });
-
-  if(done.length){
-    const s=document.createElement("div");
-    s.className="completed";
-    s.innerHTML="<p>COMPLETED "+done.length+"</p>";
-    a.appendChild(s);
-
-    done.forEach(t=>a.appendChild(mkC(t)));
-  }
-}
-
-function mkC(task){
-  const iC=task.state==="charging";
-  const iD=task.state==="done";
-
-  const el=document.createElement("div");
-  el.className="task"+(iC?" charging":"")+(iD?" done":"");
-
-  const nm=document.createElement("span");
-  nm.className="task-name";
-  nm.textContent=task.name;
-  el.appendChild(nm);
-
-  if(!iD){
-    const w=document.createElement("div");
-    w.className="task-action";
-
-    const b=document.createElement("button");
-    b.className="task-btn"+(iC?" cbtn":"");
-    b.onclick=()=>tap(task.id);
-    b.setAttribute("aria-label",iC?"完了確定":"チャージ開始");
-    b.innerHTML=iC
-      ? '<span style="font-family:\'Orbitron\',monospace;font-size:7px;font-weight:700;">確定</span>'
-      : '<span style="font-size:17px;">✓</span>';
-
-    w.appendChild(b);
-
-    if(iC){
-      const h=document.createElement("span");
-      h.className="push";
-      h.textContent="PUSH";
-      w.appendChild(h);
-    }
-
-    el.appendChild(w);
-  }else{
-    const ic=document.createElement("span");
-    ic.className="done-mark";
-    ic.textContent="✓";
-    el.appendChild(ic);
-  }
-
-  return el;
-}
-
-/* ---------- viewport listeners ---------- */
-function handleViewportChange(){
-  syncViewport();
-  setTimeout(syncViewport,60);
-  setTimeout(syncViewport,180);
-}
-
-if(window.visualViewport){
-  window.visualViewport.addEventListener("resize",handleViewportChange);
-  window.visualViewport.addEventListener("scroll",handleViewportChange);
-}
-
-window.addEventListener("resize",()=>{
-  initBaseViewport(false);
-  syncViewport();
-});
-
-window.addEventListener("orientationchange",()=>{
-  setTimeout(()=>{
-    initBaseViewport(true);
-    syncViewport();
-  },300);
-
-  setTimeout(syncViewport,700);
-});
-
-window.addEventListener("scroll",lockScroll,{passive:true});
-
-document.addEventListener("touchmove",e=>{
-  if(e.target.closest("#ta"))return;
-  if(e.target.closest(".popup"))return;
-  e.preventDefault();
-},{passive:false});
-
-/* ---------- boot ---------- */
-loadState();
-initBaseViewport(true);
-syncViewport();
-renderHeader();
-render();
+function saveState(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{saveTimer=null;saveNow()},90)}
+window.addEventListener('pagehide',saveNow);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')saveNow()});
+function showToast(msg){const old=document.querySelector('.toast');if(old)old.remove();const el=document.createElement('div');el.className='toast';el.textContent=msg;document.getElementById('sf8').appendChild(el);el.animate([{opacity:0,transform:'translateX(-50%) translateY(6px)'},{opacity:1,transform:'translateX(-50%) translateY(0)',offset:.15},{opacity:1,offset:.82},{opacity:0,transform:'translateX(-50%) translateY(-6px)'}],{duration:2400,fill:'forwards'}).onfinish=()=>el.remove()}
+
+function rollTier(){const r=Math.random();if(r<0.47)return null;if(r<0.80)return 'white';const b=Math.random();if(b<0.15)return 'white';if(b<0.45)return 'blue';if(b<0.70)return 'green';if(b<0.88)return 'purple';if(b<0.97)return 'red';return 'gold'}
+function grantReward(tier){const T=TIERS[tier];const canIllust=tier!=='white'&&!state.ownedIllusts.includes(tier);const pool=['title','days'];if(canIllust)pool.push('illust');const type=rnd(pool);if(type==='illust'){state.ownedIllusts.push(tier);return{kind:'illust',tier}}if(type==='days'){state.freeDays+=T.days;return{kind:'days',tier,days:T.days}}const avail=TITLES.filter(t=>t.tier===tier&&!state.ownedTitles.includes(t.id));if(avail.length){const got=rnd(avail);state.ownedTitles.push(got.id);if(!state.profile.titleId)state.profile.titleId=got.id;return{kind:'title',tier,title:got}}state.xp+=T.xp;return{kind:'levelup',tier,xp:T.xp}}
+function runReward(){const tier=rollTier();if(!tier)return;const result=grantReward(tier);saveState();renderHeader();showReward(result)}
+function tierIconSVG(tier){const c=TIERS[tier].color;return '<svg viewBox="0 0 100 100" style="color:'+c+'"><polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="none" stroke="'+c+'" stroke-width="3"/><polygon points="50,20 78,36 78,64 50,80 22,64 22,36" fill="'+c+'" opacity="0.14"/><text x="50" y="50" text-anchor="middle" dominant-baseline="central" font-family="Reggae One,sans-serif" font-size="30" font-weight="900" fill="'+c+'">'+TIERS[tier].jp+'</text></svg>'}
+function showReward(res){const ov=document.getElementById('rewardOverlay'),icon=document.getElementById('rwIcon'),tierLabel=document.getElementById('rwTierLabel'),typeEl=document.getElementById('rwType'),mainEl=document.getElementById('rwMain'),subEl=document.getElementById('rwSub');const T=TIERS[res.tier];tierLabel.textContent=T.jp+' TIER';tierLabel.style.color=T.color;icon.innerHTML=tierIconSVG(res.tier);mainEl.style.color='';mainEl.innerHTML='';subEl.textContent='';if(res.kind==='title'){typeEl.textContent='称号 GET';mainEl.innerHTML='「<span style="color:'+T.color+'">'+escapeHtml(res.title.text)+'</span>」';subEl.textContent='肩書きに追加された'}else if(res.kind==='days'){typeEl.textContent='無料期間 GET';mainEl.textContent='+'+res.days+'日';mainEl.style.color=T.color;subEl.textContent='現在無料期間 +'+state.freeDays+'日 追加！'}else if(res.kind==='illust'){typeEl.textContent='イラスト GET';mainEl.textContent=T.jp+'の一枚';mainEl.style.color=T.color;subEl.textContent='プロフィールで見られる'}else if(res.kind==='levelup'){typeEl.textContent='レベルアップ';mainEl.textContent='+'+res.xp+' XP';mainEl.style.color=T.color;subEl.textContent='Lv.'+levelFromXp(state.xp)}ov.classList.add('show');icon.classList.remove('animate');void icon.offsetWidth;icon.classList.add('animate');if(navigator.vibrate){if(res.tier==='gold'||res.tier==='red')navigator.vibrate([60,40,60,40,140]);else navigator.vibrate(50)}}
+function closeReward(){document.getElementById('rewardOverlay').classList.remove('show')}
+
+function renderHeader(){const nm=state.profile.name,t=titleById(state.profile.titleId),nameEl=document.getElementById('hdName');if(!nm)nameEl.innerHTML='<span style="color:#56607e;font-weight:500">名前未設定</span>';else{nameEl.innerHTML=(t?'<span class="ttl" style="color:'+TIERS[t.tier].color+'">'+escapeHtml(t.text)+'</span>':'')+'<span> '+escapeHtml(nm)+'</span>'}document.getElementById('hdLv').textContent=levelFromXp(state.xp);document.getElementById('hdFree').textContent='+'+state.freeDays+'日'}
+function renderNamePreview(){const el=document.getElementById('namePreview'),nm=state.profile.name,t=titleById(state.profile.titleId);if(!nm){el.innerHTML='<span class="pv-empty">名前を入力すると<br>ここに表示される</span>';return}el.innerHTML=(t?'<span class="pv-ttl" style="color:'+TIERS[t.tier].color+'">'+escapeHtml(t.text)+'</span> ':'')+'<span class="pv-nm">'+escapeHtml(nm)+'</span>'}
+function renderProfileStats(){const lv=levelFromXp(state.xp),inLv=state.xp%6,pct=Math.round(inLv/6*100);document.getElementById('pfLv').textContent=lv;document.getElementById('pfFree').textContent='+'+state.freeDays+'日';document.getElementById('pfFreeNote').textContent='現在無料期間 +'+state.freeDays+'日 追加！';document.getElementById('pfLevelFill').style.width=pct+'%';document.getElementById('pfLevelNote').textContent='NEXT +'+(6-inLv)+' XP / TOTAL '+state.xp+' XP'}
+function renderTitleGrid(){const grid=document.getElementById('titleGrid'),cnt=document.getElementById('titleCount');grid.innerHTML='';cnt.textContent='('+state.ownedTitles.length+'/'+TITLES.length+')';const none=document.createElement('div');none.className='title-none'+(state.profile.titleId?'':' sel');none.textContent='なし';none.onclick=()=>{state.profile.titleId=null;saveState();renderTitleGrid();renderNamePreview();renderHeader()};grid.appendChild(none);TITLES.slice().sort((a,b)=>TIER_ORDER.indexOf(a.tier)-TIER_ORDER.indexOf(b.tier)).forEach(t=>{const owned=state.ownedTitles.includes(t.id),sel=state.profile.titleId===t.id,chip=document.createElement('div');chip.className='title-chip'+(owned?' owned':' locked')+(sel?' sel':'');chip.textContent=owned?t.text:'？？？';if(owned){chip.style.color=sel?TIERS[t.tier].color:'#c8d8f0';if(sel)chip.style.borderColor=TIERS[t.tier].color;chip.onclick=()=>{state.profile.titleId=sel?null:t.id;saveState();renderTitleGrid();renderNamePreview();renderHeader()}}grid.appendChild(chip)})}
+function illustPlaceholderSVG(tier){const c=TIERS[tier].color;return '<svg viewBox="0 0 100 100"><defs><radialGradient id="g'+tier+'" cx="50%" cy="42%" r="62%"><stop offset="0%" stop-color="'+c+'" stop-opacity="0.55"/><stop offset="100%" stop-color="'+c+'" stop-opacity="0.05"/></radialGradient></defs><rect width="100" height="100" fill="#06060e"/><rect width="100" height="100" fill="url(#g'+tier+')"/><polygon points="50,22 72,38 72,64 50,80 28,64 28,38" fill="none" stroke="'+c+'" stroke-width="2.5" opacity="0.9"/><circle cx="50" cy="51" r="9" fill="'+c+'" opacity="0.85"/></svg>'}
+function renderIllustGrid(){const grid=document.getElementById('illustGrid');grid.innerHTML='';ILLUST_TIERS.forEach(tier=>{const owned=state.ownedIllusts.includes(tier),wrap=document.createElement('div'),cell=document.createElement('div'),cap=document.createElement('div');cell.className='illust-cell'+(owned?'':' locked');cell.innerHTML=owned?illustPlaceholderSVG(tier):'<span class="lockmark">🔒</span>';cap.className='illust-cap';cap.textContent=TIERS[tier].jp;cap.style.color=owned?TIERS[tier].color:'#4a6080';wrap.appendChild(cell);wrap.appendChild(cap);grid.appendChild(wrap)})}
+function onNameInput(){state.profile.name=document.getElementById('nameInput').value;renderNamePreview();renderHeader();saveState()}
+function openProfile(){document.getElementById('mi').blur();document.getElementById('nameInput').value=state.profile.name||'';renderProfileStats();renderNamePreview();renderTitleGrid();renderIllustGrid();document.getElementById('profileOverlay').classList.add('show');syncViewport()}
+function closeProfile(){document.getElementById('profileOverlay').classList.remove('show')}
+
+function makeDopaonMessage(taskName){const isAfter=Math.random()<0.8,item=isAfter?rnd(DOPAON_AFTER):rnd(DOPAON_QUOTES),clean=taskName?taskName.trim():'そのタスク';let text=item.text;if(taskName&&isAfter&&Math.random()<0.35)text='「'+clean+'」を終わらせた後、'+text;return{time:item.time,text}}
+function showDopaonMessage(taskName){const msg=makeDopaonMessage(taskName),el=document.createElement('div');el.className='dream';el.innerHTML='<span class="dream-time">'+escapeHtml(msg.time)+'</span><span class="dream-quote">「'+escapeHtml(msg.text)+'」</span>';document.getElementById('sf8').appendChild(el);el.animate([{opacity:0,transform:'translateY(6px) scale(.98)'},{opacity:1,transform:'translateY(0) scale(1)',offset:.1},{opacity:1,offset:.82},{opacity:0,transform:'translateY(-8px) scale(.98)'}],{duration:3600,fill:'forwards',easing:'cubic-bezier(.18,.8,.22,1)'}).onfinish=()=>el.remove()}
+
+let isComposing=false,lastStableText='',lastCompText='',livePraise=0,praiseQueue=0,praiseDrainTimer=null,busyLanes=new Set(),activePraise=new Set(),baseViewportHeight=0;
+const NS='http://www.w3.org/2000/svg',FF="'Reggae One', system-ui, sans-serif",PRAISE_LIFE=2000,MAX_PRAISE=4,PRAISE_COOLDOWN=95,MAX_PRAISE_QUEUE=12,P_MARGIN=10;
+function viewportHeight(){return window.visualViewport?window.visualViewport.height:window.innerHeight}function viewportTop(){return window.visualViewport?window.visualViewport.offsetTop:0}
+function initBaseViewport(force){const h=Math.max(window.innerHeight,viewportHeight());if(force||!baseViewportHeight){baseViewportHeight=h;return}const inputFocused=document.activeElement===document.getElementById('mi');if(!inputFocused&&h>baseViewportHeight)baseViewportHeight=h}
+function syncViewport(){initBaseViewport(false);const vvTop=viewportTop(),vvH=viewportHeight(),inputFocused=document.activeElement===document.getElementById('mi'),rawLift=baseViewportHeight-vvH,lift=inputFocused?Math.max(0,Math.round(rawLift)):0;document.documentElement.style.setProperty('--app-top',Math.round(vvTop)+'px');document.documentElement.style.setProperty('--app-h',Math.round(baseViewportHeight)+'px');document.documentElement.style.setProperty('--kb',lift+'px');lockScroll()}
+function lockScroll(){if(window.scrollX!==0||window.scrollY!==0)window.scrollTo(0,0)}
+function isSideMark(ch){return /[！!？?‼⁉⁈♡♥❤★☆♪♫♬〜ー…‥・。、,.，．]/.test(ch)}
+function grps(txt){const cs=Array.from(txt),gs=[];let i=0;while(i<cs.length){if(isSideMark(cs[i])){let j=i;while(j<cs.length&&isSideMark(cs[j]))j++;gs.push({side:true,t:cs.slice(i,j).join('')});i=j}else{gs.push({side:false,t:cs[i]});i++}}return gs}
+function textSize(mode){if(mode==='done')return 26+Math.floor(Math.random()*7);if(mode==='add')return 22+Math.floor(Math.random()*7);return 17+Math.floor(Math.random()*8)}
+function getTextBox(groups,fs){const pad=Math.ceil(fs*.55),lh=Math.ceil(fs*1.34),maxMark=groups.reduce((m,g)=>g.side?Math.max(m,charLen(g.t)):m,1);return{w:Math.ceil(Math.max(fs,maxMark*fs*.62)+pad*2),h:Math.ceil(groups.length*lh+pad),pad,lh}}
+function txPair(svg,x,y,fs,txt,col){const outer=Math.max(4,fs*.24),inner=Math.max(2,fs*.11);[['none','white',outer],[col,'#111',inner]].forEach(([fill,stroke,sw])=>{const t=document.createElementNS(NS,'text');t.setAttribute('x',x);t.setAttribute('y',y);t.setAttribute('text-anchor','middle');t.setAttribute('dominant-baseline','central');t.setAttribute('font-family',FF);t.setAttribute('font-size',fs);t.setAttribute('font-weight','900');t.setAttribute('fill',fill);t.setAttribute('stroke',stroke);t.setAttribute('stroke-width',sw);t.setAttribute('stroke-linejoin','round');if(fill!=='none')t.setAttribute('paint-order','stroke');t.textContent=txt;svg.appendChild(t)})}
+function drawPraiseText(svg,item,groups,box,fs){let cy=box.pad/2+box.lh/2;groups.forEach(g=>{const len=Math.max(1,charLen(g.t)),fitFs=g.side?Math.min(fs,Math.max(10,(box.w-box.pad*.65)/(len*.62))):fs;txPair(svg,box.w/2,cy,fitFs,g.t,item.c);cy+=box.lh})}
+function getPraiseOrigin(){const pc=document.getElementById('pc'),dock=document.getElementById('bottomDock');if(!pc||!dock)return{x:180,y:360};const pcRect=pc.getBoundingClientRect(),dockRect=dock.getBoundingClientRect();return{x:clamp(dockRect.left+dockRect.width/2-pcRect.left,48,pc.clientWidth-48),y:clamp(dockRect.top-pcRect.top+20,pc.clientHeight*.55,pc.clientHeight+86)}}
+function getLanes(origin){const pc=document.getElementById('pc'),count=pc.clientWidth<360?5:7,topY=18,minX=38,maxX=pc.clientWidth-38,lanes=[];for(let i=0;i<count;i++){const targetX=count===1?pc.clientWidth/2:minX+(maxX-minX)*(i/(count-1)),dx=targetX-origin.x,dy=topY-origin.y;lanes.push({index:i,angle:Math.atan2(dy,dx)*180/Math.PI,len:Math.hypot(dx,dy)})}return lanes}
+function getPointOnLane(origin,lane,d){const r=lane.angle*Math.PI/180;return{x:origin.x+Math.cos(r)*d,y:origin.y+Math.sin(r)*d}}
+function fitsInPraiseArea(x,y,w,h){const pc=document.getElementById('pc');return x-w/2>P_MARGIN&&x+w/2<pc.clientWidth-P_MARGIN&&y-h/2>P_MARGIN&&y+h/2<pc.clientHeight-P_MARGIN}
+function pickPraisePosition(w,h){const pc=document.getElementById('pc'),origin=getPraiseOrigin(),lanes=getLanes(origin),free=lanes.filter(l=>!busyLanes.has(l.index)),pool=shuffle(free.length?free:lanes);for(const lane of pool){const minD=88,maxD=Math.max(minD+20,Math.min(lane.len-54,340));for(let i=0;i<9;i++){const d=minD+Math.random()*(maxD-minD),p=getPointOnLane(origin,lane,d);if(fitsInPraiseArea(p.x,p.y,w,h))return{lane,x:p.x,y:p.y,angle:lane.angle}}}const fb=pool[0]||lanes[0]||{index:0,angle:-90},p=getPointOnLane(origin,fb,150);return{lane:fb,x:clamp(p.x,w/2+P_MARGIN,pc.clientWidth-w/2-P_MARGIN),y:clamp(p.y,h/2+P_MARGIN,pc.clientHeight-h/2-P_MARGIN),angle:fb.angle}}
+function spawnPraise(mode='input',forcedItem=null){if(livePraise>=MAX_PRAISE)return false;syncViewport();const pc=document.getElementById('pc');if(!pc)return false;const item=forcedItem||rnd(mode==='done'?DONE_PR:mode==='add'?ADD_PR:PR),groups=grps(item.t),fs=textSize(mode),box=getTextBox(groups,fs),pos=pickPraisePosition(box.w,box.h),rot=clamp(pos.angle+90,-34,34);busyLanes.add(pos.lane.index);livePraise++;const svg=document.createElementNS(NS,'svg');svg.setAttribute('width',box.w);svg.setAttribute('height',box.h);svg.setAttribute('viewBox','0 0 '+box.w+' '+box.h);svg.style.cssText='position:absolute;left:'+(pos.x-box.w/2).toFixed(1)+'px;top:'+(pos.y-box.h/2).toFixed(1)+'px;transform:rotate('+rot.toFixed(1)+'deg) scale(.96);opacity:0;pointer-events:none;filter:drop-shadow(0 2px 5px rgba(0,0,0,.45));';drawPraiseText(svg,item,groups,box,fs);pc.appendChild(svg);activePraise.add(svg);const scale=mode==='input'?1:1.06;const anim=svg.animate([{opacity:0,transform:'rotate('+rot.toFixed(1)+'deg) translateY(8px) scale(.9)'},{opacity:1,transform:'rotate('+rot.toFixed(1)+'deg) translateY(0) scale('+scale+')',offset:.12},{opacity:1,transform:'rotate('+rot.toFixed(1)+'deg) translateY(-8px) scale(1)',offset:.78},{opacity:0,transform:'rotate('+rot.toFixed(1)+'deg) translateY(-18px) scale(.96)'}],{duration:PRAISE_LIFE,easing:'cubic-bezier(.18,.8,.22,1)',fill:'forwards'});anim.onfinish=()=>releasePraise(svg,pos.lane.index);return true}
+function releasePraise(svg,laneIndex){if(!activePraise.has(svg))return;activePraise.delete(svg);busyLanes.delete(laneIndex);livePraise=Math.max(0,livePraise-1);if(svg.parentNode)svg.remove();if(praiseQueue>0)drainPraiseQueue()}
+function enqueuePraise(amount){if(amount<=0)return;praiseQueue=clamp(praiseQueue+amount,0,MAX_PRAISE_QUEUE);drainPraiseQueue()}
+function drainPraiseQueue(){if(praiseDrainTimer)return;const run=()=>{praiseDrainTimer=null;if(praiseQueue<=0)return;if(livePraise>=MAX_PRAISE){praiseDrainTimer=setTimeout(run,140);return}praiseQueue--;spawnPraise('input');if(praiseQueue>0)praiseDrainTimer=setTimeout(run,PRAISE_COOLDOWN)};run()}
+function clearPraiseQueue(){praiseQueue=0;if(praiseDrainTimer){clearTimeout(praiseDrainTimer);praiseDrainTimer=null}}
+function updateInputButtons(v){const db=document.getElementById('db'),ib=document.getElementById('ib');db.style.opacity=v?'1':'.4';ib.classList.toggle('ready',Boolean(v))}
+function resetPraiseInput(){lastStableText=rawValue();lastCompText='';clearPraiseQueue()}
+function onBeforeInput(){syncViewport()}
+function onCompStart(){syncViewport();isComposing=true;lastStableText=rawValue();lastCompText=''}
+function onCompUpdate(e){syncViewport();const data=e&&typeof e.data==='string'?e.data:'';const diff=charLen(data)-charLen(lastCompText);if(diff>0)enqueuePraise(diff);lastCompText=data;updateInputButtons(rawValue().trim()||data)}
+function onCompEnd(){syncViewport();isComposing=false;lastStableText=rawValue();lastCompText='';updateInputButtons(vl())}
+function onIn(e){syncViewport();const raw=rawValue();updateInputButtons(raw.trim());if(!raw&&!isComposing){resetPraiseInput();return}if(isComposing||(e&&e.isComposing))return;const diff=charLen(raw)-charLen(lastStableText);if(diff>0)enqueuePraise(diff);lastStableText=raw}
+function onInputFocus(){setTimeout(()=>{initBaseViewport(false);syncViewport();resetPraiseInput()},40);setTimeout(syncViewport,120);setTimeout(syncViewport,260);setTimeout(syncViewport,520)}
+function onInputBlur(){setTimeout(()=>{initBaseViewport(false);syncViewport()},120)}
+function onKey(e){if(e.key==='Enter'&&!isComposing){e.preventDefault();doQuickAdd()}}
+
+function defaultTaskConfig(){return{name:'',dueDate:'',taskType:'normal',habitKind:'do',repeatType:'daily',intervalDays:1,weekdays:[]}}
+function readTaskForm(){return{name:document.getElementById('taskNameInput').value.trim(),dueDate:document.getElementById('taskDueInput').value,taskType:document.getElementById('taskTypeInput').value,habitKind:document.getElementById('habitKindInput').value,repeatType:document.getElementById('repeatTypeInput').value,intervalDays:clamp(Number(document.getElementById('intervalDaysInput').value)||1,1,30),weekdays:[...menuWeekdays]}}
+function taskFromConfig(cfg,old){return Object.assign(old||{}, {name:cfg.name,dueDate:cfg.dueDate,taskType:cfg.taskType,habitKind:cfg.habitKind,repeatType:cfg.repeatType,intervalDays:cfg.intervalDays,weekdays:cfg.weekdays})}
+function createTask(name,cfg={}){return normalizeTask(Object.assign(defaultTaskConfig(),cfg,{id:newId(),name,state:'idle',rewardDone:false,createdAt:Date.now(),doneAt:null}))}
+function openTaskMenu(id=null){document.getElementById('mi').blur();editingTaskId=id;const t=id?state.tasks.find(x=>x.id===id):null;const cfg=t?normalizeTask(t):Object.assign(defaultTaskConfig(),{name:vl()});document.getElementById('taskPopupTitle').textContent=t?'TASK EDIT':'TASK MENU';document.getElementById('taskSaveBtn').textContent=t?'保存する':'追加する';document.getElementById('taskDangerRow').style.display=t?'flex':'none';document.getElementById('taskNameInput').value=cfg.name||'';document.getElementById('taskDueInput').value=cfg.dueDate||'';document.getElementById('taskTypeInput').value=cfg.taskType||'normal';document.getElementById('habitKindInput').value=cfg.habitKind||'do';document.getElementById('repeatTypeInput').value=cfg.repeatType||'daily';document.getElementById('intervalDaysInput').value=cfg.intervalDays||1;menuWeekdays=Array.isArray(cfg.weekdays)?[...cfg.weekdays]:[];renderWeekdayGrid();syncTaskMenuFields();document.getElementById('taskOverlay').classList.add('show');setTimeout(()=>document.getElementById('taskNameInput').focus(),160)}
+function closeTaskMenu(){document.getElementById('taskOverlay').classList.remove('show');editingTaskId=null}
+function syncTaskMenuFields(){const isHabit=document.getElementById('taskTypeInput').value==='habit',repeat=document.getElementById('repeatTypeInput').value;document.getElementById('habitFields').style.display=isHabit?'block':'none';document.getElementById('intervalBox').style.display=isHabit&&repeat==='interval'?'block':'none';document.getElementById('weekdayBox').style.display=isHabit&&repeat==='weekdays'?'block':'none'}
+function renderWeekdayGrid(){const grid=document.getElementById('weekdayGrid');grid.innerHTML='';WEEKDAYS.forEach((w,i)=>{const b=document.createElement('button');b.type='button';b.className='weekday-chip'+(menuWeekdays.includes(i)?' on':'');b.textContent=w;b.onclick=()=>{menuWeekdays=menuWeekdays.includes(i)?menuWeekdays.filter(x=>x!==i):[...menuWeekdays,i].sort((a,b)=>a-b);renderWeekdayGrid()};grid.appendChild(b)})}
+function saveTaskMenu(){const cfg=readTaskForm();if(!cfg.name){showToast('タスク名を入れて');return}if(cfg.taskType==='habit'&&cfg.repeatType==='weekdays'&&!cfg.weekdays.length){showToast('曜日を1つ以上選んで');return}if(editingTaskId){const t=state.tasks.find(x=>x.id===editingTaskId);if(t){taskFromConfig(cfg,t);saveState();render();showToast('タスク設定を保存した')}}else{state.tasks.unshift(createTask(cfg.name,cfg));document.getElementById('mi').value='';resetPraiseInput();updateInputButtons('');saveState();render();spawnPraise('add');showToast('タスクを追加した')}closeTaskMenu()}
+function deleteEditingTask(){if(editingTaskId)deleteTask(editingTaskId,true)}
+function doQuickAdd(){const v=vl();if(!v)return;state.tasks.unshift(createTask(v));document.getElementById('mi').value='';resetPraiseInput();updateInputButtons('');saveState();render();spawnPraise('add')}
+function doDopa(){const v=vl();if(!v)return;showDopaonMessage(v);doQuickAdd()}
+function deleteTask(id,fromMenu=false){const t=state.tasks.find(x=>x.id===id);if(!t)return;if(!confirm('「'+t.name+'」を削除する？'))return;state.tasks=state.tasks.filter(x=>x.id!==id);saveState();render();if(fromMenu)closeTaskMenu();showToast('削除した')}
+function undoTask(id){const t=state.tasks.find(x=>x.id===id);if(!t)return;t.state='idle';t.doneAt=null;saveState();render();spawnPraise('add',{t:'戻した！',c:'#00ffcc'});showToast('完了を取り消した。再完了しても再抽選なし')}
+function tap(id){const t=state.tasks.find(x=>x.id===id);if(!t)return;if(t.state==='idle'){t.state='charging';saveState();render()}else if(t.state==='charging'){t.state='done';t.doneAt=Date.now();const shouldReward=!t.rewardDone;t.rewardDone=true;saveState();render();setTimeout(()=>spawnPraise('done'),60);if(shouldReward)setTimeout(runReward,260)}}
+function formatDateLabel(s){if(!s)return '';const d=new Date(s+'T00:00:00');if(Number.isNaN(d.getTime()))return s;return (d.getMonth()+1)+'/'+d.getDate()+'('+WEEKDAYS[d.getDay()]+')'}
+function taskMeta(t){const tags=[];if(t.dueDate){const overdue=t.state!=='done'&&t.dueDate<todayStr();tags.push({cls:'due '+(overdue?'warn':''),txt:(overdue?'期限超過 ':'期限 ')+formatDateLabel(t.dueDate)})}if(t.taskType==='habit'){let r=t.repeatType==='daily'?'毎日':t.repeatType==='interval'?t.intervalDays+'日起き':(t.weekdays||[]).map(i=>WEEKDAYS[i]).join('');tags.push({cls:'habit',txt:(t.habitKind==='avoid'?'やらない ':'やる ')+r})}if(t.rewardDone)tags.push({cls:'reward',txt:'抽選済'});return tags}
+function render(){const a=document.getElementById('ta');a.innerHTML='';if(!state.tasks.length){a.innerHTML='<div class="empty"><div class="empty-icon">⚡</div><div class="empty-text">タスクを入力して追加しよう</div></div>';return}const act=state.tasks.filter(t=>t.state!=='done'),done=state.tasks.filter(t=>t.state==='done');act.forEach((t,i)=>{const c=mkC(t);if(i===0)c.classList.add('tnew');a.appendChild(c)});if(done.length){const s=document.createElement('div');s.className='completed';s.innerHTML='<div class="completed-head"><span class="completed-title">COMPLETED '+done.length+'</span><button class="completed-btn" onclick="toggleCompleted()">'+(state.ui.completedOpen?'隠す':'表示')+'</button><button class="completed-btn" onclick="clearCompleted()">整理</button></div>';a.appendChild(s);if(state.ui.completedOpen)done.forEach(t=>a.appendChild(mkC(t)))}}
+function mkC(task){const iC=task.state==='charging',iD=task.state==='done',el=document.createElement('div');el.className='task'+(iC?' charging':'')+(iD?' done':'')+(task.taskType==='habit'?' habit':'')+(task.dueDate&&task.state!=='done'&&task.dueDate<todayStr()?' overdue':'');const main=document.createElement('div');main.className='task-main';const nm=document.createElement('div');nm.className='task-name';nm.textContent=task.name;main.appendChild(nm);const metas=taskMeta(task);if(metas.length){const meta=document.createElement('div');meta.className='task-meta';metas.forEach(m=>{const tag=document.createElement('span');tag.className='tag '+m.cls;tag.textContent=m.txt;meta.appendChild(tag)});main.appendChild(meta)}el.appendChild(main);const w=document.createElement('div');w.className='task-action';if(!iD){const b=document.createElement('button');b.className='task-btn'+(iC?' cbtn':'');b.onclick=()=>tap(task.id);b.setAttribute('aria-label',iC?'完了確定':'チャージ開始');b.innerHTML=iC?'<span style="font-family:\'Orbitron\',monospace;font-size:7px;font-weight:700;">確定</span>':'<span style="font-size:17px;">✓</span>';w.appendChild(b);if(iC){const h=document.createElement('span');h.className='push';h.textContent='PUSH';w.appendChild(h)}}else{const ic=document.createElement('span');ic.className='done-mark';ic.textContent='✓';w.appendChild(ic)}el.appendChild(w);const tools=document.createElement('div');tools.className='task-tools';if(iD){const u=document.createElement('button');u.className='mini-btn undo';u.textContent='↩';u.onclick=()=>undoTask(task.id);tools.appendChild(u)}const edit=document.createElement('button');edit.className='mini-btn';edit.textContent='⚙';edit.onclick=()=>openTaskMenu(task.id);tools.appendChild(edit);const del=document.createElement('button');del.className='mini-btn danger';del.textContent='×';del.onclick=()=>deleteTask(task.id);tools.appendChild(del);el.appendChild(tools);return el}
+function toggleCompleted(){state.ui.completedOpen=!state.ui.completedOpen;saveState();render()}
+function clearCompleted(){const n=state.tasks.filter(t=>t.state==='done').length;if(!n)return;if(!confirm('完了済みタスク '+n+'件を整理して削除する？\n報酬・プロフィール・無料期間は残る。'))return;state.tasks=state.tasks.filter(t=>t.state!=='done');saveState();render();showToast('完了済みを整理した')}
+
+function handleViewportChange(){syncViewport();setTimeout(syncViewport,60);setTimeout(syncViewport,180)}
+if(window.visualViewport){visualViewport.addEventListener('resize',handleViewportChange);visualViewport.addEventListener('scroll',handleViewportChange)}
+window.addEventListener('resize',()=>{initBaseViewport(false);syncViewport()});window.addEventListener('orientationchange',()=>{setTimeout(()=>{initBaseViewport(true);syncViewport()},300);setTimeout(syncViewport,700)});window.addEventListener('scroll',lockScroll,{passive:true});
+document.addEventListener('touchmove',e=>{if(e.target.closest('#ta'))return;if(e.target.closest('.popup'))return;e.preventDefault()},{passive:false});
+
+loadState();initBaseViewport(true);syncViewport();renderHeader();render();resetPraiseInput();
 </script>
 </body>
 </html>

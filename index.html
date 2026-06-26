@@ -3,6 +3,13 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+<meta name="theme-color" content="#07070f" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="DOPAON" />
+<meta name="mobile-web-app-capable" content="yes" />
+
 <title>DOPAON TASK SYSTEM</title>
 
 <style>
@@ -10,7 +17,8 @@
 
 :root{
   --kb:0px;
-  --safe:env(safe-area-inset-bottom,0px);
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
   --header-h:46px;
   --dock-h:158px;
   --input-h:58px;
@@ -27,10 +35,13 @@ html,body{
   overflow:hidden;
   font-family:system-ui,sans-serif;
   -webkit-text-size-adjust:100%;
+  overscroll-behavior:none;
 }
 
 body{
   touch-action:manipulation;
+  position:fixed;
+  inset:0;
 }
 
 #sf8{
@@ -48,17 +59,17 @@ body{
   border-right:1px solid #1e1e38;
 }
 
-/* fixed top */
+/* fixed header */
 .header{
   position:absolute;
   top:0;
   left:0;
   right:0;
   z-index:20;
-  height:var(--header-h);
+  height:calc(var(--safe-top) + var(--header-h));
+  padding:var(--safe-top) 16px 0;
   display:flex;
   align-items:center;
-  padding:0 16px;
   gap:8px;
   background:#07070f;
   border-bottom:1px solid #1e1e38;
@@ -101,10 +112,10 @@ body{
   letter-spacing:2px;
 }
 
-/* task area is visually fixed */
+/* screen stays fixed */
 #ta{
   position:absolute;
-  top:var(--header-h);
+  top:calc(var(--safe-top) + var(--header-h));
   bottom:var(--dock-h);
   left:0;
   right:0;
@@ -113,10 +124,9 @@ body{
   -webkit-overflow-scrolling:touch;
 }
 
-/* praise area is fixed too, but origin follows floating dock */
 #pc{
   position:absolute;
-  top:var(--header-h);
+  top:calc(var(--safe-top) + var(--header-h));
   bottom:var(--dock-h);
   left:0;
   right:0;
@@ -126,13 +136,13 @@ body{
   transform:translateZ(0);
 }
 
-/* this is the only part that floats up */
+/* only this dock floats above the keyboard */
 #bottomDock{
   position:absolute;
   left:0;
   right:0;
   bottom:0;
-  height:calc(var(--dock-h) + var(--safe));
+  height:calc(var(--dock-h) + var(--safe-bottom));
   z-index:30;
   transform:translateY(calc(var(--kb) * -1));
   transition:transform .18s ease-out;
@@ -155,8 +165,8 @@ body{
   left:0;
   right:0;
   bottom:0;
-  height:calc(var(--input-h) + var(--safe));
-  padding:0 12px var(--safe);
+  height:calc(var(--input-h) + var(--safe-bottom));
+  padding:0 12px var(--safe-bottom);
   border-top:1px solid #1e1e38;
   background:#07070f;
   display:flex;
@@ -452,12 +462,12 @@ body{
         spellcheck="false"
         enterkeyhint="done"
         oninput="onIn(event)"
-        onbeforeinput="onBeforeInput(event)"
         onkeydown="onKey(event)"
         oncompositionstart="onCompStart(event)"
         oncompositionupdate="onCompUpdate(event)"
         oncompositionend="onCompEnd(event)"
         onfocus="onInputFocus()"
+        onblur="onInputBlur()"
       />
 
       <button id="db" class="roundBtn dopa" onclick="doDopa()" aria-label="DOPAON!">✦</button>
@@ -504,8 +514,8 @@ const DONE_PR=[
 
 let tasks=[];
 let isComposing=false;
-let compositionText="";
-let lastRawLen=0;
+let compText="";
+let lastValueLen=0;
 let lastCompLen=0;
 let praiseMeter=0;
 let lastPraiseAt=0;
@@ -526,8 +536,8 @@ const P_MARGIN=10;
 function clamp(n,min,max){return Math.max(min,Math.min(max,n))}
 function rand(a){return a[Math.floor(Math.random()*a.length)]}
 function charLen(t){return Array.from(String(t||"")).length}
-function vl(){return document.getElementById("mi").value.trim()}
 function rawValue(){return document.getElementById("mi").value}
+function vl(){return rawValue().trim()}
 
 function newId(){
   return window.crypto&&typeof window.crypto.randomUUID==="function"
@@ -536,10 +546,7 @@ function newId(){
 }
 
 function shuffle(a){
-  return a
-    .map(v=>[Math.random(),v])
-    .sort((x,y)=>x[0]-y[0])
-    .map(v=>v[1]);
+  return a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(v=>v[1]);
 }
 
 function isSideMark(ch){
@@ -625,14 +632,11 @@ function drawPraiseText(svg,item,groups,box,fs){
   });
 }
 
-/* keyboard: do not move whole screen, only bottomDock */
+/* keyboard only moves bottomDock */
 function refreshBaseViewportHeight(){
   const vv=window.visualViewport;
   const h=vv?vv.height:window.innerHeight;
-
-  if(h>baseViewportHeight){
-    baseViewportHeight=h;
-  }
+  if(h>baseViewportHeight)baseViewportHeight=h;
 }
 
 function keyboardInset(){
@@ -662,14 +666,16 @@ function onInputFocus(){
   setTimeout(syncDock,700);
 }
 
+function onInputBlur(){
+  setTimeout(syncDock,80);
+}
+
 /* praise origin follows floating dock */
 function getPraiseOrigin(){
   const pc=document.getElementById("pc");
   const dock=document.getElementById("bottomDock");
 
-  if(!pc||!dock){
-    return{x:180,y:360};
-  }
+  if(!pc||!dock)return{x:180,y:360};
 
   const pcRect=pc.getBoundingClientRect();
   const dockRect=dock.getBoundingClientRect();
@@ -694,7 +700,6 @@ function getLanes(origin){
     const dy=topY-origin.y;
     const angle=Math.atan2(dy,dx)*180/Math.PI;
     const len=Math.hypot(dx,dy);
-
     lanes.push({index:i,angle,len});
   }
 
@@ -703,7 +708,6 @@ function getLanes(origin){
 
 function getPointOnLane(origin,lane,d){
   const r=lane.angle*Math.PI/180;
-
   return{
     x:origin.x+Math.cos(r)*d,
     y:origin.y+Math.sin(r)*d
@@ -712,7 +716,6 @@ function getPointOnLane(origin,lane,d){
 
 function fitsInPraiseArea(x,y,w,h){
   const pc=document.getElementById("pc");
-
   return(
     x-w/2>P_MARGIN &&
     x+w/2<pc.clientWidth-P_MARGIN &&
@@ -810,9 +813,7 @@ function releasePraise(svg,laneIndex){
   busyLanes.delete(laneIndex);
   livePraise=Math.max(0,livePraise-1);
 
-  if(svg.parentNode){
-    svg.parentNode.removeChild(svg);
-  }
+  if(svg.parentNode)svg.parentNode.removeChild(svg);
 }
 
 function updateInputButtons(v){
@@ -825,9 +826,9 @@ function updateInputButtons(v){
 }
 
 function resetPraiseInput(){
-  lastRawLen=charLen(rawValue());
+  lastValueLen=charLen(rawValue());
   lastCompLen=0;
-  compositionText="";
+  compText="";
   praiseMeter=0;
   lastPraiseAt=0;
 }
@@ -855,40 +856,24 @@ function addPraiseProgress(amount,force){
   }
 }
 
-function onBeforeInput(e){
-  syncDock();
-
-  if(isComposing)return;
-
-  if(e&&typeof e.data==="string"&&e.data){
-    const added=charLen(e.data);
-
-    setTimeout(()=>{
-      if(!isComposing){
-        addPraiseProgress(added,false);
-      }
-    },0);
-  }
-}
-
 function onCompStart(){
   isComposing=true;
-  compositionText="";
+  compText="";
   lastCompLen=0;
 }
 
 function onCompUpdate(e){
   syncDock();
 
-  compositionText=e&&typeof e.data==="string"?e.data:"";
-  const compLen=charLen(compositionText);
+  compText=e&&typeof e.data==="string"?e.data:"";
+  const compLen=charLen(compText);
 
   if(compLen>lastCompLen){
     addPraiseProgress(compLen-lastCompLen,false);
   }
 
   lastCompLen=compLen;
-  updateInputButtons(rawValue().trim()||compositionText);
+  updateInputButtons(rawValue().trim()||compText);
 }
 
 function onCompEnd(e){
@@ -902,26 +887,23 @@ function onCompEnd(e){
   }
 
   isComposing=false;
-  compositionText="";
+  compText="";
   lastCompLen=0;
 
   const currentLen=charLen(rawValue());
-  lastRawLen=currentLen;
-
-  updateInputButtons(vl());
-
-  if(currentLen>=PRAISE_STEP&&praiseMeter>0){
-    addPraiseProgress(0,true);
+  if(currentLen>lastValueLen){
+    addPraiseProgress(currentLen-lastValueLen,false);
   }
+
+  lastValueLen=currentLen;
+  updateInputButtons(vl());
 }
 
 function onIn(e){
   syncDock();
 
   const raw=rawValue();
-  const v=vl();
-
-  updateInputButtons(v);
+  updateInputButtons(raw.trim());
 
   if(!raw&&!isComposing){
     resetPraiseInput();
@@ -934,11 +916,11 @@ function onIn(e){
 
   const currentLen=charLen(raw);
 
-  if(currentLen>lastRawLen){
-    addPraiseProgress(currentLen-lastRawLen,false);
+  if(currentLen>lastValueLen){
+    addPraiseProgress(currentLen-lastValueLen,false);
   }
 
-  lastRawLen=currentLen;
+  lastValueLen=currentLen;
 }
 
 function onKey(e){
@@ -950,15 +932,11 @@ function onKey(e){
 
 function doInst(){
   const v=vl();
-
-  if(v){
-    addT(v,"add");
-  }
+  if(v)addT(v,"add");
 }
 
 function doDopa(){
   const v=vl();
-
   if(!v)return;
 
   const el=document.createElement("div");
@@ -975,9 +953,7 @@ function doDopa(){
     ],
     {duration:2800,fill:"forwards"}
   ).onfinish=()=>{
-    if(el.parentNode){
-      el.parentNode.removeChild(el);
-    }
+    if(el.parentNode)el.parentNode.removeChild(el);
   };
 
   addT(v,"add");
@@ -996,9 +972,7 @@ function addT(name,praiseMode){
   render();
 
   const ta=document.getElementById("ta");
-  if(ta){
-    ta.scrollTop=0;
-  }
+  if(ta)ta.scrollTop=0;
 
   if(praiseMode){
     setTimeout(()=>spawnPraise(praiseMode),80);
@@ -1007,7 +981,6 @@ function addT(name,praiseMode){
 
 function tap(id){
   const t=tasks.find(x=>x.id===id);
-
   if(!t)return;
 
   if(t.state==="idle"){
@@ -1047,7 +1020,6 @@ function render(){
     s.className="completed";
     s.innerHTML="<p>COMPLETED "+done.length+"</p>";
     a.appendChild(s);
-
     done.forEach(t=>a.appendChild(mkC(t)));
   }
 }

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>DOPAON BONUS</title>
+<link href="https://fonts.googleapis.com/css2?family=Reggae+One&family=Noto+Serif+JP:wght@700&family=Orbitron:wght@900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}html,body{width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font-family:'Reggae One',system-ui,sans-serif;user-select:none}body{position:fixed;inset:0;touch-action:manipulation}#stage{position:fixed;inset:0;background:#050505;overflow:hidden}#bg{position:absolute;inset:0;width:100%;height:100%}#content{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:6vw;z-index:2}.wait{color:#555;font-family:'Orbitron',monospace;font-size:11px;letter-spacing:3px}.step{width:100%;font-size:clamp(30px,12vw,72px);font-weight:900;line-height:1.25;text-shadow:4px 4px 0 #000,0 0 24px currentColor;transform:rotate(-4deg);animation:slam .55s cubic-bezier(.12,1.6,.3,1) both}.step.small{font-size:clamp(24px,9vw,56px)}.white{color:#fff}.blue{color:#63bdff}.green{color:#39ff88}.purple{color:#d76bff}.red{color:#ff3030}.gold{color:#ffd700}.rainbow{background:linear-gradient(90deg,#ff2020,#ff8a00,#fff000,#00d060,#008cff,#b000ff,#ff1493);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:4px 4px 0 #000}.grab-wrap{display:flex;flex-direction:column;align-items:center;gap:5vh;width:100%;animation:fadeIn .25s both}.grab-title{writing-mode:vertical-rl;text-orientation:upright;font-size:clamp(54px,18vw,104px);letter-spacing:.05em;line-height:1;text-shadow:5px 5px 0 #000,0 0 26px rgba(255,255,255,.5);transform:rotate(3deg)}.grab-btn{font-family:'Reggae One',sans-serif;border:3px solid #fff;border-radius:16px;background:linear-gradient(180deg,#383838,#080808);box-shadow:0 7px 0 #000,0 0 30px rgba(255,255,255,.55);color:#fff;padding:14px 40px;font-size:clamp(24px,7vw,42px);letter-spacing:.08em}.bar{width:min(78vw,350px);height:14px;border:2px solid #fff;border-radius:999px;background:#111;box-shadow:0 0 0 2px #000;overflow:hidden}.fill{height:100%;transform-origin:left;background:linear-gradient(90deg,#ff3030,#ffd700);animation:bar 5.5s linear forwards}@keyframes bar{from{transform:scaleX(1)}to{transform:scaleX(0)}}.result-wrap{display:flex;flex-direction:column;align-items:center;gap:5vh;animation:resultPop .62s cubic-bezier(.12,1.4,.25,1) both}.hex{width:min(70vw,330px);aspect-ratio:1;display:flex;align-items:center;justify-content:center;clip-path:polygon(25% 4%,75% 4%,98% 50%,75% 96%,25% 96%,2% 50%);background:#111;border:0;position:relative;filter:drop-shadow(0 0 28px var(--glow));animation:hexVib .08s linear infinite}.hex::before{content:"";position:absolute;inset:5%;clip-path:inherit;background:radial-gradient(circle at 35% 28%,rgba(255,255,255,.55),transparent 28%),linear-gradient(145deg,var(--hi),var(--lo))}.hex span{position:relative;z-index:2;font-size:clamp(28px,9vw,56px);text-shadow:3px 3px 0 #000,-1px -1px 0 #fff;color:var(--txt)}.receive{font-family:'Reggae One',sans-serif;border:1px solid #444;border-radius:12px;background:#111;color:#aaa;padding:12px 30px;font-size:clamp(14px,4vw,20px);letter-spacing:.1em}.flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:9}.shake{animation:shake .25s ease both}@keyframes slam{from{opacity:0;transform:scale(4) rotate(-50deg)}70%{opacity:1;transform:scale(.95) rotate(3deg)}to{opacity:1;transform:scale(1) rotate(-4deg)}}@keyframes fadeIn{from{opacity:0;transform:scale(1.12)}to{opacity:1;transform:scale(1)}}@keyframes resultPop{from{opacity:0;transform:scale(5) rotate(-50deg)}75%{opacity:1;transform:scale(.92) rotate(2deg)}to{opacity:1;transform:scale(1) rotate(0)}}@keyframes hexVib{0%,100%{transform:translate(0,0)}25%{transform:translate(1px,-1px)}50%{transform:translate(-1px,1px)}75%{transform:translate(1px,1px)}}@keyframes shake{0%,100%{transform:translate(0,0)}20%{transform:translate(10px,5px)}40%{transform:translate(-8px,-6px)}60%{transform:translate(7px,-4px)}80%{transform:translate(-5px,4px)}}
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="bg"></canvas><div id="content"><div class="wait">BONUS STANDBY</div></div><div class="flash" id="flash"></div></div>
+<script>
+const RESULT_KEYS=['white','blue','green','purple','red','gold'];
+const WEIGHTS=[0.15,0.30,0.25,0.18,0.09,0.03];
+const COLORS={white:['#ffffff','#777777','#ffffff','rgba(255,255,255,.7)'],blue:['#b0e8ff','#1b5cff','#d8f6ff','rgba(64,168,255,.85)'],green:['#a0ff90','#12a030','#efffee','rgba(40,255,120,.85)'],purple:['#f0a0ff','#8500c8','#ffd8ff','rgba(204,0,255,.85)'],red:['#ff3300','#880000','#ffdd80','rgba(255,60,0,.9)'],gold:['#fff8a0','#ff8800','#fff7b0','rgba(255,215,0,.95)']};
+let currentTier='white', raf=null, particles=[], running=false;
+const stage=document.getElementById('stage'), cv=document.getElementById('bg'), ctx=cv.getContext('2d'), ct=document.getElementById('content'), fl=document.getElementById('flash');
+function resize(){cv.width=innerWidth;cv.height=innerHeight}resize();addEventListener('resize',resize);
+function pick(){let r=Math.random(),c=0;for(let i=0;i<WEIGHTS.length;i++){c+=WEIGHTS[i];if(r<c)return RESULT_KEYS[i]}return 'gold'}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+function vib(p){if(navigator.vibrate)navigator.vibrate(p)}
+function flash(a=.85){fl.style.opacity=a;setTimeout(()=>fl.style.opacity=0,80)}
+function shake(){stage.classList.remove('shake');void stage.offsetWidth;stage.classList.add('shake')}
+function startBg(tier){stopBg();running=true;particles=[];for(let i=0;i<100;i++)particles.push(makeP(tier));draw(tier)}
+function stopBg(){running=false;if(raf)cancelAnimationFrame(raf);raf=null;ctx.clearRect(0,0,cv.width,cv.height)}
+function makeP(t){const c=COLORS[t]||COLORS.white;return{x:Math.random()*cv.width,y:cv.height+Math.random()*cv.height*.4,vx:(Math.random()-.5)*1.7,vy:-(1+Math.random()*3.5),s:1+Math.random()*5,a:.25+Math.random()*.75,col:c[Math.floor(Math.random()*3)]}}
+function draw(tier){if(!running)return;const W=cv.width,H=cv.height;ctx.clearRect(0,0,W,H);const bg=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.max(W,H));const c=COLORS[tier]||COLORS.white;bg.addColorStop(0,c[3]);bg.addColorStop(.45,'rgba(0,0,0,.15)');bg.addColorStop(1,'#000');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.015;if(p.y<-30||p.a<=0)Object.assign(p,makeP(tier));ctx.globalAlpha=p.a;ctx.fillStyle=p.col;ctx.beginPath();ctx.arc(p.x,p.y,p.s,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1});raf=requestAnimationFrame(()=>draw(tier))}
+function stepHtml(text,tier,extra=''){return `<div class="step ${tier} ${extra}">${text}</div>`}
+async function play(){
+  currentTier=pick();
+  const order=['white','blue','green','purple','red','gold'];
+  const max=Math.max(0,order.indexOf(currentTier));
+  for(let i=0;i<=max;i++){
+    const tier=order[i];
+    flash(.75);shake();vib([30]);startBg(tier);
+    ct.innerHTML= i===5 ? stepHtml('全ては<br>ここにある','rainbow') : stepHtml(i<2?'もっともっと!!':'もっともっと..',tier,i>2?'small':'');
+    await sleep(i===5?2400:850+250*i);
+  }
+  showGrab();
+}
+function showGrab(){
+  startBg(currentTier);flash(.5);vib([80,40,80]);
+  ct.innerHTML=`<div class="grab-wrap"><div class="grab-title ${currentTier}">掴み取れ</div><button class="grab-btn" id="push">PUSH</button><div class="bar"><div class="fill"></div></div></div>`;
+  document.getElementById('push').onclick=showResult;
+  setTimeout(()=>{const b=document.getElementById('push');if(b)b.click()},6500);
+}
+function showResult(){
+  startBg(currentTier);flash(1);shake();vib(currentTier==='gold'?[100,40,100,40,220]:[80,40,120]);
+  const label={white:'Tia白',blue:'Tia青',green:'Tia緑',purple:'Tia紫',red:'Tia赤',gold:'Tia金'}[currentTier];
+  const c=COLORS[currentTier];
+  ct.innerHTML=`<div class="result-wrap"><div class="hex" style="--hi:${c[0]};--lo:${c[1]};--txt:${c[2]};--glow:${c[3]}"><span>${label}</span></div><button class="receive" id="recv">受け取る</button></div>`;
+  document.getElementById('recv').onclick=()=>{parent.postMessage({type:'DOPAON_BONUS_RESULT',tier:currentTier},'*');ct.innerHTML='<div class="wait">BONUS STANDBY</div>';stopBg()};
+}
+addEventListener('message',e=>{if(e.data&&e.data.type==='DOPAON_BONUS_START')play()});
+</script>
+</body>
+</html>

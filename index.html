@@ -297,7 +297,97 @@ function tap(id){const t=state.tasks.find(x=>x.id===id);if(!t)return;if(t.state=
 function formatDateLabel(s){if(!s)return '';const d=new Date(s+'T00:00:00');if(Number.isNaN(d.getTime()))return s;return (d.getMonth()+1)+'/'+d.getDate()+'('+WEEKDAYS[d.getDay()]+')'}
 function taskMeta(t){const tags=[];if(t.dueDate){const overdue=t.state!=='done'&&t.dueDate<todayStr();tags.push({cls:'due '+(overdue?'warn':''),txt:(overdue?'期限超過 ':'期限 ')+formatDateLabel(t.dueDate)})}if(t.taskType==='habit'){let r=t.repeatType==='daily'?'毎日':t.repeatType==='interval'?t.intervalDays+'日起き':(t.weekdays||[]).map(i=>WEEKDAYS[i]).join('');tags.push({cls:'habit',txt:(t.habitKind==='avoid'?'やらない ':'やる ')+r})}if(t.rewardDone)tags.push({cls:'reward',txt:'抽選済'});return tags}
 function render(){const a=document.getElementById('ta');a.innerHTML='';if(!state.tasks.length){a.innerHTML='<div class="empty"><div class="empty-icon">⚡</div><div class="empty-text">タスクを入力して追加しよう</div></div>';return}const act=state.tasks.filter(t=>t.state!=='done'),done=state.tasks.filter(t=>t.state==='done');act.forEach((t,i)=>{const c=mkC(t);if(i===0)c.classList.add('tnew');a.appendChild(c)});if(done.length){const s=document.createElement('div');s.className='completed';s.innerHTML='<div class="completed-head"><span class="completed-title">COMPLETED '+done.length+'</span><button class="completed-btn" onclick="toggleCompleted()">'+(state.ui.completedOpen?'隠す':'表示')+'</button><button class="completed-btn" onclick="clearCompleted()">整理</button></div>';a.appendChild(s);if(state.ui.completedOpen)done.forEach(t=>a.appendChild(mkC(t)))}}
-function mkC(task){const iC=task.state==='charging',iD=task.state==='done',el=document.createElement('div');el.className='task'+(iC?' charging':'')+(iD?' done':'')+(task.taskType==='habit'?' habit':'')+(task.dueDate&&task.state!=='done'&&task.dueDate<todayStr()?' overdue':'');const main=document.createElement('div');main.className='task-main';const nm=document.createElement('div');nm.className='task-name';nm.textContent=task.name;main.appendChild(nm);const metas=taskMeta(task);if(metas.length){const meta=document.createElement('div');meta.className='task-meta';metas.forEach(m=>{const tag=document.createElement('span');tag.className='tag '+m.cls;tag.textContent=m.txt;meta.appendChild(tag)});main.appendChild(meta)}el.appendChild(main);const w=document.createElement('div');w.className='task-action';if(!iD){const b=document.createElement('button');b.className='task-btn'+(iC?' cbtn':'');b.onclick=()=>tap(task.id);b.setAttribute('aria-label',iC?'完了確定':'チャージ開始');b.innerHTML=iC?'<span style="font-family:\'Orbitron\',monospace;font-size:7px;font-weight:700;">確定</span>':'<span style="font-size:17px;">✓</span>';w.appendChild(b);if(iC){const h=document.createElement('span');h.className='push';h.textContent='PUSH';w.appendChild(h)}}else{const ic=document.createElement('span');ic.className='done-mark';ic.textContent='✓';w.appendChild(ic)}el.appendChild(w);const tools=document.createElement('div');tools.className='task-tools';if(iD){const u=document.createElement('button');u.className='mini-btn undo';u.textContent='↩';u.onclick=()=>undoTask(task.id);tools.appendChild(u)}const edit=document.createElement('button');edit.className='mini-btn';edit.textContent='⚙';edit.onclick=()=>openTaskMenu(task.id);tools.appendChild(edit);const del=document.createElement('button');del.className='mini-btn danger';del.textContent='×';del.onclick=()=>deleteTask(task.id);tools.appendChild(del);el.appendChild(tools);return el}
+function mkC(task){
+  const iC=task.state==='charging';
+  const iD=task.state==='done';
+  const el=document.createElement('div');
+
+  el.className='task'+
+    (iC?' charging':'')+
+    (iD?' done':'')+
+    (task.taskType==='habit'?' habit':'')+
+    (task.dueDate&&task.state!=='done'&&task.dueDate<todayStr()?' overdue':'');
+
+  const main=document.createElement('div');
+  main.className='task-main';
+
+  const nm=document.createElement('div');
+  nm.className='task-name';
+  nm.textContent=task.name;
+  main.appendChild(nm);
+
+  const metas=taskMeta(task);
+  if(metas.length){
+    const meta=document.createElement('div');
+    meta.className='task-meta';
+    metas.forEach(m=>{
+      const tag=document.createElement('span');
+      tag.className='tag '+m.cls;
+      tag.textContent=m.txt;
+      meta.appendChild(tag);
+    });
+    main.appendChild(meta);
+  }
+  el.appendChild(main);
+
+  /* 左から: 本文 → 編集/削除/取り消し → 完了ボタン。完了ボタンを必ず一番右に置く。 */
+  const tools=document.createElement('div');
+  tools.className='task-tools';
+
+  if(iD){
+    const u=document.createElement('button');
+    u.className='mini-btn undo';
+    u.textContent='↩';
+    u.setAttribute('aria-label','完了を取り消す');
+    u.onclick=()=>undoTask(task.id);
+    tools.appendChild(u);
+  }
+
+  const edit=document.createElement('button');
+  edit.className='mini-btn';
+  edit.textContent='⚙';
+  edit.setAttribute('aria-label','タスク設定を編集');
+  edit.onclick=()=>openTaskMenu(task.id);
+  tools.appendChild(edit);
+
+  const del=document.createElement('button');
+  del.className='mini-btn danger';
+  del.textContent='×';
+  del.setAttribute('aria-label','タスクを削除');
+  del.onclick=()=>deleteTask(task.id);
+  tools.appendChild(del);
+
+  el.appendChild(tools);
+
+  const w=document.createElement('div');
+  w.className='task-action';
+
+  if(!iD){
+    const b=document.createElement('button');
+    b.className='task-btn'+(iC?' cbtn':'');
+    b.onclick=()=>tap(task.id);
+    b.setAttribute('aria-label',iC?'完了確定':'チャージ開始');
+    b.innerHTML=iC
+      ? '<span style="font-family:\'Orbitron\',monospace;font-size:7px;font-weight:700;">確定</span>'
+      : '<span style="font-size:17px;">✓</span>';
+    w.appendChild(b);
+
+    if(iC){
+      const h=document.createElement('span');
+      h.className='push';
+      h.textContent='PUSH';
+      w.appendChild(h);
+    }
+  }else{
+    const ic=document.createElement('span');
+    ic.className='done-mark';
+    ic.textContent='✓';
+    w.appendChild(ic);
+  }
+
+  el.appendChild(w);
+  return el;
+}
 function toggleCompleted(){state.ui.completedOpen=!state.ui.completedOpen;saveState();render()}
 function clearCompleted(){const n=state.tasks.filter(t=>t.state==='done').length;if(!n)return;if(!confirm('完了済みタスク '+n+'件を整理して削除する？\n報酬・プロフィール・無料期間は残る。'))return;state.tasks=state.tasks.filter(t=>t.state!=='done');saveState();render();showToast('完了済みを整理した')}
 

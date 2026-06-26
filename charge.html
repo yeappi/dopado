@@ -29,27 +29,31 @@
 }
 
 body {
-    background: var(--bg);
+    background: transparent;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
+    width: 260px;
+    height: 260px;
+    min-height: 0;
     color: #fff;
     font-family: 'Orbitron', sans-serif;
     user-select: none;
     overflow:hidden;
 }
+html{width:260px;height:260px;overflow:hidden;background:transparent;}
 
 .pachinko-panel {
-    background: var(--panel-bg);
-    padding: 28px 22px 22px;
-    border-radius: 24px;
-    border: 2px solid #222;
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    border: 0;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    width: 310px;
+    justify-content: center;
+    width: 260px;
+    height: 260px;
+    overflow: hidden;
 }
 
 .gimmick-container {
@@ -436,11 +440,7 @@ body {
 }
 
 /* ===== INFO ===== */
-.info-panel {
-    margin-top: 18px;
-    text-align: center;
-    width: 100%;
-}
+.info-panel { display:none !important; }
 
 #status {
     font-size: 11px;
@@ -464,12 +464,7 @@ body {
     color: var(--mint);
 }
 
-.debug-row {
-    display: flex;
-    gap: 8px;
-    margin-top: 14px;
-    width: 100%;
-}
+.debug-row { display:none !important; }
 
 .debug-btn {
     flex: 1;
@@ -570,12 +565,11 @@ const els = {
     days: document.getElementById('days')
 };
 
-const STORAGE_KEY = 'dopaCount';
 const SYMBOL_HEIGHT = 176;
 const RESULT_LIGHT_DELAY = 450;
 const PARENT_CONTROLLED = window.parent && window.parent !== window;
 
-let count = parseInt(localStorage.getItem(STORAGE_KEY)) || 0;
+let count = 0;
 let state = 'OFF';
 let rafId = null;
 let pendingOutcome = null;
@@ -584,6 +578,7 @@ let resultEmitTimer = null;
 
 updateDisplay();
 setMeter(0);
+if (PARENT_CONTROLLED) setStatus('STANDBY');
 
 function emitChargeResult(kind) {
     if (!PARENT_CONTROLLED) return;
@@ -599,8 +594,8 @@ function scheduleEmit(kind, ms) {
 }
 
 function updateDisplay() {
-    els.count.innerText = count;
-    els.days.innerText = count * 7;
+    if (els.count) els.count.innerText = count;
+    if (els.days) els.days.innerText = count * 7;
 }
 
 function setStatus(text) {
@@ -861,7 +856,6 @@ function stopSpinManual() {
         stopAsWhite();
     }
 
-    localStorage.setItem(STORAGE_KEY, count);
     updateDisplay();
 }
 

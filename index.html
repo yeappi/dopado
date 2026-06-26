@@ -17,9 +17,12 @@
   --bottom-ui:calc(var(--input-h) + var(--habit-h));
 }
 
-*{box-sizing:border-box}
+*{
+  box-sizing:border-box;
+}
 
-html,body{
+html,
+body{
   margin:0;
   width:100%;
   height:100%;
@@ -35,11 +38,12 @@ body{
 
 #sf8{
   position:fixed;
-  inset:0;
+  top:0;
+  left:50%;
+  transform:translateX(-50%);
   width:100%;
   max-width:430px;
-  height:100dvh;
-  margin:0 auto;
+  height:100vh;
   background:#07070f;
   color:#c8d8f0;
   overflow:hidden;
@@ -167,8 +171,13 @@ body{
   letter-spacing:.5px;
 }
 
-#mi::placeholder{color:#2a3a55}
-#mi:focus{outline:none}
+#mi::placeholder{
+  color:#2a3a55;
+}
+
+#mi:focus{
+  outline:none;
+}
 
 .roundBtn{
   width:38px;
@@ -222,7 +231,8 @@ body{
   align-items:center;
 }
 
-.dot-on,.dot-off{
+.dot-on,
+.dot-off{
   width:9px;
   height:9px;
   border-radius:50%;
@@ -230,8 +240,14 @@ body{
   flex-shrink:0;
 }
 
-.dot-on{background:#00ffcc}
-.dot-off{background:transparent;border:1.5px solid #2a3a55}
+.dot-on{
+  background:#00ffcc;
+}
+
+.dot-off{
+  background:transparent;
+  border:1.5px solid #2a3a55;
+}
 
 .counter{
   font-family:'Orbitron',monospace;
@@ -277,8 +293,13 @@ body{
   margin-bottom:8px;
 }
 
-.task.charging{border-color:#ffd700}
-.task.done{opacity:.35}
+.task.charging{
+  border-color:#ffd700;
+}
+
+.task.done{
+  opacity:.35;
+}
 
 .task-name{
   flex:1;
@@ -368,17 +389,32 @@ body{
 }
 
 @keyframes tslide{
-  from{opacity:0;transform:translateY(-6px)}
-  to{opacity:1;transform:translateY(0)}
+  from{
+    opacity:0;
+    transform:translateY(-6px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
 }
 
 @keyframes cpulse{
-  0%,100%{opacity:1}
-  50%{opacity:.5}
+  0%,100%{
+    opacity:1;
+  }
+  50%{
+    opacity:.5;
+  }
 }
 
-.tnew{animation:tslide .2s ease-out}
-.cbtn{animation:cpulse 1s ease-in-out infinite}
+.tnew{
+  animation:tslide .2s ease-out;
+}
+
+.cbtn{
+  animation:cpulse 1s ease-in-out infinite;
+}
 </style>
 </head>
 
@@ -431,6 +467,7 @@ body{
 
   <div id="inputBar">
     <button id="ib" class="roundBtn bolt" onclick="doInst()" aria-label="即タスク化">⚡</button>
+
     <input
       id="mi"
       type="text"
@@ -447,6 +484,7 @@ body{
       oncompositionend="onCompEnd(event)"
       onfocus="onInputFocus()"
     />
+
     <button id="db" class="roundBtn dopa" onclick="doDopa()" aria-label="DOPAON!">✦</button>
   </div>
 </div>
@@ -490,28 +528,51 @@ const DONE_PR=[
 
 let tasks=[];
 let isComposing=false;
-let compositionBaseLen=0;
 let compositionText="";
-let lastPraiseLen=0;
+let lastRawLen=0;
+let lastCompLen=0;
+let praiseMeter=0;
 let lastPraiseAt=0;
 let livePraise=0;
 let busyLanes=new Set();
 let activePraise=new Set();
 
+let baseViewportHeight=window.innerHeight;
+
 const NS="http://www.w3.org/2000/svg";
 const FF="'Reggae One', system-ui, sans-serif";
+
 const PRAISE_STEP=3;
 const PRAISE_LIFE=2000;
 const MAX_PRAISE=3;
 const PRAISE_COOLDOWN=350;
 const P_MARGIN=10;
 
-function clamp(n,min,max){return Math.max(min,Math.min(max,n))}
-function rand(a){return a[Math.floor(Math.random()*a.length)]}
-function charLen(t){return Array.from(String(t||"")).length}
-function vl(){return document.getElementById("mi").value.trim()}
-function rawValue(){return document.getElementById("mi").value}
-function newId(){return window.crypto&&typeof window.crypto.randomUUID==="function"?window.crypto.randomUUID():String(Date.now())+"_"+String(Math.random()).slice(2)}
+function clamp(n,min,max){
+  return Math.max(min,Math.min(max,n));
+}
+
+function rand(a){
+  return a[Math.floor(Math.random()*a.length)];
+}
+
+function charLen(t){
+  return Array.from(String(t||"")).length;
+}
+
+function vl(){
+  return document.getElementById("mi").value.trim();
+}
+
+function rawValue(){
+  return document.getElementById("mi").value;
+}
+
+function newId(){
+  return window.crypto&&typeof window.crypto.randomUUID==="function"
+    ? window.crypto.randomUUID()
+    : String(Date.now())+"_"+String(Math.random()).slice(2);
+}
 
 function shuffle(a){
   return a
@@ -603,11 +664,26 @@ function drawPraiseText(svg,item,groups,box,fs){
   });
 }
 
+function refreshBaseViewportHeight(){
+  const vv=window.visualViewport;
+  const h=vv?vv.height:window.innerHeight;
+
+  if(h>baseViewportHeight){
+    baseViewportHeight=h;
+  }
+}
+
 function keyboardInset(){
   const vv=window.visualViewport;
-  if(!vv)return 0;
 
-  const inset=window.innerHeight-(vv.height+vv.offsetTop);
+  if(!vv){
+    return 0;
+  }
+
+  const byInner=window.innerHeight-(vv.height+vv.offsetTop);
+  const byBase=baseViewportHeight-vv.height-vv.offsetTop;
+  const inset=Math.max(byInner,byBase,0);
+
   return Math.max(0,Math.round(inset));
 }
 
@@ -617,20 +693,28 @@ function syncLineLikeLayout(){
 
 function onInputFocus(){
   setTimeout(()=>{
+    refreshBaseViewportHeight();
     syncLineLikeLayout();
+    resetPraiseInput();
+
     const mi=document.getElementById("mi");
-    if(mi)mi.scrollIntoView({block:"nearest"});
+    if(mi){
+      mi.scrollIntoView({block:"nearest"});
+    }
   },60);
 
-  setTimeout(syncLineLikeLayout,260);
-  setTimeout(syncLineLikeLayout,520);
+  setTimeout(syncLineLikeLayout,180);
+  setTimeout(syncLineLikeLayout,360);
+  setTimeout(syncLineLikeLayout,700);
 }
 
 function getPraiseOrigin(){
   const pc=document.getElementById("pc");
   const bar=document.getElementById("inputBar");
 
-  if(!pc||!bar)return{x:180,y:360};
+  if(!pc||!bar){
+    return{x:180,y:360};
+  }
 
   const pcRect=pc.getBoundingClientRect();
   const barRect=bar.getBoundingClientRect();
@@ -664,6 +748,7 @@ function getLanes(origin){
 
 function getPointOnLane(origin,lane,d){
   const r=lane.angle*Math.PI/180;
+
   return{
     x:origin.x+Math.cos(r)*d,
     y:origin.y+Math.sin(r)*d
@@ -714,12 +799,16 @@ function pickPraisePosition(w,h){
 }
 
 function spawnPraise(mode="input",forcedItem=null){
-  if(livePraise>=MAX_PRAISE)return;
+  if(livePraise>=MAX_PRAISE){
+    return;
+  }
 
   syncLineLikeLayout();
 
   const pc=document.getElementById("pc");
-  if(!pc)return;
+  if(!pc){
+    return;
+  }
 
   const item=forcedItem||rand(mode==="done"?DONE_PR:mode==="add"?ADD_PR:PR);
   const groups=grps(item.t);
@@ -760,22 +849,30 @@ function spawnPraise(mode="input",forcedItem=null){
     {duration:PRAISE_LIFE,easing:"cubic-bezier(.18,.8,.22,1)",fill:"forwards"}
   );
 
-  anim.onfinish=()=>releasePraise(svg,pos.lane.index);
+  anim.onfinish=()=>{
+    releasePraise(svg,pos.lane.index);
+  };
 }
 
 function releasePraise(svg,laneIndex){
-  if(!activePraise.has(svg))return;
+  if(!activePraise.has(svg)){
+    return;
+  }
 
   activePraise.delete(svg);
   busyLanes.delete(laneIndex);
   livePraise=Math.max(0,livePraise-1);
 
-  if(svg.parentNode)svg.parentNode.removeChild(svg);
+  if(svg.parentNode){
+    svg.parentNode.removeChild(svg);
+  }
 }
 
 function clearPraise(){
   const pc=document.getElementById("pc");
-  if(!pc)return;
+  if(!pc){
+    return;
+  }
 
   pc.innerHTML="";
   activePraise.clear();
@@ -793,87 +890,126 @@ function updateInputButtons(v){
 }
 
 function resetPraiseInput(){
-  lastPraiseLen=0;
-  lastPraiseAt=0;
-  compositionBaseLen=0;
+  lastRawLen=charLen(rawValue());
+  lastCompLen=0;
   compositionText="";
+  praiseMeter=0;
+  lastPraiseAt=0;
 }
 
-function measuredInputLen(extraText){
-  const currentLen=charLen(rawValue());
-  const compLen=isComposing?compositionBaseLen+charLen(compositionText):currentLen;
-  const extraLen=extraText?currentLen+charLen(extraText):0;
-
-  return Math.max(currentLen,compLen,extraLen);
-}
-
-function checkPraiseInput(options){
-  const opts=options||{};
-  const v=vl();
-
-  updateInputButtons(v);
-
-  if(!v && !isComposing){
-    resetPraiseInput();
-    return;
-  }
-
-  const len=measuredInputLen(opts.extraText||"");
+function addPraiseProgress(amount,force){
   const now=Date.now();
 
-  if(len<lastPraiseLen){
-    lastPraiseLen=len;
+  if(force){
+    if(now-lastPraiseAt>=PRAISE_COOLDOWN){
+      spawnPraise("input");
+      lastPraiseAt=now;
+      praiseMeter=0;
+    }
     return;
   }
 
-  const shouldSpawn=
-    opts.force ||
-    (len-lastPraiseLen>=PRAISE_STEP && now-lastPraiseAt>=PRAISE_COOLDOWN);
+  if(amount<=0){
+    return;
+  }
 
-  if(shouldSpawn){
+  praiseMeter+=amount;
+
+  if(praiseMeter>=PRAISE_STEP&&now-lastPraiseAt>=PRAISE_COOLDOWN){
     spawnPraise("input");
-    lastPraiseLen=len;
     lastPraiseAt=now;
+    praiseMeter=0;
   }
 }
 
 function onBeforeInput(e){
   syncLineLikeLayout();
 
-  if(e && typeof e.data==="string" && e.data){
-    setTimeout(()=>checkPraiseInput({extraText:e.data}),0);
+  if(isComposing){
+    return;
+  }
+
+  if(e&&typeof e.data==="string"&&e.data){
+    const added=charLen(e.data);
+
+    setTimeout(()=>{
+      if(!isComposing){
+        addPraiseProgress(added,false);
+      }
+    },0);
   }
 }
 
 function onCompStart(){
   isComposing=true;
-  compositionBaseLen=charLen(rawValue());
   compositionText="";
+  lastCompLen=0;
 }
 
 function onCompUpdate(e){
   syncLineLikeLayout();
+
   compositionText=e&&typeof e.data==="string"?e.data:"";
-  checkPraiseInput();
+
+  const compLen=charLen(compositionText);
+
+  if(compLen>lastCompLen){
+    addPraiseProgress(compLen-lastCompLen,false);
+  }
+
+  lastCompLen=compLen;
+
+  updateInputButtons(rawValue().trim()||compositionText);
 }
 
 function onCompEnd(e){
+  syncLineLikeLayout();
+
+  const endText=e&&typeof e.data==="string"?e.data:"";
+  const endLen=charLen(endText);
+
+  if(endLen>lastCompLen){
+    addPraiseProgress(endLen-lastCompLen,false);
+  }
+
   isComposing=false;
-  compositionText=e&&typeof e.data==="string"?e.data:"";
-  checkPraiseInput({force:charLen(rawValue())>=PRAISE_STEP});
-  compositionBaseLen=0;
   compositionText="";
+  lastCompLen=0;
+
+  const currentLen=charLen(rawValue());
+  lastRawLen=currentLen;
+
+  updateInputButtons(vl());
+
+  if(currentLen>=PRAISE_STEP&&praiseMeter>0){
+    addPraiseProgress(0,true);
+  }
 }
 
 function onIn(e){
   syncLineLikeLayout();
 
-  if(e && e.isComposing){
-    checkPraiseInput();
+  const raw=rawValue();
+  const v=vl();
+
+  updateInputButtons(v);
+
+  if(!raw&&!isComposing){
+    resetPraiseInput();
     return;
   }
 
-  checkPraiseInput();
+  if(isComposing||(e&&e.isComposing)){
+    return;
+  }
+
+  const currentLen=charLen(raw);
+
+  if(currentLen>lastRawLen){
+    addPraiseProgress(currentLen-lastRawLen,false);
+  }
+
+  lastRawLen=currentLen;
 }
 
 function onKey(e){
@@ -885,12 +1021,18 @@ function onKey(e){
 
 function doInst(){
   const v=vl();
-  if(v)addT(v,"add");
+
+  if(v){
+    addT(v,"add");
+  }
 }
 
 function doDopa(){
   const v=vl();
-  if(!v)return;
+
+  if(!v){
+    return;
+  }
 
   const el=document.createElement("div");
   el.className="dream";
@@ -906,7 +1048,9 @@ function doDopa(){
     ],
     {duration:2800,fill:"forwards"}
   ).onfinish=()=>{
-    if(el.parentNode)el.parentNode.removeChild(el);
+    if(el.parentNode){
+      el.parentNode.removeChild(el);
+    }
   };
 
   addT(v,"add");
@@ -925,22 +1069,32 @@ function addT(name,praiseMode){
   render();
 
   const ta=document.getElementById("ta");
-  if(ta)ta.scrollTop=0;
+  if(ta){
+    ta.scrollTop=0;
+  }
 
   if(praiseMode){
-    setTimeout(()=>spawnPraise(praiseMode),80);
+    setTimeout(()=>{
+      spawnPraise(praiseMode);
+    },80);
   }
 }
 
 function tap(id){
   const t=tasks.find(x=>x.id===id);
-  if(!t)return;
+
+  if(!t){
+    return;
+  }
 
   if(t.state==="idle"){
     t.state="charging";
   }else if(t.state==="charging"){
     t.state="done";
-    setTimeout(()=>spawnPraise("done"),80);
+
+    setTimeout(()=>{
+      spawnPraise("done");
+    },80);
   }
 
   render();
@@ -951,7 +1105,11 @@ function render(){
   a.innerHTML="";
 
   if(!tasks.length){
-    a.innerHTML='<div class="empty"><div class="empty-icon">⚡</div><div class="empty-text">タスクを入力して追加しよう</div></div>';
+    a.innerHTML=
+      '<div class="empty">'+
+        '<div class="empty-icon">⚡</div>'+
+        '<div class="empty-text">タスクを入力して追加しよう</div>'+
+      '</div>';
     return;
   }
 
@@ -960,7 +1118,9 @@ function render(){
 
   act.forEach((t,i)=>{
     const c=mkC(t);
-    if(i===0)c.classList.add("tnew");
+    if(i===0){
+      c.classList.add("tnew");
+    }
     a.appendChild(c);
   });
 
@@ -970,7 +1130,9 @@ function render(){
     s.innerHTML="<p>COMPLETED "+done.length+"</p>";
     a.appendChild(s);
 
-    done.forEach(t=>a.appendChild(mkC(t)));
+    done.forEach(t=>{
+      a.appendChild(mkC(t));
+    });
   }
 }
 
@@ -992,7 +1154,9 @@ function mkC(task){
 
     const b=document.createElement("button");
     b.className="task-btn"+(iC?" cbtn":"");
-    b.onclick=()=>tap(task.id);
+    b.onclick=()=>{
+      tap(task.id);
+    };
     b.setAttribute("aria-label",iC?"完了確定":"チャージ開始");
     b.innerHTML=iC
       ? '<span style="font-family:\'Orbitron\',monospace;font-size:7px;font-weight:700;">確定</span>'
@@ -1020,6 +1184,8 @@ function mkC(task){
 
 function handleViewportChange(){
   syncLineLikeLayout();
+  setTimeout(syncLineLikeLayout,60);
+  setTimeout(syncLineLikeLayout,180);
 }
 
 if(window.visualViewport){
@@ -1027,9 +1193,19 @@ if(window.visualViewport){
   window.visualViewport.addEventListener("scroll",handleViewportChange);
 }
 
-window.addEventListener("resize",syncLineLikeLayout);
-window.addEventListener("orientationchange",()=>setTimeout(syncLineLikeLayout,250));
+window.addEventListener("resize",()=>{
+  refreshBaseViewportHeight();
+  syncLineLikeLayout();
+});
 
+window.addEventListener("orientationchange",()=>{
+  setTimeout(()=>{
+    refreshBaseViewportHeight();
+    syncLineLikeLayout();
+  },250);
+});
+
+refreshBaseViewportHeight();
 syncLineLikeLayout();
 render();
 </script>

@@ -12,28 +12,25 @@
   --kb:0px;
   --safe:env(safe-area-inset-bottom,0px);
   --header-h:46px;
+  --dock-h:158px;
   --input-h:58px;
   --habit-h:100px;
-  --bottom-ui:calc(var(--input-h) + var(--habit-h));
 }
 
-*{
-  box-sizing:border-box;
-}
+*{box-sizing:border-box}
 
-html,
-body{
+html,body{
   margin:0;
   width:100%;
   height:100%;
   background:#020208;
   overflow:hidden;
   font-family:system-ui,sans-serif;
+  -webkit-text-size-adjust:100%;
 }
 
 body{
   touch-action:manipulation;
-  -webkit-text-size-adjust:100%;
 }
 
 #sf8{
@@ -51,6 +48,7 @@ body{
   border-right:1px solid #1e1e38;
 }
 
+/* fixed top */
 .header{
   position:absolute;
   top:0;
@@ -103,58 +101,67 @@ body{
   letter-spacing:2px;
 }
 
+/* task area is visually fixed */
 #ta{
   position:absolute;
   top:var(--header-h);
-  bottom:calc(var(--bottom-ui) + var(--kb) + var(--safe));
+  bottom:var(--dock-h);
   left:0;
   right:0;
   overflow-y:auto;
   padding:12px 14px;
   -webkit-overflow-scrolling:touch;
-  transition:bottom .18s ease-out;
 }
 
+/* praise area is fixed too, but origin follows floating dock */
 #pc{
   position:absolute;
   top:var(--header-h);
-  bottom:calc(var(--bottom-ui) + var(--kb) + var(--safe));
+  bottom:var(--dock-h);
   left:0;
   right:0;
   pointer-events:none;
   overflow:hidden;
   z-index:15;
   transform:translateZ(0);
-  transition:bottom .18s ease-out;
+}
+
+/* this is the only part that floats up */
+#bottomDock{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:calc(var(--dock-h) + var(--safe));
+  z-index:30;
+  transform:translateY(calc(var(--kb) * -1));
+  transition:transform .18s ease-out;
+  will-change:transform;
 }
 
 #habitRow{
   position:absolute;
+  top:0;
   left:0;
   right:0;
-  bottom:calc(var(--input-h) + var(--kb) + var(--safe));
   height:var(--habit-h);
-  z-index:18;
   border-top:1px solid #1e1e38;
   display:flex;
   background:#07070f;
-  transition:bottom .18s ease-out;
 }
 
 #inputBar{
   position:absolute;
   left:0;
   right:0;
-  bottom:calc(var(--kb) + var(--safe));
+  bottom:0;
   height:calc(var(--input-h) + var(--safe));
   padding:0 12px var(--safe);
-  z-index:30;
   border-top:1px solid #1e1e38;
   background:#07070f;
   display:flex;
   align-items:center;
   gap:10px;
-  transition:bottom .18s ease-out;
 }
 
 #mi{
@@ -171,13 +178,8 @@ body{
   letter-spacing:.5px;
 }
 
-#mi::placeholder{
-  color:#2a3a55;
-}
-
-#mi:focus{
-  outline:none;
-}
+#mi::placeholder{color:#2a3a55}
+#mi:focus{outline:none}
 
 .roundBtn{
   width:38px;
@@ -231,8 +233,7 @@ body{
   align-items:center;
 }
 
-.dot-on,
-.dot-off{
+.dot-on,.dot-off{
   width:9px;
   height:9px;
   border-radius:50%;
@@ -240,14 +241,8 @@ body{
   flex-shrink:0;
 }
 
-.dot-on{
-  background:#00ffcc;
-}
-
-.dot-off{
-  background:transparent;
-  border:1.5px solid #2a3a55;
-}
+.dot-on{background:#00ffcc}
+.dot-off{background:transparent;border:1.5px solid #2a3a55}
 
 .counter{
   font-family:'Orbitron',monospace;
@@ -293,13 +288,8 @@ body{
   margin-bottom:8px;
 }
 
-.task.charging{
-  border-color:#ffd700;
-}
-
-.task.done{
-  opacity:.35;
-}
+.task.charging{border-color:#ffd700}
+.task.done{opacity:.35}
 
 .task-name{
   flex:1;
@@ -370,9 +360,9 @@ body{
 
 .dream{
   position:absolute;
-  bottom:calc(var(--bottom-ui) + var(--kb) + var(--safe) + 8px);
   left:12px;
   right:12px;
+  bottom:calc(var(--dock-h) + 8px);
   background:#0f0f20;
   border:1px solid #1e1e38;
   border-left:3px solid #c8a020;
@@ -385,36 +375,20 @@ body{
   line-height:1.8;
   z-index:40;
   pointer-events:none;
-  transition:bottom .18s ease-out;
 }
 
 @keyframes tslide{
-  from{
-    opacity:0;
-    transform:translateY(-6px);
-  }
-  to{
-    opacity:1;
-    transform:translateY(0);
-  }
+  from{opacity:0;transform:translateY(-6px)}
+  to{opacity:1;transform:translateY(0)}
 }
 
 @keyframes cpulse{
-  0%,100%{
-    opacity:1;
-  }
-  50%{
-    opacity:.5;
-  }
+  0%,100%{opacity:1}
+  50%{opacity:.5}
 }
 
-.tnew{
-  animation:tslide .2s ease-out;
-}
-
-.cbtn{
-  animation:cpulse 1s ease-in-out infinite;
-}
+.tnew{animation:tslide .2s ease-out}
+.cbtn{animation:cpulse 1s ease-in-out infinite}
 </style>
 </head>
 
@@ -433,59 +407,61 @@ body{
 
   <div id="ta"></div>
 
-  <div id="habitRow">
-    <div class="habit-main">
-      <span class="habit-title">パチスロをしない</span>
-      <div class="habit-status">
-        <span class="dot-on"></span>
-        <span class="dot-off"></span>
-        <span class="dot-off"></span>
-        <span class="counter">1/3</span>
-        <span style="font-size:13px;color:#3a5070;margin-left:auto;">›</span>
+  <div id="bottomDock">
+    <div id="habitRow">
+      <div class="habit-main">
+        <span class="habit-title">パチスロをしない</span>
+        <div class="habit-status">
+          <span class="dot-on"></span>
+          <span class="dot-off"></span>
+          <span class="dot-off"></span>
+          <span class="counter">1/3</span>
+          <span style="font-size:13px;color:#3a5070;margin-left:auto;">›</span>
+        </div>
+      </div>
+
+      <div class="meter">
+        <svg width="82" height="82" viewBox="0 0 82 82" aria-hidden="true">
+          <circle cx="41" cy="41" r="36" fill="none" stroke="#181830" stroke-width="5" stroke-dasharray="3.5 2.2"/>
+          <circle cx="41" cy="41" r="36" fill="none" stroke="#39ff14" stroke-width="5" stroke-dasharray="143 83" transform="rotate(-90 41 41)"/>
+          <circle cx="41" cy="41" r="28" fill="#0e0e1c" stroke="#252545" stroke-width="1.5"/>
+          <circle cx="41" cy="41" r="24" fill="#06060e"/>
+          <line x1="31" y1="31" x2="35" y2="31" stroke="#00ffcc" stroke-width="1.5"/>
+          <line x1="31" y1="31" x2="31" y2="35" stroke="#00ffcc" stroke-width="1.5"/>
+          <line x1="51" y1="31" x2="47" y2="31" stroke="#00ffcc" stroke-width="1.5"/>
+          <line x1="51" y1="31" x2="51" y2="35" stroke="#00ffcc" stroke-width="1.5"/>
+          <line x1="31" y1="51" x2="35" y2="51" stroke="#00ffcc" stroke-width="1.5"/>
+          <line x1="31" y1="51" x2="31" y2="47" stroke="#00ffcc" stroke-width="1.5"/>
+          <line x1="51" y1="51" x2="47" y2="51" stroke="#00ffcc" stroke-width="1.5"/>
+          <line x1="51" y1="51" x2="51" y2="47" stroke="#00ffcc" stroke-width="1.5"/>
+          <text x="41" y="39" text-anchor="middle" font-family="monospace" font-size="9" font-weight="bold" fill="#00ffcc">DO</text>
+          <text x="41" y="50" text-anchor="middle" font-family="monospace" font-size="7" font-weight="bold" fill="#00ffcc" opacity=".7">DO!!</text>
+        </svg>
       </div>
     </div>
 
-    <div class="meter">
-      <svg width="82" height="82" viewBox="0 0 82 82" aria-hidden="true">
-        <circle cx="41" cy="41" r="36" fill="none" stroke="#181830" stroke-width="5" stroke-dasharray="3.5 2.2"/>
-        <circle cx="41" cy="41" r="36" fill="none" stroke="#39ff14" stroke-width="5" stroke-dasharray="143 83" transform="rotate(-90 41 41)"/>
-        <circle cx="41" cy="41" r="28" fill="#0e0e1c" stroke="#252545" stroke-width="1.5"/>
-        <circle cx="41" cy="41" r="24" fill="#06060e"/>
-        <line x1="31" y1="31" x2="35" y2="31" stroke="#00ffcc" stroke-width="1.5"/>
-        <line x1="31" y1="31" x2="31" y2="35" stroke="#00ffcc" stroke-width="1.5"/>
-        <line x1="51" y1="31" x2="47" y2="31" stroke="#00ffcc" stroke-width="1.5"/>
-        <line x1="51" y1="31" x2="51" y2="35" stroke="#00ffcc" stroke-width="1.5"/>
-        <line x1="31" y1="51" x2="35" y2="51" stroke="#00ffcc" stroke-width="1.5"/>
-        <line x1="31" y1="51" x2="31" y2="47" stroke="#00ffcc" stroke-width="1.5"/>
-        <line x1="51" y1="51" x2="47" y2="51" stroke="#00ffcc" stroke-width="1.5"/>
-        <line x1="51" y1="51" x2="51" y2="47" stroke="#00ffcc" stroke-width="1.5"/>
-        <text x="41" y="39" text-anchor="middle" font-family="monospace" font-size="9" font-weight="bold" fill="#00ffcc">DO</text>
-        <text x="41" y="50" text-anchor="middle" font-family="monospace" font-size="7" font-weight="bold" fill="#00ffcc" opacity=".7">DO!!</text>
-      </svg>
+    <div id="inputBar">
+      <button id="ib" class="roundBtn bolt" onclick="doInst()" aria-label="即タスク化">⚡</button>
+
+      <input
+        id="mi"
+        type="text"
+        placeholder="タスクを入力..."
+        autocomplete="off"
+        autocapitalize="off"
+        spellcheck="false"
+        enterkeyhint="done"
+        oninput="onIn(event)"
+        onbeforeinput="onBeforeInput(event)"
+        onkeydown="onKey(event)"
+        oncompositionstart="onCompStart(event)"
+        oncompositionupdate="onCompUpdate(event)"
+        oncompositionend="onCompEnd(event)"
+        onfocus="onInputFocus()"
+      />
+
+      <button id="db" class="roundBtn dopa" onclick="doDopa()" aria-label="DOPAON!">✦</button>
     </div>
-  </div>
-
-  <div id="inputBar">
-    <button id="ib" class="roundBtn bolt" onclick="doInst()" aria-label="即タスク化">⚡</button>
-
-    <input
-      id="mi"
-      type="text"
-      placeholder="タスクを入力..."
-      autocomplete="off"
-      autocapitalize="off"
-      spellcheck="false"
-      enterkeyhint="done"
-      oninput="onIn(event)"
-      onbeforeinput="onBeforeInput(event)"
-      onkeydown="onKey(event)"
-      oncompositionstart="onCompStart(event)"
-      oncompositionupdate="onCompUpdate(event)"
-      oncompositionend="onCompEnd(event)"
-      onfocus="onInputFocus()"
-    />
-
-    <button id="db" class="roundBtn dopa" onclick="doDopa()" aria-label="DOPAON!">✦</button>
   </div>
 </div>
 
@@ -536,7 +512,6 @@ let lastPraiseAt=0;
 let livePraise=0;
 let busyLanes=new Set();
 let activePraise=new Set();
-
 let baseViewportHeight=window.innerHeight;
 
 const NS="http://www.w3.org/2000/svg";
@@ -548,25 +523,11 @@ const MAX_PRAISE=3;
 const PRAISE_COOLDOWN=350;
 const P_MARGIN=10;
 
-function clamp(n,min,max){
-  return Math.max(min,Math.min(max,n));
-}
-
-function rand(a){
-  return a[Math.floor(Math.random()*a.length)];
-}
-
-function charLen(t){
-  return Array.from(String(t||"")).length;
-}
-
-function vl(){
-  return document.getElementById("mi").value.trim();
-}
-
-function rawValue(){
-  return document.getElementById("mi").value;
-}
+function clamp(n,min,max){return Math.max(min,Math.min(max,n))}
+function rand(a){return a[Math.floor(Math.random()*a.length)]}
+function charLen(t){return Array.from(String(t||"")).length}
+function vl(){return document.getElementById("mi").value.trim()}
+function rawValue(){return document.getElementById("mi").value}
 
 function newId(){
   return window.crypto&&typeof window.crypto.randomUUID==="function"
@@ -664,6 +625,7 @@ function drawPraiseText(svg,item,groups,box,fs){
   });
 }
 
+/* keyboard: do not move whole screen, only bottomDock */
 function refreshBaseViewportHeight(){
   const vv=window.visualViewport;
   const h=vv?vv.height:window.innerHeight;
@@ -675,10 +637,7 @@ function refreshBaseViewportHeight(){
 
 function keyboardInset(){
   const vv=window.visualViewport;
-
-  if(!vv){
-    return 0;
-  }
+  if(!vv)return 0;
 
   const byInner=window.innerHeight-(vv.height+vv.offsetTop);
   const byBase=baseViewportHeight-vv.height-vv.offsetTop;
@@ -687,41 +646,37 @@ function keyboardInset(){
   return Math.max(0,Math.round(inset));
 }
 
-function syncLineLikeLayout(){
+function syncDock(){
   document.documentElement.style.setProperty("--kb",keyboardInset()+"px");
 }
 
 function onInputFocus(){
   setTimeout(()=>{
     refreshBaseViewportHeight();
-    syncLineLikeLayout();
+    syncDock();
     resetPraiseInput();
-
-    const mi=document.getElementById("mi");
-    if(mi){
-      mi.scrollIntoView({block:"nearest"});
-    }
   },60);
 
-  setTimeout(syncLineLikeLayout,180);
-  setTimeout(syncLineLikeLayout,360);
-  setTimeout(syncLineLikeLayout,700);
+  setTimeout(syncDock,180);
+  setTimeout(syncDock,360);
+  setTimeout(syncDock,700);
 }
 
+/* praise origin follows floating dock */
 function getPraiseOrigin(){
   const pc=document.getElementById("pc");
-  const bar=document.getElementById("inputBar");
+  const dock=document.getElementById("bottomDock");
 
-  if(!pc||!bar){
+  if(!pc||!dock){
     return{x:180,y:360};
   }
 
   const pcRect=pc.getBoundingClientRect();
-  const barRect=bar.getBoundingClientRect();
+  const dockRect=dock.getBoundingClientRect();
 
   return{
-    x:clamp(barRect.left+barRect.width/2-pcRect.left,48,pc.clientWidth-48),
-    y:clamp(barRect.top-pcRect.top+10,pc.clientHeight*.55,pc.clientHeight+86)
+    x:clamp(dockRect.left+dockRect.width/2-pcRect.left,48,pc.clientWidth-48),
+    y:clamp(dockRect.top-pcRect.top+20,pc.clientHeight*.55,pc.clientHeight+86)
   };
 }
 
@@ -799,16 +754,12 @@ function pickPraisePosition(w,h){
 }
 
 function spawnPraise(mode="input",forcedItem=null){
-  if(livePraise>=MAX_PRAISE){
-    return;
-  }
+  if(livePraise>=MAX_PRAISE)return;
 
-  syncLineLikeLayout();
+  syncDock();
 
   const pc=document.getElementById("pc");
-  if(!pc){
-    return;
-  }
+  if(!pc)return;
 
   const item=forcedItem||rand(mode==="done"?DONE_PR:mode==="add"?ADD_PR:PR);
   const groups=grps(item.t);
@@ -849,15 +800,11 @@ function spawnPraise(mode="input",forcedItem=null){
     {duration:PRAISE_LIFE,easing:"cubic-bezier(.18,.8,.22,1)",fill:"forwards"}
   );
 
-  anim.onfinish=()=>{
-    releasePraise(svg,pos.lane.index);
-  };
+  anim.onfinish=()=>releasePraise(svg,pos.lane.index);
 }
 
 function releasePraise(svg,laneIndex){
-  if(!activePraise.has(svg)){
-    return;
-  }
+  if(!activePraise.has(svg))return;
 
   activePraise.delete(svg);
   busyLanes.delete(laneIndex);
@@ -866,18 +813,6 @@ function releasePraise(svg,laneIndex){
   if(svg.parentNode){
     svg.parentNode.removeChild(svg);
   }
-}
-
-function clearPraise(){
-  const pc=document.getElementById("pc");
-  if(!pc){
-    return;
-  }
-
-  pc.innerHTML="";
-  activePraise.clear();
-  busyLanes.clear();
-  livePraise=0;
 }
 
 function updateInputButtons(v){
@@ -909,9 +844,7 @@ function addPraiseProgress(amount,force){
     return;
   }
 
-  if(amount<=0){
-    return;
-  }
+  if(amount<=0)return;
 
   praiseMeter+=amount;
 
@@ -923,11 +856,9 @@ function addPraiseProgress(amount,force){
 }
 
 function onBeforeInput(e){
-  syncLineLikeLayout();
+  syncDock();
 
-  if(isComposing){
-    return;
-  }
+  if(isComposing)return;
 
   if(e&&typeof e.data==="string"&&e.data){
     const added=charLen(e.data);
@@ -947,10 +878,9 @@ function onCompStart(){
 }
 
 function onCompUpdate(e){
-  syncLineLikeLayout();
+  syncDock();
 
   compositionText=e&&typeof e.data==="string"?e.data:"";
-
   const compLen=charLen(compositionText);
 
   if(compLen>lastCompLen){
@@ -958,12 +888,11 @@ function onCompUpdate(e){
   }
 
   lastCompLen=compLen;
-
   updateInputButtons(rawValue().trim()||compositionText);
 }
 
 function onCompEnd(e){
-  syncLineLikeLayout();
+  syncDock();
 
   const endText=e&&typeof e.data==="string"?e.data:"";
   const endLen=charLen(endText);
@@ -987,7 +916,7 @@ function onCompEnd(e){
 }
 
 function onIn(e){
-  syncLineLikeLayout();
+  syncDock();
 
   const raw=rawValue();
   const v=vl();
@@ -1030,9 +959,7 @@ function doInst(){
 function doDopa(){
   const v=vl();
 
-  if(!v){
-    return;
-  }
+  if(!v)return;
 
   const el=document.createElement("div");
   el.className="dream";
@@ -1074,27 +1001,20 @@ function addT(name,praiseMode){
   }
 
   if(praiseMode){
-    setTimeout(()=>{
-      spawnPraise(praiseMode);
-    },80);
+    setTimeout(()=>spawnPraise(praiseMode),80);
   }
 }
 
 function tap(id){
   const t=tasks.find(x=>x.id===id);
 
-  if(!t){
-    return;
-  }
+  if(!t)return;
 
   if(t.state==="idle"){
     t.state="charging";
   }else if(t.state==="charging"){
     t.state="done";
-
-    setTimeout(()=>{
-      spawnPraise("done");
-    },80);
+    setTimeout(()=>spawnPraise("done"),80);
   }
 
   render();
@@ -1118,9 +1038,7 @@ function render(){
 
   act.forEach((t,i)=>{
     const c=mkC(t);
-    if(i===0){
-      c.classList.add("tnew");
-    }
+    if(i===0)c.classList.add("tnew");
     a.appendChild(c);
   });
 
@@ -1130,9 +1048,7 @@ function render(){
     s.innerHTML="<p>COMPLETED "+done.length+"</p>";
     a.appendChild(s);
 
-    done.forEach(t=>{
-      a.appendChild(mkC(t));
-    });
+    done.forEach(t=>a.appendChild(mkC(t)));
   }
 }
 
@@ -1154,9 +1070,7 @@ function mkC(task){
 
     const b=document.createElement("button");
     b.className="task-btn"+(iC?" cbtn":"");
-    b.onclick=()=>{
-      tap(task.id);
-    };
+    b.onclick=()=>tap(task.id);
     b.setAttribute("aria-label",iC?"完了確定":"チャージ開始");
     b.innerHTML=iC
       ? '<span style="font-family:\'Orbitron\',monospace;font-size:7px;font-weight:700;">確定</span>'
@@ -1183,9 +1097,9 @@ function mkC(task){
 }
 
 function handleViewportChange(){
-  syncLineLikeLayout();
-  setTimeout(syncLineLikeLayout,60);
-  setTimeout(syncLineLikeLayout,180);
+  syncDock();
+  setTimeout(syncDock,60);
+  setTimeout(syncDock,180);
 }
 
 if(window.visualViewport){
@@ -1195,18 +1109,18 @@ if(window.visualViewport){
 
 window.addEventListener("resize",()=>{
   refreshBaseViewportHeight();
-  syncLineLikeLayout();
+  syncDock();
 });
 
 window.addEventListener("orientationchange",()=>{
   setTimeout(()=>{
     refreshBaseViewportHeight();
-    syncLineLikeLayout();
+    syncDock();
   },250);
 });
 
 refreshBaseViewportHeight();
-syncLineLikeLayout();
+syncDock();
 render();
 </script>
 </body>

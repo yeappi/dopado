@@ -575,6 +575,7 @@ let rafId = null;
 let pendingOutcome = null;
 let resultLightTimer = null;
 let resultEmitTimer = null;
+let forcedBonusMode = false;
 
 updateDisplay();
 setMeter(0);
@@ -627,21 +628,24 @@ function meterBg(color, pct, empty = 'rgba(0,229,188,0.12)') {
 
 function setMeter(pct) {
     const safePct = Math.max(0, Math.min(100, pct));
+    const col = forcedBonusMode ? '#ff073a' : '#00E5BC';
+    const emp = forcedBonusMode ? 'rgba(255,7,58,0.13)' : 'rgba(0,229,188,0.12)';
 
     els.meter.classList.remove('full', 'max-hold', 'bonus-flash');
-    els.meter.style.background = meterBg('#00E5BC', safePct);
+    els.meter.style.background = meterBg(col, safePct, emp);
 }
 
 function setMeterMaxHold() {
     els.meter.classList.remove('full', 'bonus-flash');
     els.meter.classList.add('max-hold');
-    els.meter.style.background = meterBg('#00E5BC', 100);
+    els.meter.style.background = meterBg(forcedBonusMode ? '#ff073a' : '#00E5BC', 100, forcedBonusMode ? 'rgba(255,7,58,0.13)' : 'rgba(0,229,188,0.12)');
 }
 
 function setMeterFull() {
     els.meter.classList.remove('max-hold', 'bonus-flash');
-    els.meter.style.background = meterBg('#00E5BC', 100, 'rgba(0,229,188,0.16)');
-    els.meter.classList.add('full');
+    els.meter.style.background = meterBg(forcedBonusMode ? '#ff073a' : '#00E5BC', 100, forcedBonusMode ? 'rgba(255,7,58,0.13)' : 'rgba(0,229,188,0.16)');
+    if(!forcedBonusMode) els.meter.classList.add('full');
+    else els.meter.classList.add('max-hold');
 }
 
 function setBonusFlash() {
@@ -759,7 +763,8 @@ function startCharge(forceOutcome) {
     state = 'ROLLING';
     emitChargeState('rolling');
     pendingOutcome = forceOutcome;
-    setStatus('CHARGING...');
+    forcedBonusMode = forceOutcome === 'bonus';
+    setStatus(forcedBonusMode ? 'BONUS CHARGE' : 'CHARGING...');
 
     const pattern = decideChargePattern(forceOutcome);
 
@@ -955,6 +960,7 @@ function resetToOff() {
     state = 'OFF';
     emitChargeState('off');
     pendingOutcome = null;
+    forcedBonusMode = false;
 }
 
 function forceResult(type) {

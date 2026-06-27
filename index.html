@@ -142,6 +142,22 @@ body{position:fixed;inset:0;touch-action:manipulation}
 @keyframes undoIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .backup-row{display:flex;gap:8px;margin-top:10px}.backup-row button{flex:1;height:36px;border-radius:10px;border:1px solid #23234a;background:#070712;color:#9ab0d0;font-size:12px;font-weight:700}
 
+/* ===== v10 important/today + swipe polish ===== */
+.task{touch-action:pan-y;overflow:hidden;transition:transform .16s ease,border-color .18s ease,background .18s ease,box-shadow .18s ease}
+.task.today-task{border-left:3px solid #66ccff}
+.task.important-task{border-color:#ffd24a88;background:linear-gradient(90deg,rgba(255,210,74,.085),#0f0f20 38%);box-shadow:0 0 22px rgba(255,210,74,.075)}
+.task.important-task::before{content:'重要 BONUS';position:absolute;left:10px;top:-1px;transform:translateY(-50%);font-family:'Orbitron',monospace;font-size:7px;letter-spacing:1.2px;color:#07070f;background:#ffd24a;border-radius:999px;padding:2px 7px;box-shadow:0 0 12px rgba(255,210,74,.28)}
+.task.swipe-left-flash{animation:swipeLeftFlash .22s ease-out}
+@keyframes swipeLeftFlash{0%{transform:translateX(0)}45%{transform:translateX(-16px)}100%{transform:translateX(0)}}
+.task-tools{display:none;gap:5px;flex-direction:column;flex-shrink:0}
+.task.show-tools .task-tools{display:flex}
+.mini-btn.important{width:42px;color:#ffd24a;border-color:#ffd24a66;font-size:10px;font-weight:900}
+.mini-btn.important.on{background:#241c04;color:#ffd24a;box-shadow:0 0 12px rgba(255,210,74,.12)}
+.mini-btn.today.on{background:#071621;color:#66ccff;border-color:#66ccff66}
+.tag.important{color:#ffd24a;border-color:#ffd24a66;background:#181304}.tag.today{color:#66ccff;border-color:#66ccff55}
+.task-swipe-hint{font-family:'Orbitron',monospace;font-size:7px;letter-spacing:1px;color:#31405e;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.task.important-task .task-swipe-hint{color:#7b6825}
+
 </style>
 </head>
 <body>
@@ -160,7 +176,7 @@ body{position:fixed;inset:0;touch-action:manipulation}
     <div id="habitRow" onclick="toggleMainMode()">
       <div class="habit-main"><span class="habit-title">パチスロをしない</span><div class="habit-status"><span class="dot-on"></span><span class="dot-off"></span><span class="dot-off"></span><span class="counter">1/3</span><span style="font-size:13px;color:#3a5070;margin-left:auto;">›</span></div></div>
       <div class="meter charge-frame-shell charge-off" id="chargeMeter" aria-label="チャージ抽選窓">
-        <iframe id="chargeFrame" src="./charge.html?v=9" title="DOPAON CHARGE"></iframe>
+        <iframe id="chargeFrame" src="./charge.html?v=10" title="DOPAON CHARGE"></iframe>
       </div>
     </div>
     <div id="inputBar">
@@ -213,7 +229,7 @@ body{position:fixed;inset:0;touch-action:manipulation}
   </div>
 
   <div id="bonusFrameOverlay">
-    <iframe id="bonusFrame" src="./bonus.html?v=9" title="DOPAON BONUS"></iframe>
+    <iframe id="bonusFrame" src="./bonus.html?v=10" title="DOPAON BONUS"></iframe>
   </div>
 </div>
 
@@ -271,6 +287,21 @@ function dateStr(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2
 function todayStr(){return dateStr(new Date())}
 function addDaysStr(base,delta){const d=new Date(base+'T00:00:00');d.setDate(d.getDate()+delta);return dateStr(d)}
 function yesterdayStr(){return addDaysStr(todayStr(),-1)}
+function appDayStr(d=new Date()){const x=new Date(d);x.setHours(x.getHours()-5);return dateStr(x)}
+function prevAppDayStr(){return addDaysStr(appDayStr(),-1)}
+function isTaskToday(t){return !!(t&&t.todayDate===appDayStr()&&t.dueDate===appDayStr())}
+function isTaskImportant(t){return !!(t&&t.importantDate===appDayStr()&&isTaskToday(t))}
+function expireDailyFlags(target=state){
+  const day=appDayStr();
+  if(!target||!Array.isArray(target.tasks))return;
+  target.tasks.forEach(t=>{
+    if(t.todayDate&&t.todayDate!==day&&t.state!=='done'){t.todayDate='';t.importantDate='';t.swipeCycle=0;if(t.dueDate)t.dueDate='';}
+    if(t.importantDate&&t.importantDate!==day)t.importantDate='';
+    if(t.importantDate&&!t.todayDate)t.importantDate='';
+  });
+}
+function importantCount(){expireDailyFlags(state);return state.tasks.filter(t=>t.state!=='done'&&isTaskImportant(t)).length}
+
 function levelFromXp(xp){return Math.floor((Number(xp)||0)/LEVEL_STEP)}
 function titleById(id){return TITLES.find(t=>t.id===id)||null}
 function currentMode(){return state.ui&&state.ui.mode==='habits'?'habits':'tasks'}
@@ -289,6 +320,9 @@ function normalizeTask(t){
     createdAt:(t&&t.createdAt)||Date.now(),
     doneAt:(t&&t.doneAt)||null,
     dueDate:(t&&t.dueDate)||'',
+    todayDate:(t&&t.todayDate)||'',
+    importantDate:(t&&t.importantDate)||'',
+    swipeCycle:Number(t&&t.swipeCycle)||0,
     taskType:'normal'
   };
 }
@@ -310,7 +344,7 @@ function normalizeLogs(logs){
     out[hid]={};
     Object.keys(logs[hid]).forEach(day=>{
       const v=logs[hid][day];
-      if(v&&typeof v==='object')out[hid][day]={status:v.status==='failed'?'failed':'done',checkedAt:v.checkedAt||Date.now()};
+      if(v&&typeof v==='object')out[hid][day]={status:v.status==='failed'?'failed':'done',checkedAt:v.checkedAt||Date.now(),rewardDone:!!v.rewardDone};
       else if(v)out[hid][day]={status:'done',checkedAt:Date.now()};
     });
   });
@@ -335,9 +369,10 @@ function normalizeState(s){
   const byId=new Map();
   existingHabits.concat(movedHabits).forEach(h=>{if(!byId.has(h.id))byId.set(h.id,h)});
   out.tasks=normalTasks;
+  expireDailyFlags(out);
   out.habits=[...byId.values()];
   out.habitLogs=normalizeLogs(out.habitLogs);
-  out.chargeTickets=Array.isArray(out.chargeTickets)?out.chargeTickets.filter(Boolean).map(x=>({id:(x&&x.id)||newId(),type:(x&&x.type)||'task',sourceId:(x&&x.sourceId)||'',name:(x&&x.name)||'',createdAt:(x&&x.createdAt)||Date.now()})):[];
+  out.chargeTickets=Array.isArray(out.chargeTickets)?out.chargeTickets.filter(Boolean).map(x=>({id:(x&&x.id)||newId(),type:(x&&x.type)||'task',sourceId:(x&&x.sourceId)||'',name:(x&&x.name)||'',force:(x&&x.force)||null,createdAt:(x&&x.createdAt)||Date.now()})):[];
   out.ui=Object.assign({completedOpen:false,mode:'tasks'},(s&&s.ui)||{});
   if(out.ui.mode!=='habits')out.ui.mode='tasks';
   out.version=APP_VERSION;
@@ -575,17 +610,26 @@ function maybeAwardSchedulePoint(task,oldDue,newDue){
   if(newLv>oldLv){showToast('整理Lv.UP！ボーナス抽選');setTimeout(runLevelBonus,160)}
   else showToast('整理 +1PT / 次Lvまで '+(LEVEL_STEP-(state.xp%LEVEL_STEP))+'PT');
 }
-function setTaskToday(id){const t=state.tasks.find(x=>x.id===id);if(!t)return;const old=t.dueDate;t.dueDate=todayStr();maybeAwardSchedulePoint(t,old,t.dueDate);saveState();render()}
+function setTaskToday(id){const t=state.tasks.find(x=>x.id===id);if(!t||t.state==='done')return;const old=t.dueDate;const day=appDayStr();t.todayDate=day;t.dueDate=day;if(!t.swipeCycle)t.swipeCycle=1;maybeAwardSchedulePoint(t,old,t.dueDate);saveState();render()}
+function unsetTaskToday(id){const t=state.tasks.find(x=>x.id===id);if(!t||t.state==='done')return;t.todayDate='';t.importantDate='';t.swipeCycle=0;if(t.dueDate===appDayStr())t.dueDate='';saveState();render()}
+function setTaskImportant(id){const t=state.tasks.find(x=>x.id===id);if(!t||t.state==='done')return;if(!isTaskToday(t)){setTaskToday(id)}if(isTaskImportant(t))return;if(importantCount()>=2){showUndo('重要タスクは今日2つまで',null);return}t.importantDate=appDayStr();t.swipeCycle=2;saveState();render()}
+function unsetTaskImportant(id){const t=state.tasks.find(x=>x.id===id);if(!t)return;t.importantDate='';t.swipeCycle=3;saveState();render()}
+function cycleTaskPriority(id){const t=state.tasks.find(x=>x.id===id);if(!t||t.state==='done')return;const day=appDayStr();if(!isTaskToday(t)){setTaskToday(id);showUndo('今日タスクにした',null);return}
+  if(!isTaskImportant(t)&&t.swipeCycle!==3){setTaskImportant(id);showUndo('重要タスクにした',null);return}
+  if(isTaskImportant(t)){unsetTaskImportant(id);showUndo('重要を外した',null);return}
+  unsetTaskToday(id);showUndo('今日タグを外した',null);
+}
+
 function doQuickAdd(){const v=vl();if(!v)return;if(currentMode()==='habits'){state.habits.unshift(createHabit(v,{habitKind:'do'}));showToast('習慣を追加した')}else{state.tasks.unshift(createTask(v));showToast('タスクを追加した')}document.getElementById('mi').value='';resetPraiseInput();updateInputButtons('');saveState();render();spawnPraise('add')}
 function doDopa(){const v=vl();if(!v)return;showDopaonMessage(v);doQuickAdd()}
-function deleteTask(id,fromMenu=false){const t=state.tasks.find(x=>x.id===id);if(!t)return;if(!confirm('「'+t.name+'」を削除する？'))return;state.tasks=state.tasks.filter(x=>x.id!==id);saveState();render();if(fromMenu)closeTaskMenu();showToast('削除した')}
-function deleteHabit(id,fromMenu=false){const h=state.habits.find(x=>x.id===id);if(!h)return;if(!confirm('習慣「'+h.name+'」を削除する？\n記録も消える。'))return;state.habits=state.habits.filter(x=>x.id!==id);delete state.habitLogs[id];saveState();render();if(fromMenu)closeTaskMenu();showToast('習慣を削除した')}
+function deleteTask(id,fromMenu=false){const idx=state.tasks.findIndex(x=>x.id===id);if(idx<0)return;const removed=state.tasks[idx];state.tasks.splice(idx,1);saveState();render();if(fromMenu)closeTaskMenu();showUndo('タスクを削除した',()=>{state.tasks.splice(Math.min(idx,state.tasks.length),0,removed);saveState();render()})}
+function deleteHabit(id,fromMenu=false){const idx=state.habits.findIndex(x=>x.id===id);if(idx<0)return;const removed=state.habits[idx];const logs=state.habitLogs[id];state.habits.splice(idx,1);delete state.habitLogs[id];saveState();render();if(fromMenu)closeTaskMenu();showUndo('習慣を削除した',()=>{state.habits.splice(Math.min(idx,state.habits.length),0,removed);if(logs)state.habitLogs[id]=logs;saveState();render()})}
 function undoTask(id){const t=state.tasks.find(x=>x.id===id);if(!t)return;t.state='idle';t.doneAt=null;taskChargingId=null;saveState();render();spawnPraise('add',{t:'戻した！',c:'#00ffcc'});showToast('完了を取り消した。再完了しても再抽選なし')}
-function tap(id){if(chargeBusy&&!chargeCanInterrupt)return;const t=state.tasks.find(x=>x.id===id);if(!t)return;if(t.state==='idle'){t.state='charging';taskChargingId=id;saveState();render()}else if(t.state==='charging'){t.state='done';t.doneAt=Date.now();const shouldReward=!t.rewardDone;t.rewardDone=true;taskChargingId=null;if(shouldReward)issueChargeTicket(t);saveState();render();setTimeout(()=>spawnPraise('done'),60);if(shouldReward){if(chargeBusy&&chargeCanInterrupt){resetChargeFrame();chargeBusy=false;chargeCanInterrupt=false;renderChargeMini();setTimeout(()=>startNextChargeTicket(true),60)}else setTimeout(()=>startNextChargeTicket(true),160)}}}
+function tap(id){if(chargeBusy&&!chargeCanInterrupt)return;const t=state.tasks.find(x=>x.id===id);if(!t)return;if(t.state==='idle'){t.state='charging';taskChargingId=id;saveState();render()}else if(t.state==='charging'){t.state='done';t.doneAt=Date.now();const shouldReward=!t.rewardDone;const forceBonus=isTaskImportant(t);t.rewardDone=true;taskChargingId=null;if(shouldReward)issueChargeTicket(t,{force:forceBonus?'bonus':null,type:forceBonus?'important':'task'});saveState();render();setTimeout(()=>spawnPraise('done'),60);if(shouldReward){if(chargeBusy&&chargeCanInterrupt){resetChargeFrame();chargeBusy=false;chargeCanInterrupt=false;renderChargeMini();setTimeout(()=>startNextChargeTicket(true),60)}else setTimeout(()=>startNextChargeTicket(true),160)}}}
 function formatDateLabel(s){if(!s)return '';const d=new Date(s+'T00:00:00');if(Number.isNaN(d.getTime()))return s;return (d.getMonth()+1)+'/'+d.getDate()+'('+WEEKDAYS[d.getDay()]+')'}
-function taskMeta(t){const tags=[],today=todayStr();if(t.dueDate){const overdue=t.state!=='done'&&t.dueDate<today,istoday=t.dueDate===today;tags.push({cls:'due '+(overdue?'warn':''),txt:overdue?'期限超過':(istoday?'今日':formatDateLabel(t.dueDate))})}return tags}
-function sortTasks(list){const today=todayStr();return list.slice().sort((a,b)=>{const ba=a.dueDate===today?0:!a.dueDate?1:2,bb=b.dueDate===today?0:!b.dueDate?1:2;if(ba!==bb)return ba-bb;if(ba===2&&a.dueDate!==b.dueDate)return a.dueDate.localeCompare(b.dueDate);return (b.createdAt||0)-(a.createdAt||0)})}
-function render(){const a=document.getElementById('ta');a.innerHTML='';if(currentMode()==='habits')renderHabits(a);else renderTasks(a);renderBottomBar();}
+function taskMeta(t){const tags=[];if(isTaskImportant(t))tags.push({cls:'important',txt:'重要'});if(isTaskToday(t))tags.push({cls:'today',txt:'今日'});else if(t.dueDate){const today=appDayStr();const overdue=t.state!=='done'&&t.dueDate<today;tags.push({cls:'due '+(overdue?'warn':''),txt:overdue?'期限超過':formatDateLabel(t.dueDate)})}return tags}
+function sortTasks(list){return list.slice().sort((a,b)=>{const ba=isTaskImportant(a)?0:isTaskToday(a)?1:!a.dueDate?2:3,bb=isTaskImportant(b)?0:isTaskToday(b)?1:!b.dueDate?2:3;if(ba!==bb)return ba-bb;if(ba===3&&a.dueDate!==b.dueDate)return a.dueDate.localeCompare(b.dueDate);return (b.createdAt||0)-(a.createdAt||0)})}
+function render(){expireDailyFlags(state);const a=document.getElementById('ta');a.innerHTML='';if(currentMode()==='habits')renderHabits(a);else renderTasks(a);renderBottomBar();}
 function renderTasks(a){
   if(!state.tasks.length){a.innerHTML='<div class="empty"><div class="empty-icon">⚡</div><div class="empty-text">最初の一手を入れよう</div><div class="empty-sub">入力してEnter。未来の自分が少しラクになる。</div></div>';return}
   const act=sortTasks(state.tasks.filter(t=>t.state!=='done')),done=state.tasks.filter(t=>t.state==='done').sort((a,b)=>(b.doneAt||0)-(a.doneAt||0));
@@ -593,32 +637,45 @@ function renderTasks(a){
   if(done.length){const s=document.createElement('div');s.className='completed';s.innerHTML='<div class="completed-head"><span class="completed-title">COMPLETED '+done.length+'</span><button class="completed-btn" onclick="toggleCompleted()">'+(state.ui.completedOpen?'隠す':'表示')+'</button><button class="completed-btn" onclick="clearCompleted()">整理</button></div>';a.appendChild(s);if(state.ui.completedOpen)done.forEach(t=>a.appendChild(mkC(t)))}
 }
 function mkC(task){
-  const iC=task.state==='charging',iD=task.state==='done',today=todayStr();
-  const el=document.createElement('div');el.className='task'+(iC?' charging':'')+(iD?' done':'')+(task.dueDate&&task.state!=='done'&&task.dueDate<today?' overdue':'');
+  const iC=task.state==='charging',iD=task.state==='done';
+  const todayActive=isTaskToday(task),important=isTaskImportant(task);
+  const el=document.createElement('div');
+  el.className='task'+(iC?' charging':'')+(iD?' done':'')+(todayActive?' today-task':'')+(important?' important-task':'')+(task.dueDate&&task.state!=='done'&&task.dueDate<appDayStr()&&!todayActive?' overdue':'');
+  el.dataset.id=task.id;
   const main=document.createElement('div');main.className='task-main';
   const nm=document.createElement('div');nm.className='task-name';nm.textContent=task.name;main.appendChild(nm);
   const metas=taskMeta(task);if(metas.length){const meta=document.createElement('div');meta.className='task-meta';metas.forEach(m=>{const tag=document.createElement('span');tag.className='tag '+m.cls;tag.textContent=m.txt;meta.appendChild(tag)});main.appendChild(meta)}
+  if(!iD){const hint=document.createElement('div');hint.className='task-swipe-hint';hint.textContent='← 今日 / 重要　　→ 管理';main.appendChild(hint)}
   el.appendChild(main);
   const tools=document.createElement('div');tools.className='task-tools';
-  if(!iD&&task.dueDate!==today){const todayBtn=document.createElement('button');todayBtn.className='mini-btn today';todayBtn.textContent='今日';todayBtn.setAttribute('aria-label','今日やる');todayBtn.onclick=()=>setTaskToday(task.id);tools.appendChild(todayBtn)}
-  if(iD){const u=document.createElement('button');u.className='mini-btn undo';u.textContent='↩';u.setAttribute('aria-label','完了を取り消す');u.onclick=()=>undoTask(task.id);tools.appendChild(u)}
-  const edit=document.createElement('button');edit.className='mini-btn';edit.textContent='⚙';edit.setAttribute('aria-label','タスク設定を編集');edit.onclick=()=>openTaskMenu(task.id,'task');tools.appendChild(edit);
-  const del=document.createElement('button');del.className='mini-btn danger';del.textContent='×';del.setAttribute('aria-label','タスクを削除');del.onclick=()=>deleteTask(task.id);tools.appendChild(del);
+  if(!iD){
+    const todayBtn=document.createElement('button');todayBtn.className='mini-btn today'+(todayActive?' on':'');todayBtn.textContent=todayActive?'外す':'今日';todayBtn.setAttribute('aria-label',todayActive?'今日タグを外す':'今日やる');todayBtn.onclick=e=>{e.stopPropagation();todayActive?unsetTaskToday(task.id):setTaskToday(task.id)};tools.appendChild(todayBtn);
+    const imp=document.createElement('button');imp.className='mini-btn important'+(important?' on':'');imp.textContent=important?'重外':'重要';imp.setAttribute('aria-label',important?'重要タグを外す':'重要タグをつける');imp.onclick=e=>{e.stopPropagation();important?unsetTaskImportant(task.id):setTaskImportant(task.id)};tools.appendChild(imp);
+  }
+  if(iD){const u=document.createElement('button');u.className='mini-btn undo';u.textContent='↩';u.setAttribute('aria-label','完了を取り消す');u.onclick=e=>{e.stopPropagation();undoTask(task.id)};tools.appendChild(u)}
+  const edit=document.createElement('button');edit.className='mini-btn';edit.textContent='⚙';edit.setAttribute('aria-label','タスク設定を編集');edit.onclick=e=>{e.stopPropagation();openTaskMenu(task.id,'task')};tools.appendChild(edit);
+  const del=document.createElement('button');del.className='mini-btn danger';del.textContent='×';del.setAttribute('aria-label','タスクを削除');del.onclick=e=>{e.stopPropagation();deleteTask(task.id)};tools.appendChild(del);
   el.appendChild(tools);
   const w=document.createElement('div');w.className='task-action';
-  if(!iD){const b=document.createElement('button');b.className='task-btn'+(iC?' cbtn':'');b.onclick=()=>tap(task.id);b.setAttribute('aria-label',iC?'完了確定':'チャージ開始');b.innerHTML=iC?'<span style="font-family:\'Orbitron\',monospace;font-size:7px;font-weight:700;">確定</span>':'<span style="font-size:17px;">✓</span>';w.appendChild(b);if(iC){const h=document.createElement('span');h.className='push';h.textContent='PUSH';w.appendChild(h)}}
+  if(!iD){const b=document.createElement('button');b.className='task-btn'+(iC?' cbtn':'');b.onclick=e=>{e.stopPropagation();tap(task.id)};b.setAttribute('aria-label',iC?'完了確定':'チャージ開始');b.innerHTML=iC?'<span style="font-family:\'Orbitron\',monospace;font-size:7px;font-weight:700;">確定</span>':'<span style="font-size:17px;">✓</span>';w.appendChild(b);if(iC){const h=document.createElement('span');h.className='push';h.textContent='PUSH';w.appendChild(h)}}
   else{const ic=document.createElement('span');ic.className='done-mark';ic.textContent='✓';w.appendChild(ic)}
-  el.appendChild(w);return el;
+  el.appendChild(w);attachTaskSwipe(el,task);return el;
+}
+function attachTaskSwipe(el,task){
+  let sx=0,sy=0,started=false;
+  el.addEventListener('touchstart',e=>{if(!e.touches||!e.touches[0])return;const t=e.touches[0];sx=t.clientX;sy=t.clientY;started=true},{passive:true});
+  el.addEventListener('touchend',e=>{if(!started)return;started=false;const t=(e.changedTouches&&e.changedTouches[0])||null;if(!t)return;const dx=t.clientX-sx,dy=t.clientY-sy;if(Math.abs(dx)<48||Math.abs(dx)<Math.abs(dy)*1.25)return;if(dx<0){el.classList.remove('show-tools');el.classList.add('swipe-left-flash');setTimeout(()=>el.classList.remove('swipe-left-flash'),240);cycleTaskPriority(task.id)}else{document.querySelectorAll('.task.show-tools').forEach(x=>{if(x!==el)x.classList.remove('show-tools')});el.classList.toggle('show-tools')}},{passive:true});
 }
 function toggleCompleted(){state.ui.completedOpen=!state.ui.completedOpen;saveState();render()}
-function clearCompleted(){const n=state.tasks.filter(t=>t.state==='done').length;if(!n)return;if(!confirm('完了済みタスク '+n+'件を整理して削除する？\n報酬・プロフィール・無料期間は残る。'))return;state.tasks=state.tasks.filter(t=>t.state!=='done');saveState();render();showToast('完了済みを整理した')}
+function clearCompleted(){const removed=state.tasks.filter(t=>t.state==='done');const n=removed.length;if(!n)return;state.tasks=state.tasks.filter(t=>t.state!=='done');saveState();render();showUndo('完了済み '+n+'件を整理した',()=>{state.tasks=state.tasks.concat(removed);saveState();render()})}
+
 
 function habitTargetDate(h){return h.habitKind==='avoid'?yesterdayStr():todayStr()}
 function habitTargetLabel(h){return h.habitKind==='avoid'?'昨日':'今日'}
 function habitLog(h){return state.habitLogs[h.id]&&state.habitLogs[h.id][habitTargetDate(h)]}
 function isHabitDone(h){const l=habitLog(h);return l&&l.status==='done'}
 function ensureHabitLogBox(id){if(!state.habitLogs[id])state.habitLogs[id]={};return state.habitLogs[id]}
-function setHabitDone(id){const h=state.habits.find(x=>x.id===id);if(!h)return;const box=ensureHabitLogBox(id),day=habitTargetDate(h);const shouldReward=!(box[day]&&box[day].rewardDone);box[day]={status:'done',checkedAt:Date.now(),rewardDone:true};habitChargingId=null;if(shouldReward)issueChargeTicket({id:h.id,name:h.name});saveState();render();spawnPraise('done');if(shouldReward){if(chargeBusy&&chargeCanInterrupt){resetChargeFrame();chargeBusy=false;chargeCanInterrupt=false;renderChargeMini();setTimeout(()=>startNextChargeTicket(true),60)}else setTimeout(()=>startNextChargeTicket(true),160)}}
+function setHabitDone(id){const h=state.habits.find(x=>x.id===id);if(!h)return;const box=ensureHabitLogBox(id),day=habitTargetDate(h);const shouldReward=!(box[day]&&box[day].rewardDone);box[day]={status:'done',checkedAt:Date.now(),rewardDone:true};habitChargingId=null;if(shouldReward)issueChargeTicket({id:h.id,name:h.name},{force:'bonus',type:'habit'});saveState();render();spawnPraise('done');if(shouldReward){if(chargeBusy&&chargeCanInterrupt){resetChargeFrame();chargeBusy=false;chargeCanInterrupt=false;renderChargeMini();setTimeout(()=>startNextChargeTicket(true),60)}else setTimeout(()=>startNextChargeTicket(true),160)}}
 function undoHabit(id){const h=state.habits.find(x=>x.id===id);if(!h)return;if(state.habitLogs[id])delete state.habitLogs[id][habitTargetDate(h)];habitChargingId=null;saveState();render();showToast('習慣記録を戻した')}
 function tapHabit(id){if(chargeBusy&&!chargeCanInterrupt)return;const h=state.habits.find(x=>x.id===id);if(!h||isHabitDone(h))return;if(habitChargingId!==id){habitChargingId=id;render();return}setHabitDone(id)}
 function habitStats(){const total=state.habits.length,done=state.habits.filter(isHabitDone).length;return{total,done,pending:Math.max(0,total-done)}}
@@ -644,7 +701,7 @@ function mkHabitCard(h){
   else{const ic=document.createElement('span');ic.className='done-mark';ic.textContent='✓';w.appendChild(ic)}
   el.appendChild(w);return el;
 }
-function todayTaskStats(){const today=todayStr(),todayTasks=state.tasks.filter(t=>t.dueDate===today),done=todayTasks.filter(t=>t.state==='done').length;return{total:todayTasks.length,done,pending:Math.max(0,todayTasks.length-done),items:todayTasks}}
+function todayTaskStats(){const todayTasks=state.tasks.filter(t=>isTaskToday(t)),done=todayTasks.filter(t=>t.state==='done').length;return{total:todayTasks.length,done,pending:Math.max(0,todayTasks.length-done),important:state.tasks.filter(t=>isTaskImportant(t)).length,items:todayTasks}}
 function dotHtml(done,total){const max=5,filled=total?Math.round(done/total*max):0;let s='';for(let i=0;i<max;i++)s+='<span class="'+(i<filled?'dot-on':'dot-off')+'"></span>';return s}
 function renderBottomBar(){
   const title=document.querySelector('.habit-title'),status=document.querySelector('.habit-status'),row=document.getElementById('habitRow');
@@ -653,7 +710,7 @@ function renderBottomBar(){
   if(currentMode()==='habits'){
     const st=todayTaskStats(),sample=st.items.length?rnd(st.items):rnd(state.tasks.filter(t=>t.state!=='done'));
     title.textContent='日常タスクバー'+(sample?'：'+sample.name:'');
-    status.innerHTML=dotHtml(st.done,st.total)+'<span class="counter">今日 '+st.done+'/'+st.total+'</span><span style="font-size:13px;color:#3a5070;margin-left:auto;">›</span>';
+    status.innerHTML=dotHtml(st.done,st.total)+'<span class="counter">今日 '+st.done+'/'+st.total+' / 重要 '+(st.important||0)+'/2</span><span style="font-size:13px;color:#3a5070;margin-left:auto;">›</span>';
   }else{
     const st=habitStats(),sample=state.habits.length?rnd(state.habits):null;
     title.textContent=sample?sample.name:'習慣バー';
@@ -680,9 +737,9 @@ function postBonusRewardReady(payload,tries=0){
 }
 
 /* ===== v7 CHARGE BRIDGE: charge demo UI removed, original gimmick preserved ===== */
-function issueChargeTicket(task){
+function issueChargeTicket(task,opts={}){
   if(!Array.isArray(state.chargeTickets))state.chargeTickets=[];
-  state.chargeTickets.push({id:newId(),type:'task',sourceId:task.id,name:task.name,createdAt:Date.now()});
+  state.chargeTickets.push({id:newId(),type:opts.type||'task',sourceId:task.id,name:task.name,force:opts.force||null,createdAt:Date.now()});
 }
 function chargeFrame(){return document.getElementById('chargeFrame')}
 function chargeShell(){return document.getElementById('chargeMeter')}
@@ -712,7 +769,7 @@ function startNextChargeTicket(auto=false){
   saveState();
   chargeBusy=true;chargeCanInterrupt=true;
   renderChargeMini();
-  postToCharge({type:'DOPAON_CHARGE_START',ticketId:ticket.id});
+  postToCharge({type:'DOPAON_CHARGE_START',ticketId:ticket.id,force:ticket.force||null});
   return true;
 }
 async function handleChargeResult(kind){

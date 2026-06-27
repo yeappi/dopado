@@ -584,6 +584,10 @@ function emitChargeResult(kind) {
     if (!PARENT_CONTROLLED) return;
     window.parent.postMessage({ type: 'DOPAON_CHARGE_RESULT', kind }, '*');
 }
+function emitChargeState(phase) {
+    if (!PARENT_CONTROLLED) return;
+    window.parent.postMessage({ type: 'DOPAON_CHARGE_STATE', phase }, '*');
+}
 
 function scheduleEmit(kind, ms) {
     if (resultEmitTimer) clearTimeout(resultEmitTimer);
@@ -753,6 +757,7 @@ function startCharge(forceOutcome) {
     clearPekaVisuals();
 
     state = 'ROLLING';
+    emitChargeState('rolling');
     pendingOutcome = forceOutcome;
     setStatus('CHARGING...');
 
@@ -804,6 +809,7 @@ function chargeToMaxThenMiss() {
             setStatus('DROP...');
             animateMeterDown(100, 650, () => {
                 state = 'OFF';
+                emitChargeState('miss');
                 setStatus('MISS');
                 scheduleEmit('miss', 350);
             });
@@ -819,6 +825,7 @@ function chargePartialThenMiss() {
 
         animateMeterDown(peak, 520, () => {
             state = 'OFF';
+            emitChargeState('miss');
             setStatus('MISS');
             scheduleEmit('miss', 350);
         });
@@ -827,6 +834,7 @@ function chargePartialThenMiss() {
 
 function triggerPeka() {
     state = 'PEKA';
+    emitChargeState('peka');
 
     setMeterFull();
     els.logo.classList.add('peka');
@@ -837,6 +845,7 @@ function triggerPeka() {
 
 function startSpin() {
     state = 'SPINNING';
+    emitChargeState('spinning');
 
     clearResultLightTimer();
     els.logo.classList.remove('peka');
@@ -854,6 +863,7 @@ function stopSpinManual() {
     if (state !== 'SPINNING') return;
 
     state = 'STOPPED';
+    emitChargeState('stopped');
     els.reelStrip.classList.remove('spinning');
     clearResultLightTimer();
 
@@ -943,6 +953,7 @@ function resetToOff() {
     setStatus('TAP TO START');
 
     state = 'OFF';
+    emitChargeState('off');
     pendingOutcome = null;
 }
 

@@ -650,6 +650,15 @@ function setWhiteResultMeter() {
     els.meter.style.background = meterBg('#b8793a', 100, 'rgba(184,121,58,0.15)');
 }
 
+function setBlueResultMeter() {
+    els.meter.classList.remove('bonus-flash', 'full', 'max-hold');
+    els.meter.style.background = meterBg('#3aa0ff', 100, 'rgba(58,160,255,0.15)');
+}
+
+function setTiaLabels(text) {
+    document.querySelectorAll('.tia-panel span').forEach(el => { el.textContent = text; });
+}
+
 function clearPekaVisuals() {
     clearResultLightTimer();
     if (resultEmitTimer) {
@@ -664,6 +673,7 @@ function resetReel() {
     els.reelContainer.style.display = 'none';
     els.reelStrip.classList.remove('spinning');
     els.reelStrip.style.transform = '';
+    setTiaLabels('Tia白');
 }
 
 function animateMeterTo(targetPct, duration, onDone) {
@@ -762,13 +772,13 @@ function startCharge(forceOutcome) {
 }
 
 function decideChargePattern(forceOutcome) {
-    if (forceOutcome === 'bonus' || forceOutcome === 'white') return 'hit';
-    if (forceOutcome === 'miss') return 'fakeMiss';
+    if (forceOutcome === 'bonus' || forceOutcome === 'white' || forceOutcome === 'blue') return 'hit';
+    if (forceOutcome === 'miss') return Math.random() < 0.10 ? 'fakeMiss' : 'normalMiss';
 
+    // 通常時: 1/3でペカ。ハズレ時のフェイク満タンはハズレ10回に1回くらい。
     const r = Math.random();
-    if (r < 0.20) return 'hit';
-    if (r < 0.55) return 'fakeMiss';
-    return 'normalMiss';
+    if (r < 1 / 3) return 'hit';
+    return Math.random() < 0.10 ? 'fakeMiss' : 'normalMiss';
 }
 
 function chargeToMaxThenPeka() {
@@ -852,6 +862,8 @@ function stopSpinManual() {
 
     if (outcome === 'bonus') {
         stopAsBonus();
+    } else if (outcome === 'blue') {
+        stopAsBlue();
     } else {
         stopAsWhite();
     }
@@ -861,7 +873,11 @@ function stopSpinManual() {
 
 function resolveOutcome() {
     if (pendingOutcome && pendingOutcome !== 'miss') return pendingOutcome;
-    return Math.random() < 1 / 3 ? 'bonus' : 'white';
+    // ペカ後: 1/4 BONUS, 2/4 Tia白, 1/4 Tia青
+    const r = Math.random();
+    if (r < 0.25) return 'bonus';
+    if (r < 0.75) return 'white';
+    return 'blue';
 }
 
 function stopAsBonus() {
@@ -896,6 +912,26 @@ function stopAsWhite() {
     }, RESULT_LIGHT_DELAY);
 
     scheduleEmit('white', 900);
+}
+
+
+function stopAsBlue() {
+    const idx = Math.floor(Math.random() * 3) + 1;
+
+    setTiaLabels('Tia青');
+    els.reelStrip.style.transform = `translateY(-${idx * SYMBOL_HEIGHT}px)`;
+    setStatus('Tia青');
+
+    if (navigator.vibrate) navigator.vibrate([40, 30, 80]);
+
+    count += 2;
+
+    resultLightTimer = setTimeout(() => {
+        if (state !== 'STOPPED') return;
+        setBlueResultMeter();
+    }, RESULT_LIGHT_DELAY);
+
+    scheduleEmit('blue', 900);
 }
 
 function resetToOff() {

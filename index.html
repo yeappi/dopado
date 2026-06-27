@@ -416,7 +416,7 @@ function makeDopaonMessage(taskName){const isAfter=Math.random()<0.8,item=isAfte
 let currentDopaonEl=null,currentDopaonAnim=null,undoToastEl=null,undoTimer=null;
 function showDopaonMessage(taskName){if(currentDopaonAnim){try{currentDopaonAnim.cancel()}catch(e){}}if(currentDopaonEl&&currentDopaonEl.parentNode)currentDopaonEl.remove();const msg=makeDopaonMessage(taskName),el=document.createElement('div');currentDopaonEl=el;el.className='dream';el.innerHTML='<span class="dream-time">'+escapeHtml(msg.time)+'</span><span class="dream-quote">「'+escapeHtml(msg.text)+'」</span>';document.getElementById('sf8').appendChild(el);const anim=el.animate([{opacity:0,transform:'translateY(6px) scale(.98)'},{opacity:1,transform:'translateY(0) scale(1)',offset:.07},{opacity:1,offset:.92},{opacity:0,transform:'translateY(-8px) scale(.98)'}],{duration:14000,fill:'forwards',easing:'cubic-bezier(.18,.8,.22,1)'});currentDopaonAnim=anim;anim.onfinish=()=>{if(currentDopaonEl===el)currentDopaonEl=null;el.remove()}}
 
-let isComposing=false,lastCountedLen=0,compBaseLen=0,livePraise=0,praiseQueue=0,praiseDrainTimer=null,busyLanes=new Set(),activePraise=new Set(),baseViewportHeight=0;
+let isComposing=false,lastCountedLen=0,compBaseLen=0,lastDirectPraiseAt=0,lastPraiseOpAt=0,lastCompData='',livePraise=0,praiseQueue=0,praiseDrainTimer=null,busyLanes=new Set(),activePraise=new Set(),baseViewportHeight=0;
 const NS='http://www.w3.org/2000/svg',FF="'Reggae One', system-ui, sans-serif",PRAISE_LIFE=2300,MAX_PRAISE=8,PRAISE_COOLDOWN=24,MAX_PRAISE_QUEUE=40,P_MARGIN=10;
 function viewportHeight(){return window.visualViewport?window.visualViewport.height:window.innerHeight}
 function viewportTop(){return window.visualViewport?window.visualViewport.offsetTop:0}
@@ -439,14 +439,40 @@ function releasePraise(svg,laneIndex){if(!activePraise.has(svg))return;activePra
 function enqueuePraise(amount){if(amount<=0)return;praiseQueue=clamp(praiseQueue+amount,0,MAX_PRAISE_QUEUE);drainPraiseQueue()}
 function drainPraiseQueue(){if(praiseDrainTimer)return;const run=()=>{praiseDrainTimer=null;if(praiseQueue<=0)return;if(livePraise>=MAX_PRAISE){praiseDrainTimer=setTimeout(run,140);return}praiseQueue--;spawnPraise('input');if(praiseQueue>0)praiseDrainTimer=setTimeout(run,PRAISE_COOLDOWN)};run()}
 function clearPraiseQueue(){praiseQueue=0;if(praiseDrainTimer){clearTimeout(praiseDrainTimer);praiseDrainTimer=null}}
-function resetPraiseInput(){lastCountedLen=charLen(rawValue());compBaseLen=lastCountedLen;clearPraiseQueue()}
-function praiseDelta(fromLen,toLen){if(toLen>fromLen)enqueuePraise(toLen-fromLen)}
-function observeTypingLength(len){if(len>lastCountedLen)enqueuePraise(len-lastCountedLen);lastCountedLen=len}
-function onBeforeInput(e){syncViewport()}
-function onCompStart(){syncViewport();isComposing=true;compBaseLen=charLen(rawValue());lastCountedLen=compBaseLen}
-function onCompUpdate(e){syncViewport();const comp=e&&typeof e.data==='string'?e.data:'';const len=compBaseLen+charLen(comp);praiseDelta(lastCountedLen,len);lastCountedLen=len;updateInputButtons(rawValue().trim()||comp)}
-function onCompEnd(e){syncViewport();isComposing=false;setTimeout(()=>{observeTypingLength(charLen(rawValue()));updateInputButtons(vl())},0)}
-function onIn(e){syncViewport();const raw=rawValue();updateInputButtons(raw.trim());const len=charLen(raw);if(isComposing||(e&&e.isComposing)){return}observeTypingLength(len);if(!raw)resetPraiseInput()}
+function resetPraiseInput(){lastCountedLen=charLen(rawValue());compBaseLen=lastCountedLen;lastCompData='';clearPraiseQueue()}
+function praiseOne(){
+  const now=performance.now();
+  if(now-lastPraiseOpAt<28)return;
+  lastPraiseOpAt=now;
+  lastDirectPraiseAt=now;
+  enqueuePraise(1);
+}
+function onBeforeInput(e){
+  syncViewport();
+  if(!e)return;
+  const type=e.inputType||'';
+  if(type.indexOf('delete')===0)return;
+  if(type.indexOf('insert')===0)praiseOne();
+}
+function onCompStart(){syncViewport();isComposing=true;compBaseLen=charLen(rawValue());lastCountedLen=compBaseLen;lastCompData=''}
+function onCompUpdate(e){
+  syncViewport();
+  const comp=e&&typeof e.data==='string'?e.data:'';
+  if(comp&&comp!==lastCompData){praiseOne();lastCompData=comp}
+  updateInputButtons(rawValue().trim()||comp)
+}
+function onCompEnd(e){syncViewport();isComposing=false;lastCompData='';setTimeout(()=>{lastCountedLen=charLen(rawValue());updateInputButtons(vl())},0)}
+function onIn(e){
+  syncViewport();
+  const raw=rawValue();
+  updateInputButtons(raw.trim());
+  if(isComposing||(e&&e.isComposing)){lastCountedLen=charLen(raw);return}
+  const type=e&&e.inputType?e.inputType:'';
+  if(type.indexOf('delete')===0){lastCountedLen=charLen(raw);if(!raw)resetPraiseInput();return}
+  if(type.indexOf('insert')===0)praiseOne();
+  lastCountedLen=charLen(raw);
+  if(!raw)resetPraiseInput();
+}
 function onInputFocus(){setTimeout(()=>{initBaseViewport(false);syncViewport();resetPraiseInput()},40);setTimeout(syncViewport,120);setTimeout(syncViewport,260);setTimeout(syncViewport,520)}
 function onInputBlur(){setTimeout(()=>{initBaseViewport(false);syncViewport()},120)}
 function onKey(e){if(e.key==='Enter'&&!isComposing){e.preventDefault();doDopa()}}

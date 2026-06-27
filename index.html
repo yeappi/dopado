@@ -55,6 +55,8 @@ body{position:fixed;inset:0;touch-action:manipulation}
 .id-lv{font-family:'Orbitron',monospace;font-size:8px;letter-spacing:1px;color:#4a6080;display:flex;align-items:center;gap:5px}
 .id-lv b{color:#ffd24a;font-weight:700}.id-lv .free{color:#00ffcc}
 .id-avatar{width:34px;height:34px;border-radius:50%;border:1.5px solid #2a2a50;background:#0f0f20;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.header-level-line{position:absolute;left:0;right:0;bottom:-1px;height:2px;background:#111124;overflow:hidden;z-index:2}
+.header-level-fill{height:100%;width:0%;background:#ffd24a;box-shadow:0 0 8px rgba(255,210,74,.45);transition:width .25s ease}
 #ta{position:absolute;top:calc(var(--safe-top) + var(--header-h));bottom:calc(var(--dock-h) + var(--safe-bottom));left:0;right:0;overflow-y:auto;padding:12px 14px;-webkit-overflow-scrolling:touch;z-index:5}
 #pc{position:absolute;top:calc(var(--safe-top) + var(--header-h));bottom:0;left:0;right:0;pointer-events:none;overflow:hidden;z-index:40;transform:translateZ(0)}
 #bottomDock{position:absolute;left:0;right:0;bottom:0;height:calc(var(--dock-h) + var(--safe-bottom));z-index:35;transform:translate3d(0,calc(var(--kb) * -1),0);transition:transform .18s ease-out;will-change:transform;background:#07070f}
@@ -130,13 +132,14 @@ body{position:fixed;inset:0;touch-action:manipulation}
       <div class="id-text"><div class="id-name" id="hdName"></div><div class="id-lv"><span>Lv.<b id="hdLv">0</b></span><span class="free" id="hdFree">+0日</span></div></div>
       <div class="id-avatar">👤</div>
     </div>
+    <div class="header-level-line"><div class="header-level-fill" id="hdLevelFill"></div></div>
   </div>
   <div id="ta"></div>
   <div id="bottomDock">
     <div id="habitRow" onclick="toggleMainMode()">
       <div class="habit-main"><span class="habit-title">パチスロをしない</span><div class="habit-status"><span class="dot-on"></span><span class="dot-off"></span><span class="dot-off"></span><span class="counter">1/3</span><span style="font-size:13px;color:#3a5070;margin-left:auto;">›</span></div></div>
       <div class="meter charge-frame-shell charge-off" id="chargeMeter" aria-label="チャージ抽選窓">
-        <iframe id="chargeFrame" src="./charge.html?v=7" title="DOPAON CHARGE"></iframe>
+        <iframe id="chargeFrame" src="./charge.html?v=8" title="DOPAON CHARGE"></iframe>
       </div>
     </div>
     <div id="inputBar">
@@ -189,7 +192,7 @@ body{position:fixed;inset:0;touch-action:manipulation}
   </div>
 
   <div id="bonusFrameOverlay">
-    <iframe id="bonusFrame" src="./bonus.html?v=7" title="DOPAON BONUS"></iframe>
+    <iframe id="bonusFrame" src="./bonus.html?v=8" title="DOPAON BONUS"></iframe>
   </div>
 </div>
 
@@ -214,8 +217,8 @@ const ILLUST_TIERS=['blue','green','purple','red','gold'];
 const WEEKDAYS=['日','月','火','水','木','金','土'];
 
 const PR=['えらい！','最高！！','天才！！','すごい！！','神！！！','無敵！！','できる！！','やばい！！','完璧！！','キュン！','いいぞ！','前進！！','ナイス！','強い！！','優勝！！','勝ち！！','尊い！！','えっら！','爆進！！','覚醒！！','成長！！','進んだ！','偉業！！','革命！！','拍手！！','いける！','良すぎ！','えぐい！','光ってる！','優秀！！','大正解！','つよつよ！','神速！！','よすぎ！','激アツ！','前のめり！','できてる！','積んでる！','勝者！！','天才か！','センス！','伸びてる！','すばら！','本物！！','継続！！','奇跡！！','気合い！','えらすぎ！','助かる！','完璧か！','誇れ！！','伝説！！','神ムーブ！','大勝利！','才気！！','着火！！','集中！！','丁寧！！','偉すぎる！','尊敬！！','動いた！','進化！！','熱い！！','いい手！','勝機！！','突破！！','神入力！','冴えてる！','流れ来た！','やるね！','美しい！','一歩！！','豪運！！','希望！！','未来！！','燃えてる！','手が早い！','よくやった！','キレてる！','王道！！','優勝です！','もう強い！','今日も勝ち！','積み上げ！','その調子！','まぶしい！','すごすぎ！','大丈夫！','才能！！','行動力！','えら王！','勝ち筋！','抜群！！','いい波！','圧倒！！','冴えた！'].map((t,i)=>({t,c:['#00ffcc','#39ff14','#ffd700','#ff3366','#66ccff','#ff8c00','#00ff99'][i%7]}));
-const ADD_PR=['よし！！','起動！！','いいね！！','登録！！','仕込んだ！','やる気！！','開始！！','任務発生！','勝負！！'].map((t,i)=>({t,c:['#00ffcc','#39ff14','#ffd700','#66ccff','#ff8c00','#00ff99','#ffd700','#00ffcc','#ff3366'][i]}));
-const DONE_PR=['完了！！','確定！！','神！！！','撃破！！','制覇！！','勝利！！','任務完了！','えらすぎ！','大成功！'].map((t,i)=>({t,c:['#ffd700','#ff3366','#ffd700','#39ff14','#00ffcc','#ff8c00','#66ccff','#ffd700','#00ff99'][i]}));
+const ADD_PR=['よし！！','起動！！','いいね！！','登録！！','仕込んだ！','やる気！！','開始！！','任務発生！','勝負！！','今日やる！','未来予約！','勝ち筋！','着手！！','置いた！','決まった！','先制！！','動線ヨシ！','えら予約！','積んだ！','一手！！','準備完了！','逃げ道封鎖！','ナイス整理！','今日の弾！'].map((t,i)=>({t,c:['#00ffcc','#39ff14','#ffd700','#66ccff','#ff8c00','#00ff99','#ffd700','#00ffcc','#ff3366'][i%9]}));
+const DONE_PR=['完了！！','確定！！','神！！！','撃破！！','制覇！！','勝利！！','任務完了！','えらすぎ！','大成功！','片付いた！','強すぎる！','やり切った！','閉店ガラガラ！','勝ち確！！','脳が喜ぶ！','未来が拍手！','自分えらい！','神処理！','一丁上がり！','突破！！','ナイス完了！','これは偉業！','今日の勝ち！','完了の民！'].map((t,i)=>({t,c:['#ffd700','#ff3366','#ffd700','#39ff14','#00ffcc','#ff8c00','#66ccff','#ffd700','#00ff99'][i%9]}));
 const DOPAON_AFTER=[['3分後','終わらせた自分、ちょっと好きになっていた。'],['5分後','終わったおかげで、頭の中が少し静かになっていた。'],['10分後','やる前より、自分を信用できるようになっていた。'],['15分後','逃げなかったことが、静かに自信へ変わっていた。'],['30分後','やっておいてよかったと、本気で思っていた。'],['1時間後','小さい勝ちが、ちゃんと自信になっていた。'],['2時間後','自分との約束を一つ守れて、少し強くなっていた。'],['夜','今日の自分、意外と悪くなかったと思えていた。'],['明日の朝','昨日の自分が片付けてくれていて、かなり助かっていた。'],['未来','あの小さい完了が、地味に人生の流れを変えていた。'],['5分後','自分を責める理由が、一つ減っていた。'],['10分後','完了した事実が、静かに背中を押していた。'],['30分後','終わらせたから、次の自分がラクをしていた。'],['夜','ちゃんとやった自分を、寝る前に少し誇れていた。'],['明日','昨日の一歩が、今日の自分を助けていた。']].map(x=>({time:x[0],text:x[1]}));
 const DOPAON_QUOTES=['やる気を待つより、手を動かした方が早い。','一歩は小さくていい。止まらない方が強い。','完璧じゃなくていい。完了が強い。','未来の自分は、今の小さい一手に救われる。','自信は先に来ない。終わらせた後についてくる。','小さい完了をなめるな。あれが人生を押す。','気分が乗らない日にも、進めた一歩は本物だ。'].map(t=>({time:'今',text:t}));
 
@@ -343,15 +346,10 @@ function saveNow(){
 function saveState(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{saveTimer=null;saveNow()},90)}
 window.addEventListener('pagehide',saveNow);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')saveNow()});
-function showToast(msg){
-  const old=document.querySelector('.toast');if(old)old.remove();
-  const el=document.createElement('div');el.className='toast';el.textContent=msg;
-  document.getElementById('sf8').appendChild(el);
-  el.animate([{opacity:0,transform:'translateX(-50%) translateY(6px)'},{opacity:1,transform:'translateX(-50%) translateY(0)',offset:.15},{opacity:1,offset:.82},{opacity:0,transform:'translateX(-50%) translateY(-6px)'}],{duration:2400,fill:'forwards'}).onfinish=()=>el.remove();
-}
+function showToast(msg){/* 操作ログは出さない */}
 
 function rollTier(){const r=Math.random();if(r<0.47)return null;if(r<0.80)return 'white';return rollBonusTier()}
-function rollBonusTier(){const b=Math.random();if(b<0.15)return 'white';if(b<0.45)return 'blue';if(b<0.70)return 'green';if(b<0.88)return 'purple';if(b<0.97)return 'red';return 'gold'}
+function rollBonusTier(){const b=Math.random();if(b<0.10)return 'white';if(b<0.29)return 'blue';if(b<0.61)return 'green';if(b<0.84)return 'purple';if(b<0.96)return 'red';return 'gold'}
 function grantReward(tier){
   const T=TIERS[tier];const canIllust=tier!=='white'&&!state.ownedIllusts.includes(tier);const pool=['title','days'];if(canIllust)pool.push('illust');const type=rnd(pool);
   if(type==='illust'){state.ownedIllusts.push(tier);return{kind:'illust',tier}}
@@ -381,6 +379,7 @@ function renderHeader(){
   else nameEl.innerHTML=(t?'<span class="ttl" style="color:'+TIERS[t.tier].color+'">'+escapeHtml(t.text)+'</span>':'')+'<span> '+escapeHtml(nm)+'</span>';
   document.getElementById('hdLv').textContent=levelFromXp(state.xp);
   document.getElementById('hdFree').textContent='+'+state.freeDays+'日';
+  const hf=document.getElementById('hdLevelFill');if(hf)hf.style.width=Math.round((state.xp%LEVEL_STEP)/LEVEL_STEP*100)+'%';
 }
 function renderNamePreview(){const el=document.getElementById('namePreview'),nm=state.profile.name,t=titleById(state.profile.titleId);if(!nm){el.innerHTML='<span class="pv-empty">名前を入力すると<br>ここに表示される</span>';return}el.innerHTML=(t?'<span class="pv-ttl" style="color:'+TIERS[t.tier].color+'">'+escapeHtml(t.text)+'</span> ':'')+'<span class="pv-nm">'+escapeHtml(nm)+'</span>'}
 function renderProfileStats(){const lv=levelFromXp(state.xp),inLv=state.xp%LEVEL_STEP,pct=Math.round(inLv/LEVEL_STEP*100);document.getElementById('pfLv').textContent=lv;document.getElementById('pfFree').textContent='+'+state.freeDays+'日';document.getElementById('pfFreeNote').textContent='現在無料期間 +'+state.freeDays+'日 追加！';document.getElementById('pfLevelFill').style.width=pct+'%';document.getElementById('pfLevelNote').textContent='NEXT +'+(LEVEL_STEP-inLv)+' PT / TOTAL '+state.xp+' PT'}
@@ -392,10 +391,11 @@ function openProfile(){document.getElementById('mi').blur();document.getElementB
 function closeProfile(){document.getElementById('profileOverlay').classList.remove('show')}
 
 function makeDopaonMessage(taskName){const isAfter=Math.random()<0.8,item=isAfter?rnd(DOPAON_AFTER):rnd(DOPAON_QUOTES),clean=taskName?taskName.trim():'そのタスク';let text=item.text;if(taskName&&isAfter&&Math.random()<0.35)text='「'+clean+'」を終わらせた後、'+text;return{time:item.time,text}}
-function showDopaonMessage(taskName){const msg=makeDopaonMessage(taskName),el=document.createElement('div');el.className='dream';el.innerHTML='<span class="dream-time">'+escapeHtml(msg.time)+'</span><span class="dream-quote">「'+escapeHtml(msg.text)+'」</span>';document.getElementById('sf8').appendChild(el);el.animate([{opacity:0,transform:'translateY(6px) scale(.98)'},{opacity:1,transform:'translateY(0) scale(1)',offset:.1},{opacity:1,offset:.82},{opacity:0,transform:'translateY(-8px) scale(.98)'}],{duration:3600,fill:'forwards',easing:'cubic-bezier(.18,.8,.22,1)'}).onfinish=()=>el.remove()}
+let currentDopaonEl=null,currentDopaonAnim=null;
+function showDopaonMessage(taskName){if(currentDopaonAnim){try{currentDopaonAnim.cancel()}catch(e){}}if(currentDopaonEl&&currentDopaonEl.parentNode)currentDopaonEl.remove();const msg=makeDopaonMessage(taskName),el=document.createElement('div');currentDopaonEl=el;el.className='dream';el.innerHTML='<span class="dream-time">'+escapeHtml(msg.time)+'</span><span class="dream-quote">「'+escapeHtml(msg.text)+'」</span>';document.getElementById('sf8').appendChild(el);const anim=el.animate([{opacity:0,transform:'translateY(6px) scale(.98)'},{opacity:1,transform:'translateY(0) scale(1)',offset:.07},{opacity:1,offset:.92},{opacity:0,transform:'translateY(-8px) scale(.98)'}],{duration:14000,fill:'forwards',easing:'cubic-bezier(.18,.8,.22,1)'});currentDopaonAnim=anim;anim.onfinish=()=>{if(currentDopaonEl===el)currentDopaonEl=null;el.remove()}}
 
 let isComposing=false,lastCountedLen=0,compBaseLen=0,livePraise=0,praiseQueue=0,praiseDrainTimer=null,busyLanes=new Set(),activePraise=new Set(),baseViewportHeight=0;
-const NS='http://www.w3.org/2000/svg',FF="'Reggae One', system-ui, sans-serif",PRAISE_LIFE=2000,MAX_PRAISE=4,PRAISE_COOLDOWN=95,MAX_PRAISE_QUEUE=10,P_MARGIN=10;
+const NS='http://www.w3.org/2000/svg',FF="'Reggae One', system-ui, sans-serif",PRAISE_LIFE=2300,MAX_PRAISE=8,PRAISE_COOLDOWN=24,MAX_PRAISE_QUEUE=40,P_MARGIN=10;
 function viewportHeight(){return window.visualViewport?window.visualViewport.height:window.innerHeight}
 function viewportTop(){return window.visualViewport?window.visualViewport.offsetTop:0}
 function initBaseViewport(force){const h=Math.max(window.innerHeight,viewportHeight());if(force||!baseViewportHeight){baseViewportHeight=h;return}const inputFocused=document.activeElement===document.getElementById('mi');if(!inputFocused&&h>baseViewportHeight)baseViewportHeight=h}
@@ -419,14 +419,14 @@ function drainPraiseQueue(){if(praiseDrainTimer)return;const run=()=>{praiseDrai
 function clearPraiseQueue(){praiseQueue=0;if(praiseDrainTimer){clearTimeout(praiseDrainTimer);praiseDrainTimer=null}}
 function resetPraiseInput(){lastCountedLen=charLen(rawValue());compBaseLen=lastCountedLen;clearPraiseQueue()}
 function observeTypingLength(len){if(len<lastCountedLen){if(!isComposing)lastCountedLen=len;return}if(len>lastCountedLen){enqueuePraise(len-lastCountedLen);lastCountedLen=len}}
-function onBeforeInput(e){syncViewport()}
+function onBeforeInput(e){syncViewport();if(!e||isComposing||e.isComposing)return;if(e.inputType&&e.inputType.indexOf('insert')===0&&e.data){enqueuePraise(charLen(e.data));lastCountedLen=charLen(rawValue())+charLen(e.data)}}
 function onCompStart(){syncViewport();isComposing=true;compBaseLen=charLen(rawValue());lastCountedLen=compBaseLen}
 function onCompUpdate(e){syncViewport();const comp=e&&typeof e.data==='string'?e.data:'';observeTypingLength(compBaseLen+charLen(comp));updateInputButtons(rawValue().trim()||comp)}
 function onCompEnd(e){syncViewport();isComposing=false;setTimeout(()=>{observeTypingLength(charLen(rawValue()));updateInputButtons(vl())},0)}
 function onIn(e){syncViewport();const raw=rawValue();updateInputButtons(raw.trim());if(!raw&&!isComposing){resetPraiseInput();return}if(isComposing||(e&&e.isComposing))return;observeTypingLength(charLen(raw))}
 function onInputFocus(){setTimeout(()=>{initBaseViewport(false);syncViewport();resetPraiseInput()},40);setTimeout(syncViewport,120);setTimeout(syncViewport,260);setTimeout(syncViewport,520)}
 function onInputBlur(){setTimeout(()=>{initBaseViewport(false);syncViewport()},120)}
-function onKey(e){if(e.key==='Enter'&&!isComposing){e.preventDefault();doQuickAdd()}}
+function onKey(e){if(e.key==='Enter'&&!isComposing){e.preventDefault();doDopa()}}
 function updateInputButtons(v){const db=document.getElementById('db'),ib=document.getElementById('ib');db.style.opacity=v?'1':'.4';ib.classList.toggle('ready',Boolean(v))}
 
 function readTaskForm(){return{name:document.getElementById('taskNameInput').value.trim(),dueDate:document.getElementById('taskDueInput').value,taskType:document.getElementById('taskTypeInput').value,habitKind:document.getElementById('habitKindInput').value,repeatType:'daily',intervalDays:1,weekdays:[]}}
@@ -549,7 +549,7 @@ function habitTargetLabel(h){return h.habitKind==='avoid'?'昨日':'今日'}
 function habitLog(h){return state.habitLogs[h.id]&&state.habitLogs[h.id][habitTargetDate(h)]}
 function isHabitDone(h){const l=habitLog(h);return l&&l.status==='done'}
 function ensureHabitLogBox(id){if(!state.habitLogs[id])state.habitLogs[id]={};return state.habitLogs[id]}
-function setHabitDone(id){const h=state.habits.find(x=>x.id===id);if(!h)return;ensureHabitLogBox(id)[habitTargetDate(h)]={status:'done',checkedAt:Date.now()};habitChargingId=null;saveState();render();spawnPraise('done');showToast((h.habitKind==='avoid'?'やらなかった記録':'やった記録')+'をつけた')}
+function setHabitDone(id){const h=state.habits.find(x=>x.id===id);if(!h)return;const box=ensureHabitLogBox(id),day=habitTargetDate(h);const shouldReward=!(box[day]&&box[day].rewardDone);box[day]={status:'done',checkedAt:Date.now(),rewardDone:true};habitChargingId=null;if(shouldReward)issueChargeTicket({id:h.id,name:h.name});saveState();render();spawnPraise('done');if(shouldReward)setTimeout(()=>startNextChargeTicket(true),160)}
 function undoHabit(id){const h=state.habits.find(x=>x.id===id);if(!h)return;if(state.habitLogs[id])delete state.habitLogs[id][habitTargetDate(h)];habitChargingId=null;saveState();render();showToast('習慣記録を戻した')}
 function tapHabit(id){const h=state.habits.find(x=>x.id===id);if(!h||isHabitDone(h))return;if(habitChargingId!==id){habitChargingId=id;render();return}setHabitDone(id)}
 function habitStats(){const total=state.habits.length,done=state.habits.filter(isHabitDone).length;return{total,done,pending:Math.max(0,total-done)}}
@@ -649,8 +649,8 @@ function startNextChargeTicket(auto=false){
 async function handleChargeResult(kind){
   try{
     if(kind==='miss')return;
-    if(kind==='white'){
-      const reward=grantReward('white');saveState();renderHeader();showReward(reward,'Tia白');return;
+    if(kind==='white'||kind==='blue'){
+      const reward=grantReward(kind);saveState();renderHeader();showReward(reward,kind==='blue'?'Tia青':'Tia白');return;
     }
     if(kind==='bonus'){
       await showGoBonusGate();
@@ -684,7 +684,7 @@ function playBonusFrame(){
 window.addEventListener('message',e=>{
   const d=e.data||{};
   if(d.type==='DOPAON_CHARGE_RESULT'){
-    const kind=['miss','white','bonus'].includes(d.kind)?d.kind:'miss';
+    const kind=['miss','white','blue','bonus'].includes(d.kind)?d.kind:'miss';
     handleChargeResult(kind);
     return;
   }

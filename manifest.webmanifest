@@ -1,13 +1,23 @@
 {
   "name": "DOPAON TASK SYSTEM",
   "short_name": "DOPAON",
-  "start_url": "./?v=3",
+  "start_url": "./?v=12c",
   "scope": "./",
   "display": "standalone",
   "background_color": "#07070f",
   "theme_color": "#07070f",
   "icons": [
-    { "src": "./icon.png?v=3", "sizes": "180x180", "type": "image/png", "purpose": "any maskable" },
-    { "src": "./icon.png?v=3", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    {
+      "src": "./icon.png?v=12c",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon.png?v=12c",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ]
 }

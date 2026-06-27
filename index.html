@@ -7,12 +7,12 @@
 <meta name="theme-color" content="#07070f" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-title" content="DOPAON" />
+<meta name="apple-mobile-web-app-title" content="DOPADO" />
 <meta name="mobile-web-app-capable" content="yes" />
-<link rel="manifest" href="./manifest.webmanifest?v=6" />
-<link rel="apple-touch-icon" href="./icon.png?v=6" />
+<link rel="manifest" href="./manifest.webmanifest?v=12c" />
+<link rel="apple-touch-icon" href="./icon.png?v=12c" />
 
-<title>DOPAON TASK SYSTEM</title>
+<title>DOPADO TASK SYSTEM</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Reggae+One&family=Orbitron:wght@700;900&display=swap');
@@ -24,9 +24,10 @@
   --safe-top:env(safe-area-inset-top,0px);
   --safe-bottom:env(safe-area-inset-bottom,0px);
   --header-h:60px;
-  --dock-h:158px;
+  --dock-h:58px;
   --input-h:58px;
   --habit-h:100px;
+  --status-h:72px;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{
@@ -57,8 +58,8 @@ body{position:fixed;inset:0;touch-action:manipulation}
 .id-avatar{width:34px;height:34px;border-radius:50%;border:1.5px solid #2a2a50;background:#0f0f20;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
 .header-level-line{position:absolute;left:0;right:0;bottom:-1px;height:2px;background:#111124;overflow:hidden;z-index:2}
 .header-level-fill{height:100%;width:0%;background:#ffd24a;box-shadow:0 0 8px rgba(255,210,74,.45);transition:width .25s ease}
-#ta{position:absolute;top:calc(var(--safe-top) + var(--header-h));bottom:calc(var(--dock-h) + var(--safe-bottom));left:0;right:0;overflow-y:auto;padding:12px 14px;-webkit-overflow-scrolling:touch;z-index:5}
-#pc{position:absolute;top:calc(var(--safe-top) + var(--header-h));bottom:0;left:0;right:0;pointer-events:none;overflow:hidden;z-index:40;transform:translateZ(0)}
+#ta{position:absolute;top:calc(var(--safe-top) + var(--header-h) + var(--status-h));bottom:calc(var(--dock-h) + var(--safe-bottom));left:0;right:0;overflow-y:auto;padding:12px 14px;-webkit-overflow-scrolling:touch;z-index:5}
+#pc{position:absolute;top:calc(var(--safe-top) + var(--header-h) + var(--status-h));bottom:0;left:0;right:0;pointer-events:none;overflow:hidden;z-index:40;transform:translateZ(0)}
 #bottomDock{position:absolute;left:0;right:0;bottom:0;height:calc(var(--dock-h) + var(--safe-bottom));z-index:35;transform:translate3d(0,calc(var(--kb) * -1),0);transition:transform .18s ease-out;will-change:transform;background:#07070f}
 #habitRow{position:absolute;top:0;left:0;right:0;height:var(--habit-h);border-top:1px solid #1e1e38;display:flex;background:#07070f}
 #inputBar{position:absolute;left:0;right:0;bottom:0;height:calc(var(--input-h) + var(--safe-bottom));padding:8px 12px calc(8px + var(--safe-bottom));border-top:1px solid #1e1e38;background:#07070f;display:flex;align-items:center;gap:10px}
@@ -124,9 +125,9 @@ body{position:fixed;inset:0;touch-action:manipulation}
 /* ===== v9 stability + polish ===== */
 .task{padding:10px 10px 10px 12px;border-radius:12px;background:linear-gradient(180deg,#101022,#0b0b18);}
 .task:not(.charging):not(.done){box-shadow:inset 0 1px 0 rgba(255,255,255,.03)}
-.task.done{opacity:.62;background:#090914;border-color:#15152d}
+.task.done{opacity:.45;background:#080812;border-color:#13132a}
 .task.done .task-name{text-decoration:none;color:#60708f}
-.task.done::after{content:'DONE';position:absolute;right:56px;top:8px;font-family:'Orbitron',monospace;font-size:7px;letter-spacing:1.5px;color:#39ff14;opacity:.5}
+
 .task-meta{margin-top:5px}.tag{opacity:.82}.tag.reward{display:none}
 .dream{bottom:calc(var(--dock-h) + var(--safe-bottom) + 6px);background:linear-gradient(180deg,#131326,#0c0c19);border-color:#2d2740;border-left-color:#ffd24a;box-shadow:0 10px 35px rgba(0,0,0,.55),0 0 22px rgba(255,210,74,.08)}
 .empty{padding:64px 20px}.empty-icon{font-size:32px;filter:drop-shadow(0 0 12px rgba(0,255,204,.24))}.empty-text{color:#6070a0;line-height:1.7}.empty-sub{font-size:12px;color:#36415e;margin-top:8px;line-height:1.7}
@@ -165,13 +166,56 @@ body{position:fixed;inset:0;touch-action:manipulation}
 .task-dopaon .dream-quote{font-size:12px;line-height:1.65;color:#dcecff;text-align:left;text-shadow:0 0 8px rgba(255,255,255,.06)}
 @keyframes dopaInlineIn{from{opacity:0;transform:translateY(-4px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
 
+
+/* ===== v11: status bar + card cleanup + onboarding ===== */
+#statusBar{position:absolute;top:calc(var(--safe-top) + var(--header-h));left:0;right:0;z-index:25;height:var(--status-h);display:flex;background:#0a0a12;border-bottom:1px solid #1e1e38;}
+#statusBar #habitRow{position:static;flex:1;min-width:0;height:100%;border-top:none;background:transparent;display:flex;flex-direction:column;justify-content:center;padding:0 14px;gap:7px;cursor:pointer;transition:background .15s;}
+#statusBar #habitRow:active{background:#0d0d1f}
+#statusBar .meter.charge-frame-shell{width:88px;height:var(--status-h);flex-shrink:0;}
+#statusBar #chargeFrame{transform:translate(-50%,-50%) scale(0.265);}
+.task-swipe-hint{display:none}
+.task-tools{gap:6px}
+#onboardOverlay .popup{max-width:330px}
+.ob-icon{font-size:40px;text-align:center;margin-bottom:14px;filter:drop-shadow(0 0 14px rgba(0,255,204,.28))}
+.ob-title{font-family:'Orbitron',monospace;font-size:12px;letter-spacing:2px;color:#00ffcc;text-align:center;margin-bottom:12px}
+.ob-body{font-size:14px;color:#c8d8f0;line-height:1.8;text-align:center}
+.ob-dots{display:flex;justify-content:center;gap:8px;margin:20px 0}
+.ob-dot{width:7px;height:7px;border-radius:50%;background:#2a3a55;transition:background .2s}
+.ob-dot.on{background:#00ffcc}
+.ob-next{width:100%;height:46px;background:#00ffcc;color:#07100f;border:none;border-radius:13px;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:.5px}
+
+/* ===== v12: quick tags always visible ===== */
+.task-quick-tags{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
+.qtag{font-family:'Orbitron',monospace;font-size:7px;letter-spacing:.5px;padding:3px 8px;border-radius:999px;border:1px solid #1e1e38;background:transparent;color:#2a3a55;cursor:pointer;transition:all .15s;line-height:1.4}
+.qtag:active{transform:scale(.92)}
+.qtag.today-q{color:#3a5070;border-color:#1a2a40}
+.qtag.today-q.on{color:#66ccff;border-color:#66ccff66;background:#071621}
+.qtag.imp-q{color:#3a3010;border-color:#2a2010}
+.qtag.imp-q.on{color:#ffd24a;border-color:#ffd24a66;background:#181304;box-shadow:0 0 8px rgba(255,210,74,.12)}
+/* 画面差別化 */
+#sf8[data-mode="habits"]{background:#050e08}
+#sf8[data-mode="habits"] .header{background:#050e08;border-bottom-color:#0d2418}
+#sf8[data-mode="habits"] #statusBar{background:#060f0a;border-bottom-color:#0d2418}
+#sf8[data-mode="habits"] #ta{background:#050e08}
+#sf8[data-mode="habits"] .logo{color:#00ffcc}
+/* 重要タスク質感強化 */
+.task.important-task{border-left:3px solid #ffd24a;background:linear-gradient(135deg,rgba(255,210,74,.07) 0%,#0f0f20 45%)}
+.task.important-task::before{background:linear-gradient(90deg,#ffd24a,#ffaa00);box-shadow:0 1px 8px rgba(255,210,74,.35)}
+/* 入力ボタン改善 */
+#db{font-size:20px;background:linear-gradient(135deg,#00d4a0,#00ffcc);color:#030f0a;border:none;border-radius:50%;box-shadow:0 2px 12px rgba(0,255,204,.22)}
+#db.ready{box-shadow:0 0 18px rgba(0,255,204,.45),0 2px 8px rgba(0,0,0,.3);transform:scale(1.04)}
+#db:not(.ready){opacity:.38;transform:scale(1)}
+/* ハズレ惜しい */
+.miss-near{position:absolute;right:6px;bottom:8px;font-family:'Reggae One',sans-serif;font-size:13px;font-weight:900;color:#ffd24a;text-shadow:2px 2px 0 #000;opacity:0;pointer-events:none;transition:none}
+.miss-near.pop{animation:missNearPop .9s ease-out forwards}
+@keyframes missNearPop{0%{opacity:0;transform:scale(.6) translateY(4px)}18%{opacity:1;transform:scale(1.15)}50%{opacity:1;transform:scale(1)}90%{opacity:.5}100%{opacity:0;transform:translateY(-8px)}}
 </style>
 </head>
 <body>
 <div id="sf8">
   <div id="pc"></div>
   <div class="header">
-    <div class="brand"><span class="logo">DOPAON</span><span class="sub">TASK SYS</span></div>
+    <div class="brand"><span class="logo">DOPADO</span><span class="sub">TASK SYS</span></div>
     <div class="identity" id="identity" onclick="openProfile()">
       <div class="id-text"><div class="id-name" id="hdName"></div><div class="id-lv"><span>Lv.<b id="hdLv">0</b></span><span class="free" id="hdFree">+0日</span></div></div>
       <div class="id-avatar">👤</div>
@@ -179,17 +223,20 @@ body{position:fixed;inset:0;touch-action:manipulation}
     <div class="header-level-line"><div class="header-level-fill" id="hdLevelFill"></div></div>
   </div>
   <div id="ta"></div>
-  <div id="bottomDock">
+  <div id="statusBar">
     <div id="habitRow" onclick="toggleMainMode()">
-      <div class="habit-main"><span class="habit-title">パチスロをしない</span><div class="habit-status"><span class="dot-on"></span><span class="dot-off"></span><span class="dot-off"></span><span class="counter">1/3</span><span style="font-size:13px;color:#3a5070;margin-left:auto;">›</span></div></div>
-      <div class="meter charge-frame-shell charge-off" id="chargeMeter" aria-label="チャージ抽選窓">
-        <iframe id="chargeFrame" src="./charge.html?v=10" title="DOPAON CHARGE"></iframe>
-      </div>
+      <span class="habit-title">パチスロをしない</span>
+      <div class="habit-status"><span class="dot-on"></span><span class="dot-off"></span><span class="dot-off"></span><span class="counter">1/3</span><span style="font-size:13px;color:#3a5070;margin-left:auto;">›</span></div>
     </div>
+    <div class="meter charge-frame-shell charge-off" id="chargeMeter" aria-label="チャージ抽選窓">
+      <iframe id="chargeFrame" src="./charge.html?v=12c" title="DOPADO CHARGE"></iframe>
+    </div>
+  </div>
+  <div id="bottomDock">
     <div id="inputBar">
       <button id="ib" class="roundBtn bolt" onclick="openTaskMenu()" aria-label="タスク設定">☰</button>
       <input id="mi" type="text" placeholder="タスクを入力..." autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" oninput="onIn(event)" onbeforeinput="onBeforeInput(event)" onkeydown="onKey(event)" oncompositionstart="onCompStart(event)" oncompositionupdate="onCompUpdate(event)" oncompositionend="onCompEnd(event)" onfocus="onInputFocus()" onblur="onInputBlur()" />
-      <button id="db" class="roundBtn dopa" onclick="doDopa()" aria-label="DOPAON!">✦</button>
+      <button id="db" class="roundBtn dopa" onclick="doDopa()" aria-label="DOPADO!">✓</button>
     </div>
   </div>
 
@@ -236,12 +283,19 @@ body{position:fixed;inset:0;touch-action:manipulation}
   </div>
 
   <div id="bonusFrameOverlay">
-    <iframe id="bonusFrame" src="./bonus.html?v=10" title="DOPAON BONUS"></iframe>
+    <iframe id="bonusFrame" src="./bonus.html?v=12c" title="DOPADO BONUS"></iframe>
   </div>
+  <div class="overlay" id="onboardOverlay">
+    <div class="popup">
+      <div class="popup-head"><span class="popup-title">WELCOME</span></div>
+      <div class="popup-body" id="onboardBody" style="padding:20px"></div>
+    </div>
+  </div>
+
 </div>
 
 <script>
-const APP_VERSION=6;
+const APP_VERSION=12;
 const STORAGE_KEY='dopaon_state_v6';
 const BACKUP_KEY='dopaon_state_v6_backup';
 const LEGACY_KEYS=['dopaon_state_v5','dopaon_state_v4','dopaon_state_v3','dopaon_state_v2','dopaon_state_v1'];
@@ -266,7 +320,7 @@ const DONE_PR=['完了！！','確定！！','神！！！','撃破！！','制�
 const DOPAON_AFTER=[['3分後','終わらせた自分、ちょっと好きになっていた。'],['5分後','終わったおかげで、頭の中が少し静かになっていた。'],['10分後','やる前より、自分を信用できるようになっていた。'],['15分後','逃げなかったことが、静かに自信へ変わっていた。'],['30分後','やっておいてよかったと、本気で思っていた。'],['1時間後','小さい勝ちが、ちゃんと自信になっていた。'],['2時間後','自分との約束を一つ守れて、少し強くなっていた。'],['夜','今日の自分、意外と悪くなかったと思えていた。'],['明日の朝','昨日の自分が片付けてくれていて、かなり助かっていた。'],['未来','あの小さい完了が、地味に人生の流れを変えていた。'],['5分後','自分を責める理由が、一つ減っていた。'],['10分後','完了した事実が、静かに背中を押していた。'],['30分後','終わらせたから、次の自分がラクをしていた。'],['夜','ちゃんとやった自分を、寝る前に少し誇れていた。'],['明日','昨日の一歩が、今日の自分を助けていた。']].map(x=>({time:x[0],text:x[1]}));
 const DOPAON_QUOTES=['やる気を待つより、手を動かした方が早い。','一歩は小さくていい。止まらない方が強い。','完璧じゃなくていい。完了が強い。','未来の自分は、今の小さい一手に救われる。','自信は先に来ない。終わらせた後についてくる。','小さい完了をなめるな。あれが人生を押す。','気分が乗らない日にも、進めた一歩は本物だ。'].map(t=>({time:'今',text:t}));
 
-let state={version:APP_VERSION,profile:{name:'',titleId:null},xp:0,freeDays:0,ownedTitles:[],ownedIllusts:[],tasks:[],habits:[],habitLogs:{},chargeTickets:[],ui:{completedOpen:false,mode:'tasks'}};
+let state={version:APP_VERSION,profile:{name:'',titleId:null},xp:0,freeDays:0,ownedTitles:[],ownedIllusts:[],tasks:[],habits:[],habitLogs:{},chargeTickets:[],ui:{completedOpen:false,mode:'tasks'},onboarded:false};
 let saveTimer=null;
 let editingId=null;
 let editingKind=null;
@@ -462,7 +516,7 @@ function showDopaonMessage(taskName,taskId){clearFloatingDopaon();const msg=make
 const el=document.createElement('div');currentDopaonEl=el;el.className='dream';el.innerHTML='<span class="dream-time">'+escapeHtml(msg.time)+'</span><span class="dream-quote">「'+escapeHtml(msg.text)+'」</span>';document.getElementById('sf8').appendChild(el);const anim=el.animate([{opacity:0,transform:'translateY(6px) scale(.98)'},{opacity:1,transform:'translateY(0) scale(1)',offset:.07},{opacity:1,offset:.92},{opacity:0,transform:'translateY(-8px) scale(.98)'}],{duration:14000,fill:'forwards',easing:'cubic-bezier(.18,.8,.22,1)'});currentDopaonAnim=anim;anim.onfinish=()=>{if(currentDopaonEl===el)currentDopaonEl=null;el.remove()}}
 
 let isComposing=false,lastCountedLen=0,compBaseLen=0,lastDirectPraiseAt=0,lastPraiseOpAt=0,lastCompData='',livePraise=0,praiseQueue=0,praiseDrainTimer=null,busyLanes=new Set(),activePraise=new Set(),baseViewportHeight=0;
-const NS='http://www.w3.org/2000/svg',FF="'Reggae One', system-ui, sans-serif",PRAISE_LIFE=2300,MAX_PRAISE=8,PRAISE_COOLDOWN=24,MAX_PRAISE_QUEUE=40,P_MARGIN=10;
+const NS='http://www.w3.org/2000/svg',FF="'Reggae One', system-ui, sans-serif",PRAISE_LIFE=2800,MAX_PRAISE=6,PRAISE_COOLDOWN=55,MAX_PRAISE_QUEUE=24,P_MARGIN=8;
 function viewportHeight(){return window.visualViewport?window.visualViewport.height:window.innerHeight}
 function viewportTop(){return window.visualViewport?window.visualViewport.offsetTop:0}
 function initBaseViewport(force){const h=Math.max(window.innerHeight,viewportHeight());if(force||!baseViewportHeight){baseViewportHeight=h;return}const inputFocused=document.activeElement===document.getElementById('mi');if(!inputFocused&&h>baseViewportHeight)baseViewportHeight=h}
@@ -475,11 +529,33 @@ function getTextBox(groups,fs){const pad=Math.ceil(fs*.55),lh=Math.ceil(fs*1.34)
 function txPair(svg,x,y,fs,txt,col){const outer=Math.max(4,fs*.24),inner=Math.max(2,fs*.11);[["none","white",outer],[col,"#111",inner]].forEach(([fill,stroke,sw])=>{const t=document.createElementNS(NS,'text');t.setAttribute('x',x);t.setAttribute('y',y);t.setAttribute('text-anchor','middle');t.setAttribute('dominant-baseline','central');t.setAttribute('font-family',FF);t.setAttribute('font-size',fs);t.setAttribute('font-weight','900');t.setAttribute('fill',fill);t.setAttribute('stroke',stroke);t.setAttribute('stroke-width',sw);t.setAttribute('stroke-linejoin','round');if(fill!=='none')t.setAttribute('paint-order','stroke');t.textContent=txt;svg.appendChild(t)})}
 function drawPraiseText(svg,item,groups,box,fs){let cy=box.pad/2+box.lh/2;groups.forEach(g=>{const len=Math.max(1,charLen(g.t)),fitFs=g.side?Math.min(fs,Math.max(10,(box.w-box.pad*.65)/(len*.62))):fs;txPair(svg,box.w/2,cy,fitFs,g.t,item.c);cy+=box.lh})}
 function getPraiseOrigin(){const pc=document.getElementById('pc'),dock=document.getElementById('bottomDock');if(!pc||!dock)return{x:180,y:360};const pcRect=pc.getBoundingClientRect(),dockRect=dock.getBoundingClientRect();return{x:clamp(dockRect.left+dockRect.width/2-pcRect.left,48,pc.clientWidth-48),y:clamp(dockRect.top-pcRect.top+20,pc.clientHeight*.55,pc.clientHeight+86)}}
-function getLanes(origin){const pc=document.getElementById('pc'),count=pc.clientWidth<360?5:7,topY=18,minX=38,maxX=pc.clientWidth-38,lanes=[];for(let i=0;i<count;i++){const targetX=count===1?pc.clientWidth/2:minX+(maxX-minX)*(i/(count-1)),dx=targetX-origin.x,dy=topY-origin.y;lanes.push({index:i,angle:Math.atan2(dy,dx)*180/Math.PI,len:Math.hypot(dx,dy)})}return lanes}
+function getLanes(origin){const pc=document.getElementById('pc'),W=pc.clientWidth,H=pc.clientHeight;
+  // 9レーン：上3 + 中3 + 横2 + 斜め1 で全体に散らす
+  const targets=[
+    {x:W*.15,y:H*.12},{x:W*.5,y:H*.08},{x:W*.85,y:H*.12},
+    {x:W*.2,y:H*.35},{x:W*.5,y:H*.32},{x:W*.8,y:H*.35},
+    {x:W*.08,y:H*.55},{x:W*.92,y:H*.55},{x:W*.5,y:H*.55}
+  ];
+  return targets.map((t,i)=>{const dx=t.x-origin.x,dy=t.y-origin.y;return{index:i,angle:Math.atan2(dy,dx)*180/Math.PI,len:Math.hypot(dx,dy),tx:t.x,ty:t.y}})
+}
 function getPointOnLane(origin,lane,d){const r=lane.angle*Math.PI/180;return{x:origin.x+Math.cos(r)*d,y:origin.y+Math.sin(r)*d}}
 function fitsInPraiseArea(x,y,w,h){const pc=document.getElementById('pc');return x-w/2>P_MARGIN&&x+w/2<pc.clientWidth-P_MARGIN&&y-h/2>P_MARGIN&&y+h/2<pc.clientHeight-P_MARGIN}
-function pickPraisePosition(w,h){const pc=document.getElementById('pc'),origin=getPraiseOrigin(),lanes=getLanes(origin),free=lanes.filter(l=>!busyLanes.has(l.index)),pool=shuffle(free.length?free:lanes);for(const lane of pool){const minD=88,maxD=Math.max(minD+20,Math.min(lane.len-54,340));for(let i=0;i<9;i++){const d=minD+Math.random()*(maxD-minD),p=getPointOnLane(origin,lane,d);if(fitsInPraiseArea(p.x,p.y,w,h))return{lane,x:p.x,y:p.y,angle:lane.angle}}}const fb=pool[0]||lanes[0]||{index:0,angle:-90},p=getPointOnLane(origin,fb,150);return{lane:fb,x:clamp(p.x,w/2+P_MARGIN,pc.clientWidth-w/2-P_MARGIN),y:clamp(p.y,h/2+P_MARGIN,pc.clientHeight-h/2-P_MARGIN),angle:fb.angle}}
-function spawnPraise(mode='input',forcedItem=null){if(livePraise>=MAX_PRAISE)return false;syncViewport();const pc=document.getElementById('pc');if(!pc)return false;const item=forcedItem||rnd(mode==='done'?DONE_PR:mode==='add'?ADD_PR:PR),groups=grps(item.t),fs=textSize(mode),box=getTextBox(groups,fs),pos=pickPraisePosition(box.w,box.h),rot=clamp(pos.angle+90,-34,34);busyLanes.add(pos.lane.index);livePraise++;const svg=document.createElementNS(NS,'svg');svg.setAttribute('width',box.w);svg.setAttribute('height',box.h);svg.setAttribute('viewBox','0 0 '+box.w+' '+box.h);svg.style.cssText='position:absolute;left:'+(pos.x-box.w/2).toFixed(1)+'px;top:'+(pos.y-box.h/2).toFixed(1)+'px;transform:rotate('+rot.toFixed(1)+'deg) scale(.96);opacity:0;pointer-events:none;filter:drop-shadow(0 2px 5px rgba(0,0,0,.45));';drawPraiseText(svg,item,groups,box,fs);pc.appendChild(svg);activePraise.add(svg);const scale=mode==='input'?1:1.06;const anim=svg.animate([{opacity:0,transform:'rotate('+rot.toFixed(1)+'deg) translateY(8px) scale(.9)'},{opacity:1,transform:'rotate('+rot.toFixed(1)+'deg) translateY(0) scale('+scale+')',offset:.12},{opacity:1,transform:'rotate('+rot.toFixed(1)+'deg) translateY(-8px) scale(1)',offset:.78},{opacity:0,transform:'rotate('+rot.toFixed(1)+'deg) translateY(-18px) scale(.96)'}],{duration:PRAISE_LIFE,easing:'cubic-bezier(.18,.8,.22,1)',fill:'forwards'});anim.onfinish=()=>releasePraise(svg,pos.lane.index);return true}
+function pickPraisePosition(w,h){
+  const pc=document.getElementById('pc'),origin=getPraiseOrigin(),lanes=getLanes(origin);
+  const free=lanes.filter(l=>!busyLanes.has(l.index)),pool=shuffle(free.length?free:lanes);
+  for(const lane of pool){
+    // レーンのターゲット座標付近にランダムにオフセットして配置
+    const tx=lane.tx!==undefined?lane.tx:(pc.clientWidth/2);
+    const ty=lane.ty!==undefined?lane.ty:(pc.clientHeight/3);
+    const ox=(Math.random()-.5)*28,oy=(Math.random()-.5)*20;
+    const x=clamp(tx+ox,w/2+P_MARGIN,pc.clientWidth-w/2-P_MARGIN);
+    const y=clamp(ty+oy,h/2+P_MARGIN,pc.clientHeight-h/2-P_MARGIN);
+    if(fitsInPraiseArea(x,y,w,h))return{lane,x,y,angle:lane.angle};
+  }
+  const fb=pool[0]||lanes[0]||{index:0,angle:-90,tx:pc.clientWidth/2,ty:pc.clientHeight/3};
+  return{lane:fb,x:pc.clientWidth/2,y:pc.clientHeight*.35,angle:-90};
+}
+function spawnPraise(mode='input',forcedItem=null){if(livePraise>=MAX_PRAISE)return false;syncViewport();const pc=document.getElementById('pc');if(!pc)return false;const item=forcedItem||rnd(mode==='done'?DONE_PR:mode==='add'?ADD_PR:PR),groups=grps(item.t),fs=textSize(mode),box=getTextBox(groups,fs),pos=pickPraisePosition(box.w,box.h),rot=clamp(pos.angle+90,-34,34);busyLanes.add(pos.lane.index);livePraise++;const svg=document.createElementNS(NS,'svg');svg.setAttribute('width',box.w);svg.setAttribute('height',box.h);svg.setAttribute('viewBox','0 0 '+box.w+' '+box.h);svg.style.cssText='position:absolute;left:'+(pos.x-box.w/2).toFixed(1)+'px;top:'+(pos.y-box.h/2).toFixed(1)+'px;transform:rotate('+rot.toFixed(1)+'deg) scale(.96);opacity:0;pointer-events:none;filter:drop-shadow(0 2px 5px rgba(0,0,0,.45));';drawPraiseText(svg,item,groups,box,fs);pc.appendChild(svg);activePraise.add(svg);const scale=mode==='input'?1:1.06;const anim=svg.animate([{opacity:0,transform:'rotate('+rot.toFixed(1)+'deg) translateY(10px) scale(.85)'},{opacity:1,transform:'rotate('+rot.toFixed(1)+'deg) translateY(0) scale('+scale+')',offset:.10},{opacity:1,transform:'rotate('+rot.toFixed(1)+'deg) translateY(-4px) scale(1)',offset:.65},{opacity:.7,transform:'rotate('+rot.toFixed(1)+'deg) translateY(-10px) scale(.98)',offset:.88},{opacity:0,transform:'rotate('+rot.toFixed(1)+'deg) translateY(-22px) scale(.93)'}],{duration:PRAISE_LIFE,easing:'cubic-bezier(.18,.8,.22,1)',fill:'forwards'});anim.onfinish=()=>releasePraise(svg,pos.lane.index);return true}
 function releasePraise(svg,laneIndex){if(!activePraise.has(svg))return;activePraise.delete(svg);busyLanes.delete(laneIndex);livePraise=Math.max(0,livePraise-1);if(svg.parentNode)svg.parentNode.removeChild(svg);if(praiseQueue>0)drainPraiseQueue()}
 function enqueuePraise(amount){if(amount<=0)return;praiseQueue=clamp(praiseQueue+amount,0,MAX_PRAISE_QUEUE);drainPraiseQueue()}
 function drainPraiseQueue(){if(praiseDrainTimer)return;const run=()=>{praiseDrainTimer=null;if(praiseQueue<=0)return;if(livePraise>=MAX_PRAISE){praiseDrainTimer=setTimeout(run,140);return}praiseQueue--;spawnPraise('input');if(praiseQueue>0)praiseDrainTimer=setTimeout(run,PRAISE_COOLDOWN)};run()}
@@ -622,7 +698,7 @@ function maybeAwardSchedulePoint(task,oldDue,newDue){
 }
 function setTaskToday(id){const t=state.tasks.find(x=>x.id===id);if(!t||t.state==='done')return;const old=t.dueDate;const day=appDayStr();t.todayDate=day;t.dueDate=day;if(!t.swipeCycle)t.swipeCycle=1;maybeAwardSchedulePoint(t,old,t.dueDate);saveState();render()}
 function unsetTaskToday(id){const t=state.tasks.find(x=>x.id===id);if(!t||t.state==='done')return;t.todayDate='';t.importantDate='';t.swipeCycle=0;if(t.dueDate===appDayStr())t.dueDate='';saveState();render()}
-function setTaskImportant(id){const t=state.tasks.find(x=>x.id===id);if(!t||t.state==='done')return;if(!isTaskToday(t)){setTaskToday(id)}if(isTaskImportant(t))return;if(importantCount()>=2){showUndo('重要タスクは今日2つまで',null);return}t.importantDate=appDayStr();t.swipeCycle=2;saveState();render()}
+function setTaskImportant(id){const t=state.tasks.find(x=>x.id===id);if(!t||t.state==='done')return;if(!isTaskToday(t)){setTaskToday(id)}if(isTaskImportant(t))return;if(importantCount()>=3){showUndo('重要タスクは今日3つまで',null);return}t.importantDate=appDayStr();t.swipeCycle=2;saveState();render()}
 function unsetTaskImportant(id){const t=state.tasks.find(x=>x.id===id);if(!t)return;t.importantDate='';t.swipeCycle=3;saveState();render()}
 function cycleTaskPriority(id){const t=state.tasks.find(x=>x.id===id);if(!t||t.state==='done')return;const day=appDayStr();if(!isTaskToday(t)){setTaskToday(id);showUndo('今日タスクにした',null);return}
   if(!isTaskImportant(t)&&t.swipeCycle!==3){setTaskImportant(id);showUndo('重要タスクにした',null);return}
@@ -637,11 +713,13 @@ function deleteHabit(id,fromMenu=false){const idx=state.habits.findIndex(x=>x.id
 function undoTask(id){const t=state.tasks.find(x=>x.id===id);if(!t)return;t.state='idle';t.doneAt=null;taskChargingId=null;saveState();render();spawnPraise('add',{t:'戻した！',c:'#00ffcc'});showToast('完了を取り消した。再完了しても再抽選なし')}
 function tap(id){if(chargeBusy&&!chargeCanInterrupt)return;const t=state.tasks.find(x=>x.id===id);if(!t)return;if(t.state==='idle'){t.state='charging';taskChargingId=id;saveState();render()}else if(t.state==='charging'){t.state='done';t.doneAt=Date.now();const shouldReward=!t.rewardDone;const forceBonus=isTaskImportant(t);t.rewardDone=true;taskChargingId=null;if(shouldReward)issueChargeTicket(t,{force:forceBonus?'bonus':null,type:forceBonus?'important':'task'});saveState();render();setTimeout(()=>spawnPraise('done'),60);if(shouldReward){if(chargeBusy&&chargeCanInterrupt){resetChargeFrame();chargeBusy=false;chargeCanInterrupt=false;renderChargeMini();setTimeout(()=>startNextChargeTicket(true),60)}else setTimeout(()=>startNextChargeTicket(true),160)}}}
 function formatDateLabel(s){if(!s)return '';const d=new Date(s+'T00:00:00');if(Number.isNaN(d.getTime()))return s;return (d.getMonth()+1)+'/'+d.getDate()+'('+WEEKDAYS[d.getDay()]+')'}
-function taskMeta(t){const tags=[];if(isTaskImportant(t))tags.push({cls:'important',txt:'重要'});if(isTaskToday(t))tags.push({cls:'today',txt:'今日'});else if(t.dueDate){const today=appDayStr();const overdue=t.state!=='done'&&t.dueDate<today;tags.push({cls:'due '+(overdue?'warn':''),txt:overdue?'期限超過':formatDateLabel(t.dueDate)})}return tags}
+function taskMeta(t){const tags=[];if(isTaskToday(t))tags.push({cls:'today',txt:'今日'});else if(t.dueDate){const today=appDayStr();const overdue=t.state!=='done'&&t.dueDate<today;tags.push({cls:'due '+(overdue?'warn':''),txt:overdue?'期限超過':formatDateLabel(t.dueDate)})}return tags}
 function sortTasks(list){return list.slice().sort((a,b)=>{const ba=isTaskImportant(a)?0:isTaskToday(a)?1:!a.dueDate?2:3,bb=isTaskImportant(b)?0:isTaskToday(b)?1:!b.dueDate?2:3;if(ba!==bb)return ba-bb;if(ba===3&&a.dueDate!==b.dueDate)return a.dueDate.localeCompare(b.dueDate);return (b.createdAt||0)-(a.createdAt||0)})}
-function render(){expireDailyFlags(state);const a=document.getElementById('ta');a.innerHTML='';if(currentMode()==='habits')renderHabits(a);else renderTasks(a);renderBottomBar();}
+function render(){expireDailyFlags(state);const a=document.getElementById('ta');a.innerHTML='';const sf8=document.getElementById('sf8');if(sf8)sf8.dataset.mode=currentMode();if(currentMode()==='habits')renderHabits(a);else renderTasks(a);renderBottomBar();}
 function renderTasks(a){
-  if(!state.tasks.length){a.innerHTML='<div class="empty"><div class="empty-icon">⚡</div><div class="empty-text">最初の一手を入れよう</div><div class="empty-sub">入力してEnter。未来の自分が少しラクになる。</div></div>';return}
+  if(!state.tasks.length){
+    const EM=['ここにタスクを入力したらもう成功者だ。','最初の1個が人生を変える。いや、マジで。','タスクは置くだけでいい。後は脳がなんとかする。','このアプリを開いた時点で8割は終わってる。','やることを書き出した人が、未来を選べる人になる。','行動力のある人って、ただ書き出しただけだったりする。','今日の自分、ここに来ただけでもうえらい。','1個だけ入れて。それだけで今日は勝ち。','脳みそは覚えるより動く方が得意。外に出してやれ。','完璧じゃなくていい。とりあえず書いとくのが最強。'];
+    a.innerHTML='<div class="empty"><div class="empty-icon">⚡</div><div class="empty-text">'+EM[Math.floor(Math.random()*EM.length)]+'</div><div class="empty-sub">下の欄に打ち込んで ✓ で追加</div></div>';return}
   const act=sortTasks(state.tasks.filter(t=>t.state!=='done')),done=state.tasks.filter(t=>t.state==='done').sort((a,b)=>(b.doneAt||0)-(a.doneAt||0));
   act.forEach((t,i)=>{const c=mkC(t);if(i===0)c.classList.add('tnew');a.appendChild(c)});
   if(done.length){const s=document.createElement('div');s.className='completed';s.innerHTML='<div class="completed-head"><span class="completed-title">COMPLETED '+done.length+'</span><button class="completed-btn" onclick="toggleCompleted()">'+(state.ui.completedOpen?'隠す':'表示')+'</button><button class="completed-btn" onclick="clearCompleted()">整理</button></div>';a.appendChild(s);if(state.ui.completedOpen)done.forEach(t=>a.appendChild(mkC(t)))}
@@ -656,16 +734,28 @@ function mkC(task){
   const nm=document.createElement('div');nm.className='task-name';nm.textContent=task.name;main.appendChild(nm);
   const metas=taskMeta(task);if(metas.length){const meta=document.createElement('div');meta.className='task-meta';metas.forEach(m=>{const tag=document.createElement('span');tag.className='tag '+m.cls;tag.textContent=m.txt;meta.appendChild(tag)});main.appendChild(meta)}
   if(!iD&&currentDopaonTaskId===task.id&&currentDopaonMsg){const dp=document.createElement('div');dp.className='task-dopaon';dp.innerHTML='<span class="dream-time">'+escapeHtml(currentDopaonMsg.time)+'</span><span class="dream-quote">「'+escapeHtml(currentDopaonMsg.text)+'」</span>';main.appendChild(dp)}
-  if(!iD){const hint=document.createElement('div');hint.className='task-swipe-hint';hint.textContent='← 今日 / 重要　　→ 管理';main.appendChild(hint)}
+
   el.appendChild(main);
-  const tools=document.createElement('div');tools.className='task-tools';
+  // 常時表示: 今日/★ quick tags
   if(!iD){
-    const todayBtn=document.createElement('button');todayBtn.className='mini-btn today'+(todayActive?' on':'');todayBtn.textContent=todayActive?'外す':'今日';todayBtn.setAttribute('aria-label',todayActive?'今日タグを外す':'今日やる');todayBtn.onclick=e=>{e.stopPropagation();todayActive?unsetTaskToday(task.id):setTaskToday(task.id)};tools.appendChild(todayBtn);
-    const imp=document.createElement('button');imp.className='mini-btn important'+(important?' on':'');imp.textContent=important?'重外':'重要';imp.setAttribute('aria-label',important?'重要タグを外す':'重要タグをつける');imp.onclick=e=>{e.stopPropagation();important?unsetTaskImportant(task.id):setTaskImportant(task.id)};tools.appendChild(imp);
+    const qt=document.createElement('div');qt.className='task-quick-tags';
+    const tb=document.createElement('button');tb.className='qtag today-q'+(todayActive?' on':'');
+    tb.textContent=todayActive?'今日 ✓':'今日';
+    tb.onclick=e=>{e.stopPropagation();todayActive?unsetTaskToday(task.id):setTaskToday(task.id)};
+    qt.appendChild(tb);
+    if(todayActive){
+      const ib=document.createElement('button');ib.className='qtag imp-q'+(important?' on':'');
+      ib.textContent=important?'★ 重要':'★';
+      ib.onclick=e=>{e.stopPropagation();important?unsetTaskImportant(task.id):setTaskImportant(task.id)};
+      qt.appendChild(ib);
+    }
+    main.appendChild(qt);
   }
-  if(iD){const u=document.createElement('button');u.className='mini-btn undo';u.textContent='↩';u.setAttribute('aria-label','完了を取り消す');u.onclick=e=>{e.stopPropagation();undoTask(task.id)};tools.appendChild(u)}
-  const edit=document.createElement('button');edit.className='mini-btn';edit.textContent='⚙';edit.setAttribute('aria-label','タスク設定を編集');edit.onclick=e=>{e.stopPropagation();openTaskMenu(task.id,'task')};tools.appendChild(edit);
-  const del=document.createElement('button');del.className='mini-btn danger';del.textContent='×';del.setAttribute('aria-label','タスクを削除');del.onclick=e=>{e.stopPropagation();deleteTask(task.id)};tools.appendChild(del);
+  // 右スワイプパネル: 取消/編集/削除のみ
+  const tools=document.createElement('div');tools.className='task-tools';
+  if(iD){const u=document.createElement('button');u.className='mini-btn undo';u.textContent='↩';u.onclick=e=>{e.stopPropagation();undoTask(task.id)};tools.appendChild(u)}
+  const edit=document.createElement('button');edit.className='mini-btn';edit.textContent='⚙';edit.onclick=e=>{e.stopPropagation();openTaskMenu(task.id,'task')};tools.appendChild(edit);
+  const del=document.createElement('button');del.className='mini-btn danger';del.textContent='×';del.onclick=e=>{e.stopPropagation();deleteTask(task.id)};tools.appendChild(del);
   el.appendChild(tools);
   const w=document.createElement('div');w.className='task-action';
   if(!iD){const b=document.createElement('button');b.className='task-btn'+(iC?' cbtn':'');b.onclick=e=>{e.stopPropagation();tap(task.id)};b.setAttribute('aria-label',iC?'完了確定':'チャージ開始');b.innerHTML=iC?'<span style="font-family:\'Orbitron\',monospace;font-size:7px;font-weight:700;">確定</span>':'<span style="font-size:17px;">✓</span>';w.appendChild(b);if(iC){const h=document.createElement('span');h.className='push';h.textContent='PUSH';w.appendChild(h)}}
@@ -673,9 +763,10 @@ function mkC(task){
   el.appendChild(w);attachTaskSwipe(el,task);return el;
 }
 function attachTaskSwipe(el,task){
+  const isHabit=!!(task&&task._isHabit);
   let sx=0,sy=0,started=false;
   el.addEventListener('touchstart',e=>{if(!e.touches||!e.touches[0])return;const t=e.touches[0];sx=t.clientX;sy=t.clientY;started=true},{passive:true});
-  el.addEventListener('touchend',e=>{if(!started)return;started=false;const t=(e.changedTouches&&e.changedTouches[0])||null;if(!t)return;const dx=t.clientX-sx,dy=t.clientY-sy;if(Math.abs(dx)<48||Math.abs(dx)<Math.abs(dy)*1.25)return;if(dx<0){el.classList.remove('show-tools');el.classList.add('swipe-left-flash');setTimeout(()=>el.classList.remove('swipe-left-flash'),240);cycleTaskPriority(task.id)}else{document.querySelectorAll('.task.show-tools').forEach(x=>{if(x!==el)x.classList.remove('show-tools')});el.classList.toggle('show-tools')}},{passive:true});
+  el.addEventListener('touchend',e=>{if(!started)return;started=false;const t=(e.changedTouches&&e.changedTouches[0])||null;if(!t)return;const dx=t.clientX-sx,dy=t.clientY-sy;if(Math.abs(dx)<44||Math.abs(dx)<Math.abs(dy)*1.2)return;if(dx>0){document.querySelectorAll('.task.show-tools').forEach(x=>{if(x!==el)x.classList.remove('show-tools')});el.classList.toggle('show-tools')}else{el.classList.remove('show-tools');if(!isHabit){el.classList.add('swipe-left-flash');setTimeout(()=>el.classList.remove('swipe-left-flash'),220);cycleTaskPriority(task.id)}}},{passive:true});
 }
 function toggleCompleted(){state.ui.completedOpen=!state.ui.completedOpen;saveState();render()}
 function clearCompleted(){const removed=state.tasks.filter(t=>t.state==='done');const n=removed.length;if(!n)return;state.tasks=state.tasks.filter(t=>t.state!=='done');saveState();render();showUndo('完了済み '+n+'件を整理した',()=>{state.tasks=state.tasks.concat(removed);saveState();render()})}
@@ -710,7 +801,7 @@ function mkHabitCard(h){
   const w=document.createElement('div');w.className='task-action';
   if(!done){const b=document.createElement('button');b.className='task-btn'+(charging?' cbtn':'');b.onclick=()=>tapHabit(h.id);b.innerHTML=charging?'<span style="font-family:\'Orbitron\',monospace;font-size:7px;font-weight:700;">確定</span>':'<span style="font-size:17px;">✓</span>';w.appendChild(b);if(charging){const p=document.createElement('span');p.className='push';p.textContent='PUSH';w.appendChild(p)}}
   else{const ic=document.createElement('span');ic.className='done-mark';ic.textContent='✓';w.appendChild(ic)}
-  el.appendChild(w);return el;
+  el.appendChild(w);attachTaskSwipe(el,{id:h.id,_isHabit:true});return el;
 }
 function todayTaskStats(){const todayTasks=state.tasks.filter(t=>isTaskToday(t)),done=todayTasks.filter(t=>t.state==='done').length;return{total:todayTasks.length,done,pending:Math.max(0,todayTasks.length-done),important:state.tasks.filter(t=>isTaskImportant(t)).length,items:todayTasks}}
 function dotHtml(done,total){const max=5,filled=total?Math.round(done/total*max):0;let s='';for(let i=0;i<max;i++)s+='<span class="'+(i<filled?'dot-on':'dot-off')+'"></span>';return s}
@@ -729,7 +820,7 @@ function renderBottomBar(){
   }
   renderChargeMini();
 }
-function toggleMainMode(){if(chargeBusy)return;state.ui.mode=currentMode()==='tasks'?'habits':'tasks';taskChargingId=null;habitChargingId=null;saveState();render();showToast(currentMode()==='habits'?'習慣画面':'日常タスク画面')}
+function toggleMainMode(){if(chargeBusy)return;state.ui.mode=currentMode()==='tasks'?'habits':'tasks';taskChargingId=null;habitChargingId=null;saveState();render()}
 
 
 
@@ -785,14 +876,21 @@ function startNextChargeTicket(auto=false){
 }
 async function handleChargeResult(kind){
   try{
-    if(kind==='miss')return;
+    if(kind==='miss'){
+      // たまに「惜しい！」をチャージ枠近くに出す
+      if(Math.random()<0.3){
+        const shell=document.getElementById('chargeMeter');
+        if(shell){const m=document.createElement('div');m.className='miss-near';m.textContent=Math.random()<0.5?'惜しい！':'あと一歩！';shell.appendChild(m);requestAnimationFrame(()=>m.classList.add('pop'));setTimeout(()=>m.remove(),950);}
+      }
+      return;
+    }
     if(kind==='white'||kind==='blue'){
       const reward=grantReward(kind);saveState();renderHeader();showReward(reward,kind==='blue'?'Tia青':'Tia白');return;
     }
     if(kind==='bonus'){
       await showGoBonusGate();
       const prepared=await playBonusFrame();
-      if(prepared){showReward(prepared,'BONUS RESULT')}
+      // reward already shown in bonus.html
       return;
     }
   }finally{
@@ -853,7 +951,33 @@ window.addEventListener('orientationchange',()=>{setTimeout(()=>{initBaseViewpor
 window.addEventListener('scroll',lockScroll,{passive:true});
 document.addEventListener('touchmove',e=>{if(e.target.closest('#ta'))return;if(e.target.closest('.popup'))return;e.preventDefault()},{passive:false});
 
+
+/* ===== onboarding ===== */
+const OB_PAGES=[
+  {icon:'⚡',title:'タスクを完了しよう',body:'タスクを入力して追加。<br>完了ボタンを2回タップするとガチャが回って報酬が手に入る。'},
+  {icon:'🎰',title:'チャージで報酬ゲット',body:'上のバーにあるのがチャージ機。<br>タスクを終わらせるたびに回って、称号・日数・イラストが当たる。'},
+  {icon:'🎁',title:'無料期間って何？',body:'ヘッダーに表示される「+◯日」は、<br>将来の有料機能を無料で使える日数。<br>タスクをこなすほど増えていく。'},
+  {icon:'↕',title:'習慣バーを使おう',body:'上のバー左側をタップすると習慣画面へ。<br>「やる」or「やらない」を毎日記録すると<br>チャージが必ず当たる。'},
+  {icon:'👆',title:'スワイプで操作',body:'カードを左スワイプすると今日→重要と優先度を設定。<br>右スワイプで編集・削除ができる。'},
+]
+let _obPage=0;
+function _obRender(){
+  const el=document.getElementById('onboardBody');if(!el)return;
+  const p=OB_PAGES[_obPage],n=OB_PAGES.length;
+  el.innerHTML='<div class="ob-icon">'+p.icon+'</div>'
+    +'<div class="ob-title">'+p.title+'</div>'
+    +'<div class="ob-body">'+p.body.replace(/\n/g,'<br>')+'</div>'
+    +'<div class="ob-dots">'+OB_PAGES.map((_,i)=>'<div class="ob-dot'+(i===_obPage?' on':'')+'" style="width:7px;height:7px;border-radius:50%;background:'+(i===_obPage?'#00ffcc':'#2a3a55')+'"></div>').join('')+'</div>'
+    +'<button class="ob-next" onclick="_obNext()">'+(_obPage<n-1?'次へ →':'はじめる！')+'</button>';
+}
+function _obNext(){
+  if(_obPage<OB_PAGES.length-1){_obPage++;_obRender();}
+  else{state.onboarded=true;saveState();document.getElementById('onboardOverlay').classList.remove('show');}
+}
+function checkOnboarding(){if(!state.onboarded){_obPage=0;_obRender();document.getElementById('onboardOverlay').classList.add('show');}}
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js?v=12c').catch(()=>{})}
 loadState();initBaseViewport(true);syncViewport();renderHeader();render();renderChargeMini();resetPraiseInput();
+checkOnboarding();
 
 </script>
 </body>

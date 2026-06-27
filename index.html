@@ -158,6 +158,13 @@ body{position:fixed;inset:0;touch-action:manipulation}
 .task-swipe-hint{font-family:'Orbitron',monospace;font-size:7px;letter-spacing:1px;color:#31405e;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .task.important-task .task-swipe-hint{color:#7b6825}
 
+.task.just-added{animation:taskAddedGlow 1.15s ease-out both}
+@keyframes taskAddedGlow{0%{box-shadow:0 0 0 rgba(0,255,204,0);border-color:#00ffcc88}35%{box-shadow:0 0 22px rgba(0,255,204,.18);border-color:#00ffccaa}100%{box-shadow:inherit}}
+.task-dopaon{margin-top:8px;padding:9px 11px;border-radius:10px;background:linear-gradient(180deg,rgba(0,229,188,.075),rgba(255,210,74,.045));border:1px solid rgba(0,229,188,.22);border-left:3px solid #00e5bc;box-shadow:0 0 18px rgba(0,229,188,.06);animation:dopaInlineIn .32s cubic-bezier(.18,.9,.25,1) both;pointer-events:none}
+.task-dopaon .dream-time{font-size:7px;letter-spacing:1.7px;color:#00e5bc;margin-bottom:3px;text-align:left;text-shadow:0 0 8px rgba(0,229,188,.35)}
+.task-dopaon .dream-quote{font-size:12px;line-height:1.65;color:#dcecff;text-align:left;text-shadow:0 0 8px rgba(255,255,255,.06)}
+@keyframes dopaInlineIn{from{opacity:0;transform:translateY(-4px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+
 </style>
 </head>
 <body>
@@ -448,8 +455,11 @@ function openProfile(){document.getElementById('mi').blur();document.getElementB
 function closeProfile(){document.getElementById('profileOverlay').classList.remove('show')}
 
 function makeDopaonMessage(taskName){const isAfter=Math.random()<0.8,item=isAfter?rnd(DOPAON_AFTER):rnd(DOPAON_QUOTES),clean=taskName?taskName.trim():'そのタスク';let text=item.text;if(taskName&&isAfter&&Math.random()<0.35)text='「'+clean+'」を終わらせた後、'+text;return{time:item.time,text}}
-let currentDopaonEl=null,currentDopaonAnim=null,undoToastEl=null,undoTimer=null;
-function showDopaonMessage(taskName){if(currentDopaonAnim){try{currentDopaonAnim.cancel()}catch(e){}}if(currentDopaonEl&&currentDopaonEl.parentNode)currentDopaonEl.remove();const msg=makeDopaonMessage(taskName),el=document.createElement('div');currentDopaonEl=el;el.className='dream';el.innerHTML='<span class="dream-time">'+escapeHtml(msg.time)+'</span><span class="dream-quote">「'+escapeHtml(msg.text)+'」</span>';document.getElementById('sf8').appendChild(el);const anim=el.animate([{opacity:0,transform:'translateY(6px) scale(.98)'},{opacity:1,transform:'translateY(0) scale(1)',offset:.07},{opacity:1,offset:.92},{opacity:0,transform:'translateY(-8px) scale(.98)'}],{duration:14000,fill:'forwards',easing:'cubic-bezier(.18,.8,.22,1)'});currentDopaonAnim=anim;anim.onfinish=()=>{if(currentDopaonEl===el)currentDopaonEl=null;el.remove()}}
+let currentDopaonEl=null,currentDopaonAnim=null,currentDopaonTaskId=null,currentDopaonMsg=null,currentDopaonTimer=null,recentAddedTaskId=null,undoToastEl=null,undoTimer=null;
+function clearInlineDopaon(doRender=true){if(currentDopaonTimer){clearTimeout(currentDopaonTimer);currentDopaonTimer=null}currentDopaonTaskId=null;currentDopaonMsg=null;if(doRender)render()}
+function clearFloatingDopaon(){if(currentDopaonAnim){try{currentDopaonAnim.cancel()}catch(e){}}currentDopaonAnim=null;if(currentDopaonEl&&currentDopaonEl.parentNode)currentDopaonEl.remove();currentDopaonEl=null}
+function showDopaonMessage(taskName,taskId){clearFloatingDopaon();const msg=makeDopaonMessage(taskName);if(taskId){if(currentDopaonTimer)clearTimeout(currentDopaonTimer);currentDopaonTaskId=taskId;currentDopaonMsg=msg;recentAddedTaskId=taskId;render();currentDopaonTimer=setTimeout(()=>{if(currentDopaonTaskId===taskId){currentDopaonTaskId=null;currentDopaonMsg=null;render()}},16000);setTimeout(()=>{if(recentAddedTaskId===taskId){recentAddedTaskId=null}},1400);return}
+const el=document.createElement('div');currentDopaonEl=el;el.className='dream';el.innerHTML='<span class="dream-time">'+escapeHtml(msg.time)+'</span><span class="dream-quote">「'+escapeHtml(msg.text)+'」</span>';document.getElementById('sf8').appendChild(el);const anim=el.animate([{opacity:0,transform:'translateY(6px) scale(.98)'},{opacity:1,transform:'translateY(0) scale(1)',offset:.07},{opacity:1,offset:.92},{opacity:0,transform:'translateY(-8px) scale(.98)'}],{duration:14000,fill:'forwards',easing:'cubic-bezier(.18,.8,.22,1)'});currentDopaonAnim=anim;anim.onfinish=()=>{if(currentDopaonEl===el)currentDopaonEl=null;el.remove()}}
 
 let isComposing=false,lastCountedLen=0,compBaseLen=0,lastDirectPraiseAt=0,lastPraiseOpAt=0,lastCompData='',livePraise=0,praiseQueue=0,praiseDrainTimer=null,busyLanes=new Set(),activePraise=new Set(),baseViewportHeight=0;
 const NS='http://www.w3.org/2000/svg',FF="'Reggae One', system-ui, sans-serif",PRAISE_LIFE=2300,MAX_PRAISE=8,PRAISE_COOLDOWN=24,MAX_PRAISE_QUEUE=40,P_MARGIN=10;
@@ -620,9 +630,9 @@ function cycleTaskPriority(id){const t=state.tasks.find(x=>x.id===id);if(!t||t.s
   unsetTaskToday(id);showUndo('今日タグを外した',null);
 }
 
-function doQuickAdd(){const v=vl();if(!v)return;if(currentMode()==='habits'){state.habits.unshift(createHabit(v,{habitKind:'do'}));showToast('習慣を追加した')}else{state.tasks.unshift(createTask(v));showToast('タスクを追加した')}document.getElementById('mi').value='';resetPraiseInput();updateInputButtons('');saveState();render();spawnPraise('add')}
-function doDopa(){const v=vl();if(!v)return;showDopaonMessage(v);doQuickAdd()}
-function deleteTask(id,fromMenu=false){const idx=state.tasks.findIndex(x=>x.id===id);if(idx<0)return;const removed=state.tasks[idx];state.tasks.splice(idx,1);saveState();render();if(fromMenu)closeTaskMenu();showUndo('タスクを削除した',()=>{state.tasks.splice(Math.min(idx,state.tasks.length),0,removed);saveState();render()})}
+function doQuickAdd(opts={}){const v=vl();if(!v)return null;let created=null,kind='task';if(currentMode()==='habits'){created=createHabit(v,{habitKind:'do'});state.habits.unshift(created);kind='habit';if(!opts.silent)showToast('習慣を追加した')}else{created=createTask(v);state.tasks.unshift(created);if(!opts.silent)showToast('タスクを追加した')}document.getElementById('mi').value='';resetPraiseInput();updateInputButtons('');saveState();render();spawnPraise('add');return{kind,item:created,name:v}}
+function doDopa(){const v=vl();if(!v)return;const res=doQuickAdd({silent:true});if(res&&res.kind==='task'&&res.item)showDopaonMessage(v,res.item.id);else showDopaonMessage(v)}
+function deleteTask(id,fromMenu=false){const idx=state.tasks.findIndex(x=>x.id===id);if(idx<0)return;const removed=state.tasks[idx];state.tasks.splice(idx,1);if(currentDopaonTaskId===id)clearInlineDopaon(false);saveState();render();if(fromMenu)closeTaskMenu();showUndo('タスクを削除した',()=>{state.tasks.splice(Math.min(idx,state.tasks.length),0,removed);saveState();render()})}
 function deleteHabit(id,fromMenu=false){const idx=state.habits.findIndex(x=>x.id===id);if(idx<0)return;const removed=state.habits[idx];const logs=state.habitLogs[id];state.habits.splice(idx,1);delete state.habitLogs[id];saveState();render();if(fromMenu)closeTaskMenu();showUndo('習慣を削除した',()=>{state.habits.splice(Math.min(idx,state.habits.length),0,removed);if(logs)state.habitLogs[id]=logs;saveState();render()})}
 function undoTask(id){const t=state.tasks.find(x=>x.id===id);if(!t)return;t.state='idle';t.doneAt=null;taskChargingId=null;saveState();render();spawnPraise('add',{t:'戻した！',c:'#00ffcc'});showToast('完了を取り消した。再完了しても再抽選なし')}
 function tap(id){if(chargeBusy&&!chargeCanInterrupt)return;const t=state.tasks.find(x=>x.id===id);if(!t)return;if(t.state==='idle'){t.state='charging';taskChargingId=id;saveState();render()}else if(t.state==='charging'){t.state='done';t.doneAt=Date.now();const shouldReward=!t.rewardDone;const forceBonus=isTaskImportant(t);t.rewardDone=true;taskChargingId=null;if(shouldReward)issueChargeTicket(t,{force:forceBonus?'bonus':null,type:forceBonus?'important':'task'});saveState();render();setTimeout(()=>spawnPraise('done'),60);if(shouldReward){if(chargeBusy&&chargeCanInterrupt){resetChargeFrame();chargeBusy=false;chargeCanInterrupt=false;renderChargeMini();setTimeout(()=>startNextChargeTicket(true),60)}else setTimeout(()=>startNextChargeTicket(true),160)}}}
@@ -640,11 +650,12 @@ function mkC(task){
   const iC=task.state==='charging',iD=task.state==='done';
   const todayActive=isTaskToday(task),important=isTaskImportant(task);
   const el=document.createElement('div');
-  el.className='task'+(iC?' charging':'')+(iD?' done':'')+(todayActive?' today-task':'')+(important?' important-task':'')+(task.dueDate&&task.state!=='done'&&task.dueDate<appDayStr()&&!todayActive?' overdue':'');
+  el.className='task'+(iC?' charging':'')+(iD?' done':'')+(todayActive?' today-task':'')+(important?' important-task':'')+(task.dueDate&&task.state!=='done'&&task.dueDate<appDayStr()&&!todayActive?' overdue':'')+(recentAddedTaskId===task.id?' just-added':'');
   el.dataset.id=task.id;
   const main=document.createElement('div');main.className='task-main';
   const nm=document.createElement('div');nm.className='task-name';nm.textContent=task.name;main.appendChild(nm);
   const metas=taskMeta(task);if(metas.length){const meta=document.createElement('div');meta.className='task-meta';metas.forEach(m=>{const tag=document.createElement('span');tag.className='tag '+m.cls;tag.textContent=m.txt;meta.appendChild(tag)});main.appendChild(meta)}
+  if(!iD&&currentDopaonTaskId===task.id&&currentDopaonMsg){const dp=document.createElement('div');dp.className='task-dopaon';dp.innerHTML='<span class="dream-time">'+escapeHtml(currentDopaonMsg.time)+'</span><span class="dream-quote">「'+escapeHtml(currentDopaonMsg.text)+'」</span>';main.appendChild(dp)}
   if(!iD){const hint=document.createElement('div');hint.className='task-swipe-hint';hint.textContent='← 今日 / 重要　　→ 管理';main.appendChild(hint)}
   el.appendChild(main);
   const tools=document.createElement('div');tools.className='task-tools';

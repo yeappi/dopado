@@ -281,7 +281,7 @@ body{position:fixed;inset:0;touch-action:manipulation}
 .task-menu-toggle.open{opacity:1;color:#00ffcc;border-color:rgba(0,255,204,.55);background:rgba(0,255,204,.07)}
 .task-extra{width:100%;box-sizing:border-box;margin-top:2px;border:1px solid rgba(255,255,255,.08);border-left:3px solid rgba(0,229,188,.55);border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(0,0,0,.10));padding:9px;animation:dopaInlineIn .22s cubic-bezier(.18,.9,.25,1) both;overflow:hidden;touch-action:pan-y}
 .task-extra-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}.task-extra-tab{height:28px;border-radius:999px;border:1px solid #25294a;background:#080914;color:#6f82a6;font-family:'Orbitron',monospace;font-size:9px;font-weight:900;letter-spacing:1.1px}.task-extra-tab.on{color:#07120f;border-color:#00e5bc;background:linear-gradient(135deg,#00e5bc,#00b88f);box-shadow:0 0 13px rgba(0,229,188,.14)}
-.subtask-add{width:100%;height:32px;border-radius:10px;border:1px dashed rgba(0,229,188,.45);background:rgba(0,229,188,.045);color:#00e5bc;font-weight:900;font-size:12px;letter-spacing:.8px;margin-bottom:7px}.subtask-list{display:flex;flex-direction:column;gap:5px}.subtask-wrap{position:relative;border-radius:10px;overflow:hidden;background:rgba(0,0,0,.10);touch-action:pan-y}.subtask-delete{position:absolute;left:0;top:0;bottom:0;width:62px;border:0;background:#3a0711;color:#ff6f8c;font-size:11px;font-weight:900;letter-spacing:.8px}.subtask-row{position:relative;z-index:1;display:flex;align-items:center;gap:8px;min-height:32px;padding:7px 9px;border:1px solid rgba(255,255,255,.07);border-radius:10px;background:linear-gradient(180deg,#111325,#090a14);transition:transform .18s ease;color:#dce8ff;font-size:13px;line-height:1.35}.subtask-wrap.swiped .subtask-row{transform:translateX(62px)}.subtask-check{width:18px;height:18px;border-radius:5px;border:1px solid rgba(200,216,240,.35);background:rgba(255,255,255,.02);color:#07120f;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;flex:0 0 auto}.subtask-text{flex:1;min-width:0;word-break:break-word}.subtask-wrap.done .subtask-row{opacity:.56;color:#73839c}.subtask-wrap.done .subtask-check{background:#283040;color:#9aa7bb;border-color:#46506a}.subtask-wrap.done .subtask-text{text-decoration:line-through;text-decoration-thickness:1.5px}.subtask-empty{font-size:11px;color:#60708f;text-align:center;padding:9px 0 4px}.task-memo{width:100%;min-height:96px;box-sizing:border-box;border:1px solid rgba(255,255,255,.08);border-radius:11px;background:#070914;color:#dce8ff;padding:10px 11px;font-size:13px;line-height:1.55;resize:vertical;outline:none}.task-memo:focus{border-color:rgba(0,229,188,.45);box-shadow:0 0 0 1px rgba(0,229,188,.10)}.task-memo-note{margin-top:6px;font-family:'Orbitron',monospace;font-size:7px;letter-spacing:1.1px;color:#52637f;text-align:right}
+.subtask-add{width:100%;height:32px;border-radius:10px;border:1px dashed rgba(0,229,188,.45);background:rgba(0,229,188,.045);color:#00e5bc;font-weight:900;font-size:12px;letter-spacing:.8px;margin-bottom:7px}.subtask-list{display:flex;flex-direction:column;gap:5px}.subtask-wrap{position:relative;border-radius:10px;overflow:hidden;background:rgba(0,0,0,.10);touch-action:pan-y}.subtask-delete{position:absolute;left:0;top:0;bottom:0;width:62px;border:0;background:#3a0711;color:#ff6f8c;font-size:11px;font-weight:900;letter-spacing:.8px}.subtask-row{position:relative;z-index:1;display:flex;align-items:center;gap:8px;min-height:32px;padding:7px 9px;border:1px solid rgba(255,255,255,.07);border-radius:10px;background:linear-gradient(180deg,#111325,#090a14);transition:transform .18s ease;color:#dce8ff;font-size:13px;line-height:1.35}.subtask-wrap.swiped .subtask-row{transform:translateX(62px)}.subtask-check{width:18px;height:18px;border-radius:5px;border:1px solid rgba(200,216,240,.35);background:rgba(255,255,255,.02);color:#07120f;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;flex:0 0 auto}.subtask-text{flex:1;min-width:0;word-break:break-word}.subtask-wrap.done .subtask-row{opacity:1;color:#73839c;background:linear-gradient(180deg,#0b0d17,#070811);border-color:rgba(115,131,156,.18)}.subtask-wrap.done .subtask-check{background:#283040;color:#9aa7bb;border-color:#46506a}.subtask-wrap.done .subtask-text{text-decoration:line-through;text-decoration-thickness:1.5px}.subtask-empty{font-size:11px;color:#60708f;text-align:center;padding:9px 0 4px}.task-memo{width:100%;min-height:96px;box-sizing:border-box;border:1px solid rgba(255,255,255,.08);border-radius:11px;background:#070914;color:#dce8ff;padding:10px 11px;font-size:13px;line-height:1.55;resize:vertical;outline:none}.task-memo:focus{border-color:rgba(0,229,188,.45);box-shadow:0 0 0 1px rgba(0,229,188,.10)}.task-memo-note{margin-top:6px;font-family:'Orbitron',monospace;font-size:7px;letter-spacing:1.1px;color:#52637f;text-align:right}
 
 #sf8[data-mode="habits"] .task-card{background:linear-gradient(180deg,#ffffffee,#e8f9ffee);border-color:#a4deea;color:#163545;box-shadow:0 10px 20px rgba(20,120,145,.10)}#sf8[data-mode="habits"] .task-name{color:#163545}#sf8[data-mode="habits"] .task.habit .task-card{border-left:4px solid #0c98b5}#sf8[data-mode="habits"] .tag{background:#f4fdff;border-color:#9eddea;color:#227386}#sf8[data-mode="habits"] .task.done .task-card{opacity:.58;background:#d7eff6}
 
@@ -491,6 +491,15 @@ body{position:fixed;inset:0;touch-action:manipulation}
 .subtask-delete{left:auto!important;right:0!important;background:#3a0711!important;color:#ff6f8c!important}.subtask-wrap.swiped .subtask-row{transform:translateX(-62px)!important}.subtask-row.swipe-done{transform:translateX(42px)!important;border-color:rgba(0,255,204,.40)!important;box-shadow:0 0 14px rgba(0,255,204,.10)!important}.subtask-row.swipe-undo{transform:translateX(42px)!important;border-color:rgba(255,210,74,.42)!important;box-shadow:0 0 14px rgba(255,210,74,.10)!important}
 .task-memo{font-size:16px!important;line-height:1.45!important;resize:none!important;touch-action:manipulation!important}
 
+
+/* ===== v13.12.2 priority visual repair / subtask done no transparency ===== */
+.task.today-task .tag.today{display:inline-flex!important}
+.task.important-task .tag.important{display:inline-flex!important}
+.task.today-task:not(.important-task) .task-btn.dpa-ready{border-color:#ffd24aaa!important;color:#ffd24a!important;background:radial-gradient(circle at 50% 50%,rgba(255,210,74,.19),transparent 66%)!important}
+.task.important-task:not(.done) .task-btn.dpa-important{border-color:#ff3b5caa!important;color:#ff3b5c!important;background:radial-gradient(circle at 50% 50%,rgba(255,59,92,.24),transparent 66%)!important}
+.subtask-wrap.done .subtask-row{opacity:1!important;color:#73839c!important;background:linear-gradient(180deg,#0b0d17,#070811)!important;border-color:rgba(115,131,156,.18)!important}
+.subtask-wrap.done .subtask-text{text-decoration:line-through;text-decoration-thickness:1.5px;color:#73839c!important}
+.subtask-wrap.done .subtask-check{background:#1b2130!important;color:#9aa7bb!important;border-color:#3c465d!important}
 </style>
 </head>
 <body>
@@ -512,7 +521,7 @@ body{position:fixed;inset:0;touch-action:manipulation}
       <div class="habit-status"><span class="mode-gate-copy"><span class="pending">習慣をセット</span></span><span class="gate-arrows" aria-hidden="true"><i>›</i><i>›</i><i>›</i></span></div>
     </div>
     <div class="meter charge-frame-shell charge-off" id="chargeMeter" aria-label="チャージ抽選窓">
-      <iframe id="chargeFrame" src="./charge.html?v=13-11-3" title="DOPADO CHARGE"></iframe>
+      <iframe id="chargeFrame" src="./charge.html?v=13-12-2" title="DOPADO CHARGE"></iframe>
     </div>
   </div>
   <div id="bottomDock">
@@ -662,7 +671,23 @@ function appDayStr(d=new Date()){const x=new Date(d);x.setHours(x.getHours()-5);
 function prevAppDayStr(){return addDaysStr(appDayStr(),-1)}
 function isTaskToday(t){return !!(t&&t.dueDate===appDayStr())}
 function isTaskImportant(t){return !!(t&&t.importantDate===appDayStr()&&isTaskToday(t))}
-function syncTaskDateFlags(t){if(!t)return;const day=appDayStr();if(t.dueDate===day){t.todayDate=day}else{t.todayDate='';if(t.importantDate)t.importantDate='';if(t.swipeCycle&&t.swipeCycle<2)t.swipeCycle=0}}
+function syncTaskDateFlags(t){
+  if(!t)return;
+  const day=appDayStr();
+  // v13.12.2: 重要は「今日＋重要」の複合状態。
+  // 重要上限表示を入れた時に、importantDate だけ先に立って dueDate/todayDate が後追いになる経路ができたため、
+  // render/expire 側で見た目が落ちることがあった。ここで必ず正規化してから判定する。
+  if(t.importantDate===day){
+    t.dueDate=day;
+    t.todayDate=day;
+    if(!t.swipeCycle||t.swipeCycle<2)t.swipeCycle=2;
+    return;
+  }
+  if(t.importantDate&&t.importantDate!==day)t.importantDate='';
+  if(t.todayDate===day&&!t.dueDate)t.dueDate=day;
+  if(t.dueDate===day){t.todayDate=day}
+  else{t.todayDate='';if(t.swipeCycle&&t.swipeCycle<2)t.swipeCycle=0}
+}
 function expireDailyFlags(target=state){
   const day=appDayStr();
   if(!target||!Array.isArray(target.tasks))return;
@@ -677,8 +702,8 @@ function syncImportantUsage(){
   if(!state.ui)state.ui={completedOpen:false,mode:'tasks',importantDay:'',importantUsedIds:[]};
   if(state.ui.importantDay!==day){state.ui.importantDay=day;state.ui.importantUsedIds=[]}
   if(!Array.isArray(state.ui.importantUsedIds))state.ui.importantUsedIds=[];
-  const ids=new Set(state.ui.importantUsedIds.filter(id=>state.tasks.some(t=>t.id===id&&t.importantDate===day)));
-  state.tasks.forEach(t=>{if(t.importantDate===day)ids.add(t.id)});
+  const ids=new Set(state.ui.importantUsedIds.filter(id=>state.tasks.some(t=>{syncTaskDateFlags(t);return t.id===id&&isTaskImportant(t)})));
+  state.tasks.forEach(t=>{syncTaskDateFlags(t);if(isTaskImportant(t))ids.add(t.id)});
   state.ui.importantUsedIds=[...ids].slice(0,2);
 }
 function importantCount(){expireDailyFlags(state);syncImportantUsage();return state.ui.importantUsedIds.length}
@@ -767,7 +792,7 @@ function normalizeState(s){
   expireDailyFlags(out);
   out.habits=[...byId.values()];
   out.habitLogs=normalizeLogs(out.habitLogs);
-  out.chargeTickets=Array.isArray(out.chargeTickets)?out.chargeTickets.filter(Boolean).map(x=>({id:(x&&x.id)||newId(),type:(x&&x.type)||'task',sourceId:(x&&x.sourceId)||'',name:(x&&x.name)||'',force:(x&&x.force)||null,createdAt:(x&&x.createdAt)||Date.now()})):[];
+  out.chargeTickets=Array.isArray(out.chargeTickets)?out.chargeTickets.filter(Boolean).map(x=>({id:(x&&x.id)||newId(),type:(x&&x.type)||'task',sourceId:(x&&x.sourceId)||'',name:(x&&x.name)||'',force:(x&&x.force)||null,outcome:(x&&x.outcome)||((x&&x.force)||null),createdAt:(x&&x.createdAt)||Date.now()})):[];
   out.ui=Object.assign({completedOpen:false,mode:'tasks'},(s&&s.ui)||{});
   if(out.ui.mode!=='habits')out.ui.mode='tasks';
   out.version=APP_VERSION;
@@ -1415,12 +1440,9 @@ function rollChargeOutcome(force){
 }
 function issueChargeTicket(task,opts={}){
   const outcome=rollChargeOutcome(opts.force||null);
-  if(outcome==='miss'){
-    const shell=document.getElementById('chargeMeter');
-    if(shell&&Math.random()<0.18){const m=document.createElement('div');m.className='miss-near';m.textContent=Math.random()<0.5?'スカッ':'MISS';shell.appendChild(m);requestAnimationFrame(()=>m.classList.add('pop'));setTimeout(()=>m.remove(),780)}
-    return false;
-  }
   if(!Array.isArray(state.chargeTickets))state.chargeTickets=[];
+  // v13.12.2: ハズレもチャージ機に渡して演出させる。
+  // ただしロック対象ではないので、他UI操作は止めない。
   state.chargeTickets.push({id:newId(),type:opts.type||'task',sourceId:task.id,name:task.name,force:outcome,outcome,createdAt:Date.now()});
   return true;
 }

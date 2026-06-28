@@ -538,6 +538,15 @@ body.tutorial-active #miPrompt{
 @keyframes tutPulse{0%,100%{filter:brightness(1);transform:scale(1)}50%{filter:brightness(1.28);transform:scale(1.035)}}
 .tut-btn{margin-top:14px;width:100%;height:46px;background:#00ffcc;color:#030f0a;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.3px;pointer-events:auto}
 .tut-btn:active{transform:scale(.97)}
+.tut-reset-btn{position:absolute;left:14px;bottom:9px;border:none;background:transparent;color:#ff6f8c;font-size:11px;font-weight:800;opacity:.82;text-decoration:underline;text-underline-offset:2px;cursor:pointer;pointer-events:auto!important;padding:5px 2px;letter-spacing:.2px}
+.tut-reset-btn:active{opacity:1;transform:scale(.97)}
+#tutBubble.has-reset{padding-bottom:38px}
+
+/* ===== POST TUTORIAL ADVICE ===== */
+#adviceOverlay{position:absolute;inset:0;z-index:540;display:none;align-items:center;justify-content:center;padding:calc(var(--safe-top) + 18px) 16px calc(var(--safe-bottom) + 18px);background:rgba(3,3,14,.86);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);pointer-events:auto}
+#adviceOverlay.show{display:flex}
+.advice-card{width:100%;max-width:380px;max-height:100%;overflow-y:auto;background:linear-gradient(180deg,#101028,#090917);border:1.5px solid rgba(0,255,204,.58);border-radius:18px;box-shadow:0 20px 70px rgba(0,0,0,.75),0 0 30px rgba(0,255,204,.10);padding:18px 16px 16px;color:#eaf2ff;-webkit-overflow-scrolling:touch}
+.advice-kicker{font-family:'Orbitron',monospace;font-size:8px;letter-spacing:2.6px;color:#00ffcc;opacity:.86;margin-bottom:7px}.advice-title{font-size:20px;font-weight:900;line-height:1.35;margin-bottom:12px;color:#fff;text-shadow:0 0 16px rgba(0,255,204,.15)}.advice-body{font-size:14px;line-height:1.78;color:#dceaff;white-space:pre-line}.advice-body b{color:#ffd24a}.advice-example{margin-top:10px;padding:10px 11px;border-radius:12px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.08);font-size:13px;line-height:1.7;color:#c8d8f0}.advice-dots{display:flex;justify-content:center;gap:7px;margin:15px 0 12px}.advice-dot{width:7px;height:7px;border-radius:50%;background:#2a3a55}.advice-dot.on{background:#00ffcc;box-shadow:0 0 10px rgba(0,255,204,.35)}.advice-actions{display:flex;gap:9px}.advice-btn{height:44px;border-radius:12px;border:1px solid #263050;background:#080914;color:#9fb3d0;font-size:14px;font-weight:800;cursor:pointer}.advice-btn.primary{flex:1;background:#00ffcc;color:#03110e;border:none}.advice-btn.ghost{width:86px}.advice-btn:active{transform:scale(.97)}
 
 .task.tut-swipe-right::after{content:'右へスワイプ ▶▶▶';position:absolute;right:10px;top:50%;transform:translateY(-50%);z-index:504;padding:7px 10px;border-radius:999px;background:rgba(255,210,74,.96);color:#07070f;font-family:'Orbitron',monospace;font-size:10px;font-weight:900;letter-spacing:.8px;box-shadow:0 0 18px rgba(255,210,74,.55);pointer-events:none;animation:tutSwipeCue 1s ease-in-out infinite}
 .task.tut-swipe-right .task-card{box-shadow:0 0 0 2px rgba(255,210,74,.82),0 0 28px rgba(255,210,74,.30),inset 0 1px 0 rgba(255,255,255,.035)!important}
@@ -672,9 +681,20 @@ body.tutorial-active #miPrompt{
       <div id="tutPart"></div>
       <div id="tutMsg"></div>
       <div id="tutHint"></div>
+      <button id="tutResetBtn" class="tut-reset-btn" type="button" onclick="tutManualReset()">詰まったらリセット</button>
     </div>
     <button id="tutSkip" onclick="tutSkip()">SKIP</button>
     <div id="tutCounter"></div>
+  </div>
+
+  <div id="adviceOverlay" aria-modal="true" role="dialog" aria-labelledby="adviceTitle">
+    <div class="advice-card">
+      <div class="advice-kicker" id="adviceKicker">DOPAON GUIDE</div>
+      <div class="advice-title" id="adviceTitle">有効活用アドバイス！</div>
+      <div class="advice-body" id="adviceBody"></div>
+      <div class="advice-dots"><span class="advice-dot" id="adviceDot0"></span><span class="advice-dot" id="adviceDot1"></span></div>
+      <div class="advice-actions" id="adviceActions"></div>
+    </div>
   </div>
 
 </div>
@@ -1914,6 +1934,8 @@ function tutStart() {
   setTutorialUiActive(true);
   const sk = document.getElementById('tutSkip');
   if (sk) sk.style.display = 'block';
+  const rb = document.getElementById('tutResetBtn');
+  if (rb) rb.style.display = 'block';
   tutRender();
 }
 
@@ -1950,6 +1972,57 @@ function tutSkip() {
   render();
 }
 
+
+function tutManualReset() {
+  const ok = confirm('チュートリアルを最初からやり直します。\n作成中のタスク・習慣・報酬データは削除されます。\n本当にリセットしますか？');
+  if (!ok) return;
+  try {
+    // 詰み状態からでも抜けられるよう、先にロックと演出をできるだけ解除する。
+    chargeBusy = false; chargeCanInterrupt = false;
+    rewardUnlockPending = false; currentChargeTicket = null;
+    stopChargeParticles();
+    resetChargeFrame();
+    setChargeInteractionLocked(false);
+    ['rewardOverlay','goBonusGate'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.classList.remove('show'); el.style.display = ''; }
+    });
+    const bfo = document.getElementById('bonusFrameOverlay');
+    if (bfo) { bfo.classList.remove('show'); bfo.style.display = ''; }
+    if (bonusResolve) { const r = bonusResolve; bonusResolve = null; try { r(null); } catch(e) {} }
+    if (goBonusResolve) { const r = goBonusResolve; goBonusResolve = null; try { r(); } catch(e) {} }
+    bonusPreparedReward = null;
+    taskChargingId = null; habitChargingId = null; flippedHabitId = null;
+  } catch(e) {}
+
+  try {
+    const exactKeys = [
+      STORAGE_KEY,
+      BACKUP_KEY,
+      ...LEGACY_KEYS,
+      'dopado_tutorial_completed',
+      'dopado_home_prompt_seen',
+      DATA_RESET_CANARY_KEY
+    ];
+    function isDopadoStorageKeyForManualReset(key) {
+      const lower = String(key || '').toLowerCase();
+      return exactKeys.includes(key) || lower.includes('dopaon') || lower.includes('dopado');
+    }
+    Object.keys(localStorage).forEach(key => {
+      if (key === DATA_RESET_DONE_KEY) return;
+      if (isDopadoStorageKeyForManualReset(key)) localStorage.removeItem(key);
+    });
+    Object.keys(sessionStorage).forEach(key => {
+      if (isDopadoStorageKeyForManualReset(key)) sessionStorage.removeItem(key);
+    });
+    // 手動リセット後に自動リセットが余計に再発火しないよう、現在の版でクリーン済みにしておく。
+    localStorage.setItem(DATA_RESET_DONE_KEY, DATA_RESET_VERSION);
+    localStorage.setItem(DATA_RESET_CANARY_KEY, DATA_RESET_VERSION);
+  } catch(e) {}
+
+  location.reload();
+}
+
 function _tutHideForBonus() {
   setTutorialUiActive(true);
   // BONUS演出中はチュートリアル文言を完全に隠す。
@@ -1960,6 +2033,8 @@ function _tutHideForBonus() {
   if (bbl) bbl.classList.remove('show');
   const counter = document.getElementById('tutCounter');
   if (counter) counter.textContent = '';
+  const rb = document.getElementById('tutResetBtn');
+  if (rb) rb.style.display = 'none';
   tutGlow(null);
   tutPulse(null);
 }
@@ -1974,6 +2049,10 @@ function _tutHideOverlay() {
   if (bg) bg.style.opacity = '0';
   const btn = document.getElementById('tutActionBtn');
   if (btn) btn.remove();
+  const rb = document.getElementById('tutResetBtn');
+  if (rb) rb.style.display = 'none';
+  const bbl = document.getElementById('tutBubble');
+  if (bbl) bbl.classList.remove('has-reset');
   tutGlow(null);
   tutPulse(null);
 }
@@ -2100,12 +2179,53 @@ function tutRender() {
   tutGlowForStep(st.id);
 }
 
+function showDopadoAdvice(page = 0) {
+  const ov = document.getElementById('adviceOverlay');
+  const body = document.getElementById('adviceBody');
+  const actions = document.getElementById('adviceActions');
+  const d0 = document.getElementById('adviceDot0');
+  const d1 = document.getElementById('adviceDot1');
+  if (!ov || !body || !actions) return;
+  const p = page === 1 ? 1 : 0;
+  if (d0) d0.classList.toggle('on', p === 0);
+  if (d1) d1.classList.toggle('on', p === 1);
+  if (p === 0) {
+    body.innerHTML = `日常タスク画面では、頭の中にある少しでも<b>「やらなきゃ！」</b>とか<b>「やりたい」</b>と思っていることを、まず全部書き出そう！！
+
+書き出したタスクから今日やる事を決めて、さらにその中から<b>2つだけ重要タグ</b>を付けると分かりやすいよ！！
+
+タスクをもっと細かく出来る時は、子タスクを使って分解しよう！<div class="advice-example">例：食材を買う
+・じゃがいも
+・にんじん
+・豚肉
+・カレールー</div>
+他にも期限をつけたり、メモで整理して使おう！`;
+    actions.innerHTML = `<button class="advice-btn primary" type="button" onclick="showDopadoAdvice(1)">次へ</button>`;
+  } else {
+    body.innerHTML = `習慣タスク画面では、<b>続けたいこと</b>と<b>辞めたいこと</b>を合わせて9個まで選べる！
+
+習慣タスクは達成で<b>BONUS確定</b>。
+無理なく続けられるものから選んで、少しずつDOPAONしていこう。`;
+    actions.innerHTML = `<button class="advice-btn ghost" type="button" onclick="showDopadoAdvice(0)">戻る</button><button class="advice-btn primary" type="button" onclick="hideDopadoAdvice()">閉じる</button>`;
+  }
+  ov.classList.add('show');
+}
+function hideDopadoAdvice() {
+  const ov = document.getElementById('adviceOverlay');
+  if (ov) ov.classList.remove('show');
+  showToast('チュートリアル完了！DOPAON開始！');
+}
+
 function tutSetBubble(st) {
   const bbl = document.getElementById('tutBubble');
   if (!bbl) return;
   document.getElementById('tutPart').textContent = st.part || '';
   document.getElementById('tutMsg').textContent = st.msg || '';
   document.getElementById('tutHint').textContent = st.hint || '';
+  const resetBtn = document.getElementById('tutResetBtn');
+  const showReset = st.id !== 't_fin';
+  if (resetBtn) resetBtn.style.display = showReset ? 'block' : 'none';
+  bbl.classList.toggle('has-reset', showReset);
   // カウンター
   const counter = document.getElementById('tutCounter');
   if (counter) {
@@ -2129,7 +2249,7 @@ function tutSetBubble(st) {
     btn.onclick = () => {
       if (st.id === 't_fin') {
         _tutHideOverlay();
-        showToast('チュートリアル完了！DOPAON開始！');
+        showDopadoAdvice(0);
         return;
       }
       if (st.id === 'h_home_ios') localStorage.setItem('dopado_home_prompt_seen', '1');

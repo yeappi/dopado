@@ -519,9 +519,11 @@ body{position:fixed;inset:0;touch-action:manipulation}
 #tutPart{font-family:'Orbitron',monospace;font-size:7px;letter-spacing:2.5px;color:#00ffcc;margin-bottom:7px;opacity:.8}
 #tutMsg{font-size:14px;color:#eaf2ff;line-height:1.65;font-weight:600;white-space:pre-line}
 #tutHint{font-family:'Orbitron',monospace;font-size:9px;letter-spacing:1px;color:#00ffcc;margin-top:9px;opacity:.85}
-#tutSkip{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);right:14px;z-index:503;background:transparent;border:1px solid #2a3a5a;color:#4a6088;border-radius:999px;padding:5px 13px;font-family:'Orbitron',monospace;font-size:8px;letter-spacing:1.5px;cursor:pointer;pointer-events:all;display:none}
+#tutSkip{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);left:14px;z-index:503;background:transparent;border:1px solid #2a3a5a;color:#4a6088;border-radius:999px;padding:5px 13px;font-family:'Orbitron',monospace;font-size:8px;letter-spacing:1.5px;cursor:pointer;pointer-events:all;display:none}
 #tutCounter{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 68px);left:50%;transform:translateX(-50%);font-family:'Orbitron',monospace;font-size:7px;letter-spacing:2px;color:#2a3a55;pointer-events:none;z-index:502;white-space:nowrap}
 .tut-glow{box-shadow:0 0 0 2.5px rgba(0,255,204,.9),0 0 20px rgba(0,255,204,.3)!important;position:relative!important;z-index:501!important;border-radius:inherit!important}
+.tut-pulse{animation:tutPulse 1.05s ease-in-out infinite!important;box-shadow:0 0 0 2px rgba(255,210,74,.95),0 0 22px rgba(255,210,74,.42)!important;position:relative!important;z-index:501!important}
+@keyframes tutPulse{0%,100%{filter:brightness(1);transform:scale(1)}50%{filter:brightness(1.28);transform:scale(1.035)}}
 .tut-btn{margin-top:14px;width:100%;height:46px;background:#00ffcc;color:#030f0a;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.3px;pointer-events:auto}
 .tut-btn:active{transform:scale(.97)}
 </style>
@@ -935,10 +937,11 @@ function taskHasExtras(t){const ex=taskExtras(t);return ex.subtasks.length>0||St
 function preferredExtraTab(t){const ex=taskExtras(t);return ex.subtasks.length?'subtasks':(String(ex.memo||'').trim()?'memo':'subtasks')}
 function closeTaskExtras(doRender=false){if(openExtraTaskId||openSubtaskSwipeId||subtaskInputTaskId){openExtraTaskId=null;openSubtaskSwipeId=null;subtaskInputTaskId=null;if(doRender)render();tutHook('extras_close');return true}return false}
 function toggleTaskExtras(id){const t=state.tasks.find(x=>x.id===id);if(!t)return;clearTaskChargePreview(null,false);openSubtaskSwipeId=null;subtaskInputTaskId=null;if(openExtraTaskId===id){openExtraTaskId=null;saveState();render();tutHook('extras_close');return}openExtraTaskId=id;openExtraTab=preferredExtraTab(t);saveState();render();tutHook('extras_open',id)}
-function setTaskExtraTab(id,tab){if(openExtraTaskId!==id)return;openExtraTab=tab==='memo'?'memo':'subtasks';openSubtaskSwipeId=null;subtaskInputTaskId=null;render();if(tab==='memo')tutHook('memo_tab')}
+function setTaskExtraTab(id,tab){if(openExtraTaskId!==id)return;openExtraTab=tab==='memo'?'memo':'subtasks';openSubtaskSwipeId=null;subtaskInputTaskId=null;render();if(tut&&tut.active)setTimeout(tutRender,60);if(tab==='memo')tutHook('memo_tab')}
 function startSubtaskInput(id){
   const t=state.tasks.find(x=>x.id===id);if(!t)return;
   openExtraTaskId=id;openExtraTab='subtasks';openSubtaskSwipeId=null;subtaskInputTaskId=id;render();
+  if(tut&&tut.active)setTimeout(tutRender,60);
   setTimeout(()=>{const input=document.querySelector('[data-subtask-input="'+id+'"]');if(input)input.focus({preventScroll:true})},30);
 }
 function commitSubtaskInput(id,value){
@@ -1157,8 +1160,9 @@ function openTaskMenu(id=null,kind=null,slot=null){
   // チュートリアル t_cavd: 「やらないこと」を自動選択
   if (tut && tut.active) { const _cs = tutCurrentStep(); if (_cs && _cs.id === 't_cavd') { const ki = document.getElementById('habitKindInput'); if (ki) ki.value = 'avoid'; } }
   document.getElementById('taskOverlay').classList.add('show');
+  if(tut&&tut.active)setTimeout(tutRender,60);
 }
-function closeTaskMenu(){document.getElementById('taskOverlay').classList.remove('show');editingId=null;editingKind=null;editingHabitSlot=null;taskMenuImportant=false}
+function closeTaskMenu(){document.getElementById('taskOverlay').classList.remove('show');editingId=null;editingKind=null;editingHabitSlot=null;taskMenuImportant=false;if(tut&&tut.active)setTimeout(tutRender,60)}
 function rerenderAfterMenuClose(){render();requestAnimationFrame(()=>render())}
 function syncTaskMenuFields(){
   const isHabit=document.getElementById('taskTypeInput').value==='habit';
@@ -1609,7 +1613,7 @@ function playBonusFrame(){
     const ov=document.getElementById('bonusFrameOverlay'),fr=document.getElementById('bonusFrame');
     if(!ov||!fr){const r=grantReward(rollBonusTier());saveState();renderHeader();resolve(r);return}
     ov.classList.add('show');
-    const send=()=>{try{fr.contentWindow.postMessage({type:'DOPAON_BONUS_START'},'*')}catch(e){const r=grantReward(rollBonusTier());saveState();renderHeader();resolve(r)}};
+    const send=()=>{try{const tutBonus=!!(tut&&tut.active&&tut.bonusFired);fr.contentWindow.postMessage({type:'DOPAON_BONUS_START',tutorial:tutBonus,forceTier:tutBonus?'red':undefined},'*')}catch(e){const r=grantReward(rollBonusTier());saveState();renderHeader();resolve(r)}};
     if(fr.contentWindow)send(); else fr.onload=send;
   })
 }
@@ -1626,15 +1630,13 @@ window.addEventListener('message',e=>{
   }
   if(d.type==='DOPAON_BONUS_PREPARE_REWARD'){
     const isTutFinalBonus=tut&&tut.active&&tut.bonusFired;
+    const tier=TIER_ORDER.includes(d.tier)?d.tier:(isTutFinalBonus?'red':rollBonusTier());
     let reward;
     if(isTutFinalBonus){
-      // チュートリアル最終BONUS: 「挑戦する」固定
-      const titleObj=TITLES.find(t=>t.id===TUT_TITLE_ID);
-      if(titleObj&&!state.ownedTitles.includes(TUT_TITLE_ID)){state.ownedTitles.push(TUT_TITLE_ID)}
-      if(!state.profile.titleId)state.profile.titleId=TUT_TITLE_ID;
-      reward={kind:'title',tier:'red',title:titleObj||{id:TUT_TITLE_ID,text:'挑戦する',tier:'red'}};
+      // チュートリアル最終BONUSも、BONUS側が出した結果色と報酬色を必ず一致させる。
+      // 赤肩書き「挑戦する」はBONUS後の完了メッセージで別途付与する。
+      reward=grantReward(tier);
     }else{
-      const tier=TIER_ORDER.includes(d.tier)?d.tier:rollBonusTier();
       reward=grantReward(tier);
     }
     bonusPreparedReward=reward;saveState();renderHeader();
@@ -1719,14 +1721,13 @@ const TUT_PART2_STEPS = [
 
 const TUT_PART3_STEPS = [
   { id: 't_hab',   part: 'PART 3 · 習慣 & BONUS', msg: '上のバーをタップして\n習慣画面へ', hint: '↑ バーをタップ' },
-  { id: 't_cdo',   part: 'PART 3 · 習慣 & BONUS', msg: '空きスロットをタップして\n「やること」の習慣を作ろう', hint: '＋ スロット → やること' },
-  { id: 't_lpdo',  part: 'PART 3 · 習慣 & BONUS', msg: 'やることは長押しで達成\n溜めて、離して。', hint: 'タイルを長押し（練習）' },
-  { id: 't_cavd',  part: 'PART 3 · 習慣 & BONUS', msg: '次は「やらないこと」の\n習慣も作ろう', hint: '＋ スロット → やらないこと' },
-  { id: 't_dtap',  part: 'PART 3 · 習慣 & BONUS', msg: '「やらないこと」は\nダブルタップで裏面へ', hint: 'タイルをダブルタップ' },
-  { id: 't_fail',  part: 'PART 3 · 習慣 & BONUS', msg: '破った時はここを長押し\nで失敗を記録できる', hint: '「失敗を記録」を長押し' },
+  { id: 't_cdo',   part: 'PART 3 · 習慣 & BONUS', msg: '空きスロットをタップして\n「やること」の習慣を作ろう', hint: '光っている＋スロット → 名前入力 → 習慣を追加', pos: 'top' },
+  { id: 't_lpdo',  part: 'PART 3 · 習慣 & BONUS', msg: 'やることは長押しで達成\n溜めて、離して。', hint: '光っているタイルを長押し（練習）' },
+  { id: 't_cavd',  part: 'PART 3 · 習慣 & BONUS', msg: '次は「やらないこと」も作ろう。\n空きスロットから作成できるよ', hint: '光っている＋スロット → チェック内容を「やらないこと」→ 習慣を追加', pos: 'top' },
+  { id: 't_dtap',  part: 'PART 3 · 習慣 & BONUS', msg: '「やらないこと」は\nダブルタップで裏面へ', hint: '光っているタイルをダブルタップ' },
+  { id: 't_fail',  part: 'PART 3 · 習慣 & BONUS', msg: '破った時はここを長押し\nで失敗を記録できる', hint: '光っている「失敗を記録」を長押し' },
   { id: 't_failmsg',part:'PART 3 · 習慣 & BONUS', msg: '失敗は赤で残る。\nでも、報酬は出ない。\nDOPADOが光るのは、次に成功した時。', hint: '', btn: '次へ' },
-  { id: 't_undo',  part: 'PART 3 · 習慣 & BONUS', msg: 'じゃあ次は、守れた時の記録。\nもう一度ダブルタップで表へ戻そう', hint: 'ダブルタップで表面へ' },
-  { id: 't_lpavd', part: 'PART 3 · 習慣 & BONUS', msg: '表面を長押しして\n「守れた / 達成」を掴もう', hint: 'タイルを長押し' },
+  { id: 't_lpavd', part: 'PART 3 · 習慣 & BONUS', msg: '次は守れた時の記録。\n表面を長押しして\n「守れた / 達成」を掴もう', hint: '光っているタイルを長押し' },
   { id: 't_bon',   part: 'PART 3 · 習慣 & BONUS', msg: '成功！！\n習慣の達成はBONUSにつながる', hint: '↑ チャージ機を見ておこう' },
 ];
 
@@ -1801,6 +1802,7 @@ function _tutHideOverlay() {
   const btn = document.getElementById('tutActionBtn');
   if (btn) btn.remove();
   tutGlow(null);
+  tutPulse(null);
 }
 
 /* ---------- チュートリアル用チケット判定 ---------- */
@@ -1951,6 +1953,7 @@ function tutSetBubble(st) {
         if (state.habitLogs[tut.habitAvoidId]) {
           delete state.habitLogs[tut.habitAvoidId][habitTargetDate({id:tut.habitAvoidId,habitKind:'avoid'})];
         }
+        flippedHabitId = null;
         saveState(); render();
       }
       btn.remove();
@@ -1968,23 +1971,50 @@ function tutGlow(el) {
   document.querySelectorAll('.tut-glow').forEach(x => x.classList.remove('tut-glow'));
   if (el) el.classList.add('tut-glow');
 }
+function tutPulse(el) {
+  document.querySelectorAll('.tut-pulse').forEach(x => x.classList.remove('tut-pulse'));
+  if (el) el.classList.add('tut-pulse');
+}
+function tutIsTaskOverlayOpen(){const ov=document.getElementById('taskOverlay');return !!(ov&&ov.classList.contains('show'))}
+function tutIsProfileOpen(){const ov=document.getElementById('profileOverlay');return !!(ov&&ov.classList.contains('show'))}
+function tutFirstEmptyHabitTile(){return document.querySelector('.habit-tile.empty')}
+function tutButtonByText(root,selector,text){
+  const list=[...(root||document).querySelectorAll(selector)];
+  return list.find(x=>String(x.textContent||'').includes(text))||null;
+}
 function tutGlowForStep(sid) {
   requestAnimationFrame(() => {
-    let el = null;
+    let el = null, pulse = null;
     const taskEl = tut.taskId ? document.querySelector('[data-id="' + tut.taskId + '"]') : null;
     const doEl = tut.habitDoId ? document.querySelector('.habit-tile[data-id="' + tut.habitDoId + '"]') : null;
     const avEl = tut.habitAvoidId ? document.querySelector('.habit-tile[data-id="' + tut.habitAvoidId + '"]') : null;
-    if (sid === 't_add') el = document.getElementById('mi');
+    if (sid === 't_add') { el = document.getElementById('mi'); pulse = document.getElementById('db'); }
     else if (sid === 't_today' || sid === 't_imp') el = taskEl;
-    else if (sid === 't_ext') el = taskEl && taskEl.querySelector('.task-menu-toggle');
-    else if (sid === 't_prep' || sid === 't_done') { const b = taskEl && taskEl.querySelector('.task-btn'); el = b || taskEl; }
+    else if (sid === 't_ext') { el = taskEl && taskEl.querySelector('.task-menu-toggle'); pulse = el; }
+    else if (sid === 't_sub') { el = document.querySelector('.subtask-input') || document.querySelector('.subtask-add'); pulse = document.querySelector('.subtask-add'); }
+    else if (sid === 't_mtab') { el = tutButtonByText(document,'button.task-extra-tab','メモ'); pulse = el; }
+    else if (sid === 't_memo') el = document.querySelector('.task-memo');
+    else if (sid === 't_cext') { el = taskEl && taskEl.querySelector('.task-menu-toggle'); pulse = el; }
+    else if (sid === 't_prep' || sid === 't_done') { const b = taskEl && taskEl.querySelector('.task-btn'); el = b || taskEl; pulse = b; }
     else if (sid === 't_chrg' || sid === 't_bon') el = document.getElementById('chargeMeter');
-    else if (sid === 't_prof') el = document.querySelector('.identity');
+    else if (sid === 't_prof') { el = document.querySelector('.identity'); pulse = el; }
     else if (sid === 't_name') el = document.getElementById('nameInput');
-    else if (sid === 't_hab') el = document.getElementById('habitRow');
-    else if (sid === 't_lpdo') el = doEl;
-    else if (sid === 't_dtap' || sid === 't_fail' || sid === 't_undo' || sid === 't_lpavd') el = avEl;
+    else if (sid === 't_pcls') { el = document.querySelector('#profileOverlay .popup-close'); pulse = el; }
+    else if (sid === 't_hab') { el = document.getElementById('habitRow'); pulse = el; }
+    else if (sid === 't_cdo' || sid === 't_cavd') {
+      if (tutIsTaskOverlayOpen()) {
+        el = sid === 't_cavd' ? document.getElementById('habitKindInput') : document.getElementById('taskNameInput');
+        pulse = document.getElementById('taskSaveBtn');
+      } else {
+        el = tutFirstEmptyHabitTile();
+        pulse = el;
+      }
+    }
+    else if (sid === 't_lpdo') { el = doEl; pulse = doEl; }
+    else if (sid === 't_dtap' || sid === 't_lpavd') { el = avEl; pulse = avEl; }
+    else if (sid === 't_fail') { el = avEl && (avEl.querySelector('.mini-btn.fail') || avEl); pulse = el; }
     tutGlow(el);
+    tutPulse(pulse);
   });
 }
 
@@ -2074,7 +2104,7 @@ function tutHook(evt, data) {
               tut.bonusFired = true;
               tutRender();
               setTimeout(() => {
-                // tutorial専用: 赤tier確定BONUS、showRewardには頼らない
+                // tutorial専用BONUS。結果色と報酬色はBONUS側の結果に合わせる
                 issueChargeTicket({ id: 'tut_bonus', name: 'TUTORIAL BONUS' }, { force: 'bonus', type: 'habit', tutorial: true });
                 setTimeout(() => startNextChargeTicket(true), 120);
               }, 800);
@@ -2085,13 +2115,9 @@ function tutHook(evt, data) {
       break;
     case 'habit_flip':
       if (sid === 't_dtap' && data === tut.habitAvoidId) tutAdvance();
-      else if (sid === 't_undo' && data === tut.habitAvoidId) tutAdvance();
       break;
     case 'habit_failed':
       if (sid === 't_fail' && data === tut.habitAvoidId) { tut.failRecorded = true; tutAdvance(); }
-      break;
-    case 'habit_undo':
-      if (sid === 't_undo' && data === tut.habitAvoidId) tutAdvance();
       break;
   }
 }

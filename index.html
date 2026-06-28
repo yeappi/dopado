@@ -479,6 +479,7 @@ const DOPAON_QUOTES=['やる気を待つより、手を動かした方が早い�
 
 let state={version:APP_VERSION,profile:{name:'',titleId:null},xp:0,freeDays:0,ownedTitles:[],ownedIllusts:[],tasks:[],habits:[],habitLogs:{},chargeTickets:[],ui:{completedOpen:false,mode:'tasks'},onboarded:false};
 let saveTimer=null;
+let hardResetting=false;
 let editingId=null;
 let editingKind=null;
 let menuWeekdays=[];
@@ -615,6 +616,7 @@ function loadState(){
   state.habits.push(defaultHabit());
 }
 function saveNow(){
+  if(hardResetting)return;
   try{
     const old=localStorage.getItem(STORAGE_KEY);
     if(old)localStorage.setItem(BACKUP_KEY,old);
@@ -707,30 +709,37 @@ function textSize(mode){if(mode==='done')return 26+Math.floor(Math.random()*7);i
 function getTextBox(groups,fs){const pad=Math.ceil(fs*.55),lh=Math.ceil(fs*1.34),maxMark=groups.reduce((m,g)=>g.side?Math.max(m,charLen(g.t)):m,1);return{w:Math.ceil(Math.max(fs,maxMark*fs*.62)+pad*2),h:Math.ceil(groups.length*lh+pad),pad,lh}}
 function txPair(svg,x,y,fs,txt,col){const outer=Math.max(4,fs*.24),inner=Math.max(2,fs*.11);[["none","white",outer],[col,"#111",inner]].forEach(([fill,stroke,sw])=>{const t=document.createElementNS(NS,'text');t.setAttribute('x',x);t.setAttribute('y',y);t.setAttribute('text-anchor','middle');t.setAttribute('dominant-baseline','central');t.setAttribute('font-family',FF);t.setAttribute('font-size',fs);t.setAttribute('font-weight','900');t.setAttribute('fill',fill);t.setAttribute('stroke',stroke);t.setAttribute('stroke-width',sw);t.setAttribute('stroke-linejoin','round');if(fill!=='none')t.setAttribute('paint-order','stroke');t.textContent=txt;svg.appendChild(t)})}
 function drawPraiseText(svg,item,groups,box,fs){let cy=box.pad/2+box.lh/2;groups.forEach(g=>{const len=Math.max(1,charLen(g.t)),fitFs=g.side?Math.min(fs,Math.max(10,(box.w-box.pad*.65)/(len*.62))):fs;txPair(svg,box.w/2,cy,fitFs,g.t,item.c);cy+=box.lh})}
-function getPraiseOrigin(){const pc=document.getElementById('pc');if(!pc)return{x:180,y:360};return{x:pc.clientWidth/2,y:pc.clientHeight+36}}
+function getPraiseOrigin(){const pc=document.getElementById('pc');if(!pc)return{x:180,y:360};return{x:pc.clientWidth/2,y:pc.clientHeight+22}}
+function praisePointRow(W,margin,intervals){
+  const total=intervals.reduce((a,b)=>a+b,0),span=W*(1-margin*2),xs=[W*margin];let acc=0;
+  intervals.forEach(v=>{acc+=v;xs.push(W*margin+span*acc/total)});
+  return xs;
+}
 function buildPraiseLanes(){
   const pc=document.getElementById('pc');if(!pc)return[];const W=pc.clientWidth,H=pc.clientHeight;
-  const baseXs=[.08,.20,.36,.50,.64,.80,.92].map(r=>W*r);
-  const targetXs=[.13,.26,.40,.50,.60,.74,.87].map(r=>W*r);
-  const targetYs=[.17,.25,.33,.22,.33,.25,.17].map(r=>H*r);
-  const originY=H+26;
-  return targetXs.map((tx,i)=>{const ox=baseXs[i],oy=originY,ty=targetYs[i];const dx=tx-ox,dy=ty-oy;return{index:i,ox,oy,tx,ty,angle:Math.atan2(dy,dx)*180/Math.PI,len:Math.hypot(dx,dy)}})
+  // 下段: ・....・...・..・.・..・...・....・
+  // 上段: ・.....・....・...・..・...・....・.....・（下段と1対1対応）
+  const bottomXs=praisePointRow(W,.10,[4,3,2,1,2,3,4]);
+  const upperXs=praisePointRow(W,.06,[5,4,3,2,3,4,5]);
+  const oy=H+24;
+  const ty=clamp(H*.24,86,Math.max(96,H-170));
+  return bottomXs.map((ox,i)=>{const tx=upperXs[i],dx=tx-ox,dy=ty-oy;return{index:i,ox,oy,tx,ty,angle:Math.atan2(dy,dx)*180/Math.PI,len:Math.hypot(dx,dy)}});
 }
+function pointOnPraiseLane(lane,t){return{x:lane.ox+(lane.tx-lane.ox)*t,y:lane.oy+(lane.ty-lane.oy)*t}}
 function fitsInPraiseArea(x,y,w,h){const pc=document.getElementById('pc');return x-w/2>P_MARGIN&&x+w/2<pc.clientWidth-P_MARGIN&&y-h/2>P_MARGIN&&y+h/2<pc.clientHeight-P_MARGIN}
 function pickPraisePosition(w,h){
-  const pc=document.getElementById('pc'),lanes=buildPraiseLanes();
-  if(!lanes.length)return null;
-  const free=lanes.filter(l=>!busyLanes.has(l.index));
-  if(!free.length)return null;
+  const lanes=buildPraiseLanes();if(!lanes.length)return null;
+  const free=lanes.filter(l=>!busyLanes.has(l.index));if(!free.length)return null;
   const pool=shuffle(free);
   for(const lane of pool){
-    const ox=(Math.random()-.5)*18,oy=(Math.random()-.5)*16;
-    const x=clamp(lane.tx+ox,w/2+P_MARGIN,pc.clientWidth-w/2-P_MARGIN);
-    const y=clamp(lane.ty+oy,h/2+P_MARGIN,pc.clientHeight-h/2-P_MARGIN);
-    if(fitsInPraiseArea(x,y,w,h))return{lane,x,y,angle:lane.angle};
+    const tBase=.48+Math.random()*.23;
+    const tries=[tBase,tBase-.08,tBase+.08,.56,.66,.46];
+    for(const tRaw of tries){
+      const t=clamp(tRaw,.38,.78),p=pointOnPraiseLane(lane,t);
+      if(fitsInPraiseArea(p.x,p.y,w,h))return{lane,x:p.x,y:p.y,angle:lane.angle};
+    }
   }
-  const fb=pool[0];
-  return fb?{lane:fb,x:clamp(fb.tx,w/2+P_MARGIN,pc.clientWidth-w/2-P_MARGIN),y:clamp(fb.ty,h/2+P_MARGIN,pc.clientHeight-h/2-P_MARGIN),angle:fb.angle}:null;
+  return null;
 }
 function spawnPraise(mode='input',forcedItem=null){if(livePraise>=MAX_PRAISE)return false;syncViewport();const pc=document.getElementById('pc');if(!pc)return false;const item=forcedItem||rnd(mode==='done'?DONE_PR:mode==='add'?ADD_PR:PR),groups=grps(item.t),fs=textSize(mode),box=getTextBox(groups,fs),pos=pickPraisePosition(box.w,box.h);if(!pos||!pos.lane)return false;const rot=clamp(pos.angle+90,-30,30);busyLanes.add(pos.lane.index);livePraise++;const svg=document.createElementNS(NS,'svg');svg.setAttribute('width',box.w);svg.setAttribute('height',box.h);svg.setAttribute('viewBox','0 0 '+box.w+' '+box.h);svg.style.cssText='position:absolute;left:'+(pos.x-box.w/2).toFixed(1)+'px;top:'+(pos.y-box.h/2).toFixed(1)+'px;transform:rotate('+rot.toFixed(1)+'deg) scale(.96);opacity:0;pointer-events:none;filter:drop-shadow(0 2px 5px rgba(0,0,0,.45));';drawPraiseText(svg,item,groups,box,fs);pc.appendChild(svg);activePraise.add(svg);const scale=mode==='input'?1:1.06;const anim=svg.animate([{opacity:0,transform:'rotate('+rot.toFixed(1)+'deg) translateY(10px) scale(.85)'},{opacity:1,transform:'rotate('+rot.toFixed(1)+'deg) translateY(0) scale('+scale+')',offset:.10},{opacity:1,transform:'rotate('+rot.toFixed(1)+'deg) translateY(-4px) scale(1)',offset:.65},{opacity:.7,transform:'rotate('+rot.toFixed(1)+'deg) translateY(-10px) scale(.98)',offset:.88},{opacity:0,transform:'rotate('+rot.toFixed(1)+'deg) translateY(-22px) scale(.93)'}],{duration:PRAISE_LIFE,easing:'cubic-bezier(.18,.8,.22,1)',fill:'forwards'});anim.onfinish=()=>releasePraise(svg,pos.lane.index);return true}
 function releasePraise(svg,laneIndex){if(!activePraise.has(svg))return;activePraise.delete(svg);busyLanes.delete(laneIndex);livePraise=Math.max(0,livePraise-1);if(svg.parentNode)svg.parentNode.removeChild(svg);if(praiseQueue>0)drainPraiseQueue()}
@@ -788,11 +797,29 @@ function importBackup(){
   input.onchange=()=>{const f=input.files&&input.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const parsed=JSON.parse(String(r.result||''));state=normalizeState(parsed);saveNow();renderHeader();render();closeProfile();showDopaonMessage('バックアップ復元');}catch(e){alert('復元できなかった。JSONファイルを確認して。')}};r.readAsText(f)};
   input.click();
 }
-function resetAllData(){
+async function resetAllData(){
   const ok=confirm('本当にすべてのデータを削除する？\nタスク・習慣・報酬・プロフィールが全部リセットされます。');
   if(!ok)return;
-  try{localStorage.removeItem(STORAGE_KEY);localStorage.removeItem(BACKUP_KEY)}catch(e){}
-  location.reload();
+  hardResetting=true;
+  if(saveTimer){clearTimeout(saveTimer);saveTimer=null}
+  const prefixes=['dopaon_','dopado_','DOPAON_','DOPADO_'];
+  try{
+    Object.keys(localStorage).forEach(key=>{if(prefixes.some(p=>key.startsWith(p)))localStorage.removeItem(key)});
+    Object.keys(sessionStorage).forEach(key=>{if(prefixes.some(p=>key.startsWith(p)))sessionStorage.removeItem(key)});
+  }catch(e){}
+  try{
+    if('caches' in window){
+      const names=await caches.keys();
+      await Promise.all(names.map(name=>caches.delete(name)));
+    }
+  }catch(e){}
+  try{
+    if('serviceWorker' in navigator){
+      const regs=await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(reg=>reg.unregister()));
+    }
+  }catch(e){}
+  location.replace(location.pathname+'?v=reset-'+Date.now());
 }
 function showUndoNotice(text,onUndo){
   if(undoTimer){clearTimeout(undoTimer);undoTimer=null}

@@ -634,38 +634,46 @@ const LEVEL_STEP=10;
 
 // ===== ONE-TIME DATA RESET FOR TUTORIAL MIGRATION =====
 // この値を変えた時だけ、同じ端末で再度1回だけ初期化される。
-const DATA_RESET_VERSION = 'tutorial-v4';
+// v6: 最終チュートリアル導線調整。既存テストデータをもう一度だけ確実に初期化する。
+const DATA_RESET_VERSION = 'tutorial-v6';
 const DATA_RESET_DONE_KEY = 'dopado_data_reset_done_version';
+const DATA_RESET_CANARY_KEY = 'dopado_clean_start_version';
 
 function oneTimeDataResetForTutorial() {
   try {
     const doneVersion = localStorage.getItem(DATA_RESET_DONE_KEY);
+    const cleanVersion = localStorage.getItem(DATA_RESET_CANARY_KEY);
 
-    // すでにこのバージョンのリセットを実行済みなら、絶対に何もしない。
-    if (doneVersion === DATA_RESET_VERSION) return false;
+    // すでにこのバージョンで「削除済み」と「クリーン起動済み」の両方が残っているなら、絶対に何もしない。
+    if (doneVersion === DATA_RESET_VERSION && cleanVersion === DATA_RESET_VERSION) return false;
 
-    const prefixes = ['dopaon_', 'dopado_', 'DOPAON_', 'DOPADO_'];
+    const exactKeys = [
+      STORAGE_KEY,
+      BACKUP_KEY,
+      ...LEGACY_KEYS,
+      'dopado_tutorial_completed',
+      'dopado_home_prompt_seen',
+      DATA_RESET_CANARY_KEY
+    ];
+
+    function isDopadoStorageKey(key) {
+      const lower = String(key || '').toLowerCase();
+      return exactKeys.includes(key) || lower.includes('dopaon') || lower.includes('dopado');
+    }
 
     Object.keys(localStorage).forEach(key => {
-      // 実行済みフラグ自体は消さない。
+      // 実行済みフラグ自体は、最後に今回のバージョンで上書きする。
       if (key === DATA_RESET_DONE_KEY) return;
-      if (prefixes.some(prefix => key.startsWith(prefix))) {
-        localStorage.removeItem(key);
-      }
+      if (isDopadoStorageKey(key)) localStorage.removeItem(key);
     });
 
     Object.keys(sessionStorage).forEach(key => {
-      if (prefixes.some(prefix => key.startsWith(prefix))) {
-        sessionStorage.removeItem(key);
-      }
+      if (isDopadoStorageKey(key)) sessionStorage.removeItem(key);
     });
-
-    // チュートリアル完了フラグは念のため個別にも消す。
-    localStorage.removeItem('dopado_tutorial_completed');
-    localStorage.removeItem('dopado_home_prompt_seen');
 
     // 削除が終わった後に、今回のリセットは済んだ印を残す。
     localStorage.setItem(DATA_RESET_DONE_KEY, DATA_RESET_VERSION);
+    localStorage.setItem(DATA_RESET_CANARY_KEY, DATA_RESET_VERSION);
     return true;
   } catch (e) {
     // localStorageが使えない環境でもアプリを止めない。
@@ -1665,8 +1673,10 @@ function playBonusFrame(){
     bonusResolve=resolve;bonusPreparedReward=null;
     const ov=document.getElementById('bonusFrameOverlay'),fr=document.getElementById('bonusFrame');
     if(!ov||!fr){const r=grantReward(rollBonusTier());saveState();renderHeader();resolve(r);return}
+    const tutBonus=!!(tut&&tut.active&&tut.bonusFired);
+    if(tutBonus)_tutHideForBonus();
     ov.classList.add('show');
-    const send=()=>{try{const tutBonus=!!(tut&&tut.active&&tut.bonusFired);fr.contentWindow.postMessage({type:'DOPAON_BONUS_START',tutorial:tutBonus,forceTier:tutBonus?'red':undefined},'*')}catch(e){const r=grantReward(rollBonusTier());saveState();renderHeader();resolve(r)}};
+    const send=()=>{try{fr.contentWindow.postMessage({type:'DOPAON_BONUS_START',tutorial:tutBonus,forceTier:tutBonus?'red':undefined},'*')}catch(e){const r=grantReward(rollBonusTier());saveState();renderHeader();resolve(r)}};
     if(fr.contentWindow)send(); else fr.onload=send;
   })
 }
@@ -1847,6 +1857,19 @@ function tutSkip() {
   render();
 }
 
+function _tutHideForBonus() {
+  // BONUS演出中はチュートリアル文言を完全に隠す。
+  // iframeの上に吹き出しが残ると、フリーズしたように見えるため。
+  const ov = document.getElementById('tutOverlay');
+  if (ov) ov.style.display = 'none';
+  const bbl = document.getElementById('tutBubble');
+  if (bbl) bbl.classList.remove('show');
+  const counter = document.getElementById('tutCounter');
+  if (counter) counter.textContent = '';
+  tutGlow(null);
+  tutPulse(null);
+}
+
 function _tutHideOverlay() {
   const ov = document.getElementById('tutOverlay');
   if (ov) ov.style.display = 'none';
@@ -1944,16 +1967,22 @@ function _tutShowFinalMessage() {
   tut.active = false;
   tut.finalMessagePending = false;
   _tutFinalCalled = false;
+  const ov = document.getElementById('tutOverlay');
+  if (ov) ov.style.display = 'block';
   const st = { id: 't_fin', part: 'COMPLETE',
-    msg: '🔴 肩書き「挑戦する」獲得！！\n\nこれは、最初の一歩を踏み出した証。\nDOPADOには、よりレアなアイテムも眠っている。\n獲得を目指せ！！',
-    hint: '', pos: 'top', bg: true };
+    msg: `🔴 肩書き「挑戦する」を獲得しました！！
+
+これは、最初の一歩を踏み出した証。
+DOPADOには、よりレアなアイテムも眠っている。
+次は自分のタスクでDOPAONしよう。`,
+    hint: '', pos: 'top', bg: true, btn: 'チュートリアルを閉じて今すぐDOPAON！' };
   tutSetBubble(st);
   tutGlow(null);
+  tutPulse(document.getElementById('tutActionBtn'));
   const bg = document.getElementById('tutBg');
   if (bg) bg.style.opacity = '0.9';
   const sk = document.getElementById('tutSkip');
   if (sk) sk.style.display = 'none';
-  setTimeout(() => { _tutHideOverlay(); showToast('チュートリアル完了！おめでとう！'); }, 5200);
 }
 
 /* ---------- 描画 ---------- */
@@ -2002,6 +2031,11 @@ function tutSetBubble(st) {
     if (!btn) { btn = document.createElement('button'); btn.id = 'tutActionBtn'; btn.className = 'tut-btn'; bbl.appendChild(btn); }
     btn.textContent = st.btn;
     btn.onclick = () => {
+      if (st.id === 't_fin') {
+        _tutHideOverlay();
+        showToast('チュートリアル完了！DOPAON開始！');
+        return;
+      }
       if (st.id === 'h_home_ios') localStorage.setItem('dopado_home_prompt_seen', '1');
       if (st.id === 't_failmsg' && tut.habitAvoidId) {
         // 失敗ログを静かに解除（成功長押しをできるようにする）

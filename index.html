@@ -500,6 +500,15 @@ body{position:fixed;inset:0;touch-action:manipulation}
 .subtask-wrap.done .subtask-row{opacity:1!important;color:#73839c!important;background:linear-gradient(180deg,#0b0d17,#070811)!important;border-color:rgba(115,131,156,.18)!important}
 .subtask-wrap.done .subtask-text{text-decoration:line-through;text-decoration-thickness:1.5px;color:#73839c!important}
 .subtask-wrap.done .subtask-check{background:#1b2130!important;color:#9aa7bb!important;border-color:#3c465d!important}
+
+/* ===== v13.12.3 realtime tag fix / inline subtask input ===== */
+.subtask-wrap.done .subtask-row{opacity:1!important;color:#73839c!important;background:linear-gradient(180deg,#0b0d17,#070811)!important;border-color:rgba(115,131,156,.18)!important}
+.subtask-wrap.done .subtask-delete{opacity:1!important}
+.subtask-input-row{display:flex;align-items:center;gap:8px;min-height:34px;padding:7px 9px;border:1px solid rgba(0,229,188,.34);border-radius:10px;background:linear-gradient(180deg,#101a22,#070b14);box-shadow:0 0 14px rgba(0,229,188,.08);}
+.subtask-input-mark{width:18px;height:18px;border-radius:5px;border:1px solid rgba(0,229,188,.45);background:rgba(0,229,188,.035);flex:0 0 auto}
+.subtask-input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:#dce8ff;font-size:16px;line-height:1.35;font-family:inherit;padding:2px 0}
+.subtask-input::placeholder{color:#52637f}
+.subtask-input-hint{font-family:'Orbitron',monospace;font-size:7px;letter-spacing:1px;color:#52637f;margin-top:4px;text-align:right}
 </style>
 </head>
 <body>
@@ -890,14 +899,26 @@ function closeProfile(){document.getElementById('profileOverlay').classList.remo
 
 function makeDopaonMessage(taskName){const isAfter=Math.random()<0.8,item=isAfter?rnd(DOPAON_AFTER):rnd(DOPAON_QUOTES);const nm=(state&&state.profile&&state.profile.name?state.profile.name:'自分');const timeLabel=isAfter?(item.time+'の'+nm):('今の'+nm);return{time:timeLabel,text:item.text}}
 let currentDopaonEl=null,currentDopaonAnim=null,currentDopaonTaskId=null,currentDopaonMsg=null,currentDopaonTimer=null,recentAddedTaskId=null,undoToastEl=null,undoTimer=null;
-let openExtraTaskId=null,openExtraTab='subtasks',openSubtaskSwipeId=null;
+let openExtraTaskId=null,openExtraTab='subtasks',openSubtaskSwipeId=null,subtaskInputTaskId=null;
 function taskExtras(t){if(!t.extras)t.extras=normalizeTaskExtras(null);else t.extras=normalizeTaskExtras(t.extras);return t.extras}
 function taskHasExtras(t){const ex=taskExtras(t);return ex.subtasks.length>0||String(ex.memo||'').trim().length>0}
 function preferredExtraTab(t){const ex=taskExtras(t);return ex.subtasks.length?'subtasks':(String(ex.memo||'').trim()?'memo':'subtasks')}
-function closeTaskExtras(doRender=false){if(openExtraTaskId||openSubtaskSwipeId){openExtraTaskId=null;openSubtaskSwipeId=null;if(doRender)render();return true}return false}
-function toggleTaskExtras(id){const t=state.tasks.find(x=>x.id===id);if(!t)return;clearTaskChargePreview(null,false);openSubtaskSwipeId=null;if(openExtraTaskId===id){openExtraTaskId=null;saveState();render();return}openExtraTaskId=id;openExtraTab=preferredExtraTab(t);saveState();render()}
-function setTaskExtraTab(id,tab){if(openExtraTaskId!==id)return;openExtraTab=tab==='memo'?'memo':'subtasks';openSubtaskSwipeId=null;render()}
-function addSubtask(id){const t=state.tasks.find(x=>x.id===id);if(!t)return;const text=(prompt('追加タスクを入力')||'').trim();if(!text)return;taskExtras(t).subtasks.unshift({id:newId(),text,done:false});openExtraTaskId=id;openExtraTab='subtasks';saveState();render()}
+function closeTaskExtras(doRender=false){if(openExtraTaskId||openSubtaskSwipeId||subtaskInputTaskId){openExtraTaskId=null;openSubtaskSwipeId=null;subtaskInputTaskId=null;if(doRender)render();return true}return false}
+function toggleTaskExtras(id){const t=state.tasks.find(x=>x.id===id);if(!t)return;clearTaskChargePreview(null,false);openSubtaskSwipeId=null;subtaskInputTaskId=null;if(openExtraTaskId===id){openExtraTaskId=null;saveState();render();return}openExtraTaskId=id;openExtraTab=preferredExtraTab(t);saveState();render()}
+function setTaskExtraTab(id,tab){if(openExtraTaskId!==id)return;openExtraTab=tab==='memo'?'memo':'subtasks';openSubtaskSwipeId=null;subtaskInputTaskId=null;render()}
+function startSubtaskInput(id){
+  const t=state.tasks.find(x=>x.id===id);if(!t)return;
+  openExtraTaskId=id;openExtraTab='subtasks';openSubtaskSwipeId=null;subtaskInputTaskId=id;render();
+  setTimeout(()=>{const input=document.querySelector('[data-subtask-input="'+id+'"]');if(input)input.focus({preventScroll:true})},30);
+}
+function commitSubtaskInput(id,value){
+  const t=state.tasks.find(x=>x.id===id);if(!t)return;
+  const text=String(value||'').trim();
+  if(text){taskExtras(t).subtasks.unshift({id:newId(),text,done:false});saveState()}
+  subtaskInputTaskId=null;openExtraTaskId=id;openExtraTab='subtasks';render();
+}
+function cancelSubtaskInput(id){if(subtaskInputTaskId===id){subtaskInputTaskId=null;render()}}
+function addSubtask(id){startSubtaskInput(id)}
 function toggleSubtaskDone(taskId,subId){const t=state.tasks.find(x=>x.id===taskId);if(!t)return;const st=taskExtras(t).subtasks.find(x=>x.id===subId);if(!st)return;st.done=!st.done;openSubtaskSwipeId=null;saveState();render()}
 function deleteSubtask(taskId,subId){const t=state.tasks.find(x=>x.id===taskId);if(!t)return;const ex=taskExtras(t);const idx=ex.subtasks.findIndex(x=>x.id===subId);if(idx<0)return;ex.subtasks.splice(idx,1);openSubtaskSwipeId=null;saveState();render()}
 function updateTaskMemo(id,value){const t=state.tasks.find(x=>x.id===id);if(!t)return;taskExtras(t).memo=value;saveState()}
@@ -1061,6 +1082,9 @@ function showUndoNotice(text,onUndo){
   el.querySelector('button').onclick=()=>{if(undoTimer)clearTimeout(undoTimer);undoTimer=null;if(el.parentNode)el.remove();undoToastEl=null;onUndo&&onUndo()};
   document.getElementById('sf8').appendChild(el);undoToastEl=el;
   undoTimer=setTimeout(()=>{if(el.parentNode)el.remove();if(undoToastEl===el)undoToastEl=null;undoTimer=null},5200);
+}
+function showUndo(text,onUndo){
+  try{showUndoNotice(text,onUndo)}catch(e){console.warn('showUndo failed',e)}
 }
 function syncTaskMenuToggleUI(){
   const type=document.getElementById('taskTypeInput'),due=document.getElementById('taskDueInput'),box=document.getElementById('taskQuickToggles'),todayChip=document.getElementById('taskTodayChip'),impChip=document.getElementById('taskImportantChip');
@@ -1270,7 +1294,13 @@ function renderTaskExtra(task){
   }
   const add=document.createElement('button');add.type='button';add.className='subtask-add';add.textContent='＋ タスクを追加';add.onclick=e=>{e.stopPropagation();addSubtask(task.id)};box.appendChild(add);
   const list=document.createElement('div');list.className='subtask-list';
-  if(!ex.subtasks.length){const emp=document.createElement('div');emp.className='subtask-empty';emp.textContent='追加タスクはまだない';list.appendChild(emp)}
+  if(subtaskInputTaskId===task.id){
+    const iw=document.createElement('div');iw.className='subtask-input-row';iw.onclick=e=>e.stopPropagation();iw.ontouchstart=e=>e.stopPropagation();
+    const mark=document.createElement('span');mark.className='subtask-input-mark';iw.appendChild(mark);
+    const inp=document.createElement('input');inp.className='subtask-input';inp.type='text';inp.placeholder='追加タスクを入力';inp.setAttribute('data-subtask-input',task.id);inp.setAttribute('enterkeyhint','done');inp.autocomplete='off';inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();commitSubtaskInput(task.id,inp.value)}};inp.onblur=()=>{if(subtaskInputTaskId===task.id)commitSubtaskInput(task.id,inp.value)};inp.onclick=e=>e.stopPropagation();inp.ontouchstart=e=>e.stopPropagation();
+    iw.appendChild(inp);list.appendChild(iw);
+  }
+  if(!ex.subtasks.length&&subtaskInputTaskId!==task.id){const emp=document.createElement('div');emp.className='subtask-empty';emp.textContent='追加タスクはまだない';list.appendChild(emp)}
   ex.subtasks.forEach(st=>list.appendChild(renderSubtaskRow(task.id,st)));
   box.appendChild(list);return box;
 }

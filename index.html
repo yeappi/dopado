@@ -634,7 +634,7 @@ const LEVEL_STEP=10;
 
 // ===== ONE-TIME DATA RESET FOR TUTORIAL MIGRATION =====
 // この値を変えた時だけ、同じ端末で再度1回だけ初期化される。
-const DATA_RESET_VERSION = 'tutorial-v3';
+const DATA_RESET_VERSION = 'tutorial-v4';
 const DATA_RESET_DONE_KEY = 'dopado_data_reset_done_version';
 
 function oneTimeDataResetForTutorial() {
@@ -1483,7 +1483,18 @@ function mkHabitTile(h){
   ['mouseup','mouseleave'].forEach(ev=>el.addEventListener(ev,clearPress));
   el.addEventListener('contextmenu',e=>e.preventDefault());
   let clickTimer=null;
-  el.addEventListener('click',e=>{if(e.target.closest('button'))return;e.stopPropagation();if(clickTimer){clearTimeout(clickTimer);clickTimer=null;const _prev=flippedHabitId;flippedHabitId=flippedHabitId===h.id?null:h.id;render();tutHook('habit_flip',h.id);return}clickTimer=setTimeout(()=>{clickTimer=null;if(flippedHabitId&&flippedHabitId!==h.id){flippedHabitId=null;render()}},230)});
+  el.addEventListener('click',e=>{if(e.target.closest('button'))return;e.stopPropagation();if(clickTimer){clearTimeout(clickTimer);clickTimer=null;
+    if(tut&&tut.active&&tutIsTempHabit(h.id)){
+      const _cs=tutCurrentStep();
+      const allowAvoidFlip=(h.id===tut.habitAvoidId&&_cs&&_cs.id==='t_dtap');
+      if(!allowAvoidFlip){
+        flippedHabitId=null;
+        render();
+        showToast(h.id===tut.habitDoId?'ここでは裏面に行かず、表面を長押ししてね':'今は点滅している案内どおり操作してね');
+        return;
+      }
+    }
+    flippedHabitId=flippedHabitId===h.id?null:h.id;render();tutHook('habit_flip',h.id);return}clickTimer=setTimeout(()=>{clickTimer=null;if(flippedHabitId&&flippedHabitId!==h.id){flippedHabitId=null;render()}},230)});
   return el;
 }
 function todayTaskStats(){const todayTasks=state.tasks.filter(t=>isTaskToday(t)),done=todayTasks.filter(t=>t.state==='done').length;return{total:todayTasks.length,done,pending:Math.max(0,todayTasks.length-done),important:importantCount(),items:todayTasks}}
@@ -1764,7 +1775,7 @@ const TUT_PART2_STEPS = [
 ];
 
 const TUT_PART3_STEPS = [
-  { id: 't_hab',   part: 'PART 3 · 習慣 & BONUS', msg: '上のバーをタップして\n習慣画面へ', hint: '↑ バーをタップ' },
+  { id: 't_hab',   part: 'PART 3 · 習慣 & BONUS', msg: '上の「日常↔習慣」バーをタップして\n習慣画面へ', hint: '点滅している横長バーをタップ' },
   { id: 't_cdo',   part: 'PART 3 · 習慣 & BONUS', msg: '空きスロットをタップして\n「やること」の習慣を作ろう', hint: '光っている＋スロット → 名前入力 → 習慣を追加', pos: 'top' },
   { id: 't_lpdo',  part: 'PART 3 · 習慣 & BONUS', msg: 'やることは長押しで達成\n溜めて、離して。', hint: '光っているタイルを長押し（練習）' },
   { id: 't_cavd',  part: 'PART 3 · 習慣 & BONUS', msg: '次は「やらないこと」も作ろう。\n空きスロットから作成できるよ', hint: '光っている＋スロット → チェック内容を「やらないこと」→ 習慣を追加', pos: 'top' },
@@ -2044,7 +2055,7 @@ function tutGlowForStep(sid) {
     else if (sid === 't_prof') { el = document.querySelector('.identity'); pulse = el; }
     else if (sid === 't_name') el = document.getElementById('nameInput');
     else if (sid === 't_pcls') { el = document.querySelector('#profileOverlay .popup-close'); pulse = el; }
-    else if (sid === 't_hab') { el = document.getElementById('habitRow'); pulse = el; }
+    else if (sid === 't_hab') { el = document.getElementById('statusBar'); pulse = document.getElementById('habitRow'); }
     else if (sid === 't_cdo' || sid === 't_cavd') {
       if (tutIsTaskOverlayOpen()) {
         el = sid === 't_cavd' ? document.getElementById('habitKindInput') : document.getElementById('taskNameInput');

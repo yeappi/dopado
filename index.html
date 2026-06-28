@@ -296,8 +296,8 @@ body{position:fixed;inset:0;touch-action:manipulation}
 .task-swipe-bg{font-size:10px!important}.task-quick-tags{display:none!important}
 
 .habit-grid-head{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin:2px 0 10px;padding:0 2px;color:#7890b8;font-family:'Orbitron',monospace;font-size:8px;letter-spacing:1.6px}.habit-grid-head b{display:block;color:#00ffcc;font-size:12px;letter-spacing:2.5px}.habit-grid-head span{color:#4a6080;font-size:8px;letter-spacing:1px}
-.habit-grid{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,minmax(132px,1fr));gap:10px;min-height:calc(100% - 28px)}
-.habit-tile{position:relative;min-height:132px;border-radius:16px;perspective:700px;touch-action:manipulation;-webkit-user-select:none;user-select:none}.habit-tile-inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .34s cubic-bezier(.18,.8,.22,1)}.habit-tile.flipped .habit-tile-inner{transform:rotateY(180deg)}.habit-face{position:absolute;inset:0;border:1px solid #1e1e38;border-radius:16px;background:linear-gradient(180deg,#101022,#0b0b18);box-shadow:inset 0 1px 0 rgba(255,255,255,.035);backface-visibility:hidden;overflow:hidden;padding:12px;display:flex;flex-direction:column;color:#c8d8f0}.habit-back{transform:rotateY(180deg);justify-content:center;gap:9px}.habit-name{font-size:13px;line-height:1.45;font-weight:800;color:#eaf2ff;word-break:break-word;min-height:38px}.habit-streak{margin-top:auto;font-family:'Orbitron',monospace;font-size:22px;font-weight:900;letter-spacing:-.5px;color:#00ffcc}.habit-streak small{font-size:8px;letter-spacing:1px;color:#4a6080;margin-left:3px}.habit-state{font-family:'Orbitron',monospace;font-size:8px;letter-spacing:1.3px;color:#7890b8;margin-top:7px}.habit-kind{position:absolute;right:10px;top:10px;font-family:'Orbitron',monospace;font-size:7px;letter-spacing:1px;color:#4a6080}.habit-tile.done .habit-face{border-color:#00ffcc88;background:linear-gradient(180deg,rgba(0,255,204,.10),#0b0b18)}.habit-tile.done .habit-state{color:#00ffcc}.habit-tile.pressing .habit-face::after{content:'';position:absolute;left:0;right:0;bottom:0;height:var(--press,0%);background:linear-gradient(0deg,rgba(0,255,204,.32),rgba(0,255,204,.06));transition:height .08s linear;pointer-events:none}.habit-tile.empty .habit-face{border-style:dashed;background:rgba(255,255,255,.025);align-items:center;justify-content:center;text-align:center;color:#4a6080}.habit-tile.empty .plus{font-size:24px;color:#00ffcc;margin-bottom:8px}.habit-back .mini-btn{width:100%;height:34px;border-radius:10px}.habit-back .mini-btn.danger{color:#ff6f8c}.habit-back .mini-btn.undo{color:#00ffcc}
+.habit-grid{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,minmax(0,1fr));gap:8px;min-height:calc(100% - 28px);height:calc(100% - 28px)}
+.habit-tile{position:relative;min-height:132px;border-radius:16px;perspective:700px;touch-action:manipulation;-webkit-user-select:none;user-select:none}.habit-tile-inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .34s cubic-bezier(.18,.8,.22,1)}.habit-tile.flipped .habit-tile-inner{transform:rotateY(180deg)}.habit-face{position:absolute;inset:0;border:1px solid #1e1e38;border-radius:14px;background:linear-gradient(180deg,#101022,#0b0b18);box-shadow:inset 0 1px 0 rgba(255,255,255,.035);backface-visibility:hidden;overflow:hidden;padding:9px;display:flex;flex-direction:column;color:#c8d8f0}.habit-back{transform:rotateY(180deg);justify-content:center;gap:9px}.habit-name{font-size:13px;line-height:1.35;font-weight:800;color:#eaf2ff;word-break:break-word;min-height:0;max-height:36px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.habit-streak{margin-top:auto;font-family:'Orbitron',monospace;font-size:22px;font-weight:900;letter-spacing:-.5px;color:#00ffcc}.habit-streak small{font-size:8px;letter-spacing:1px;color:#4a6080;margin-left:3px}.habit-state{font-family:'Orbitron',monospace;font-size:8px;letter-spacing:1.3px;color:#7890b8;margin-top:7px}.habit-kind{position:absolute;right:10px;top:10px;font-family:'Orbitron',monospace;font-size:7px;letter-spacing:1px;color:#4a6080}.habit-tile.done .habit-face{border-color:#00ffcc88;background:linear-gradient(180deg,rgba(0,255,204,.10),#0b0b18)}.habit-tile.done .habit-state{color:#00ffcc}.habit-tile.pressing .habit-face::after{content:'';position:absolute;left:0;right:0;bottom:0;height:var(--press,0%);background:linear-gradient(0deg,rgba(0,255,204,.32),rgba(0,255,204,.06));transition:height .08s linear;pointer-events:none}.habit-tile.empty .habit-face{border-style:dashed;background:rgba(255,255,255,.025);align-items:center;justify-content:center;text-align:center;color:#4a6080}.habit-tile.empty .plus{font-size:24px;color:#00ffcc;margin-bottom:8px}.habit-back .mini-btn{width:100%;height:34px;border-radius:10px}.habit-back .mini-btn.danger{color:#ff6f8c}.habit-back .mini-btn.undo{color:#00ffcc}
 
 
 /* ===== v13.3: praise revive + gate polish + task-preview cancel ===== */
@@ -560,7 +560,18 @@ function expireDailyFlags(target=state){
     if(t.importantDate&&!isTaskToday(t))t.importantDate='';
   });
 }
-function importantCount(){expireDailyFlags(state);return state.tasks.filter(t=>t.state!=='done'&&isTaskImportant(t)).length}
+function syncImportantUsage(){
+  const day=appDayStr();
+  if(!state.ui)state.ui={completedOpen:false,mode:'tasks',importantDay:'',importantUsedIds:[]};
+  if(state.ui.importantDay!==day){state.ui.importantDay=day;state.ui.importantUsedIds=[]}
+  if(!Array.isArray(state.ui.importantUsedIds))state.ui.importantUsedIds=[];
+  const ids=new Set(state.ui.importantUsedIds.filter(id=>state.tasks.some(t=>t.id===id&&t.importantDate===day)));
+  state.tasks.forEach(t=>{if(t.importantDate===day)ids.add(t.id)});
+  state.ui.importantUsedIds=[...ids].slice(0,2);
+}
+function importantCount(){expireDailyFlags(state);syncImportantUsage();return state.ui.importantUsedIds.length}
+function canClaimImportant(t){syncImportantUsage();return !!(t&&t.importantDate===appDayStr())||importantCount()<2}
+function claimImportant(t){if(!t)return false;syncImportantUsage();const day=appDayStr();if(t.importantDate!==day&&importantCount()>=2)return false;t.importantDate=day;t.dueDate=day;t.todayDate=day;if(!state.ui.importantUsedIds.includes(t.id))state.ui.importantUsedIds.push(t.id);state.ui.importantUsedIds=[...new Set(state.ui.importantUsedIds)].slice(0,2);return true}
 
 function levelFromXp(xp){return Math.floor((Number(xp)||0)/LEVEL_STEP)}
 function titleById(id){return TITLES.find(t=>t.id===id)||null}
@@ -593,7 +604,8 @@ function normalizeHabit(h){
     name:String((h&&h.name)||'').trim()||defaultHabitName(),
     habitKind:(h&&h.habitKind)==='avoid'?'avoid':'do',
     createdAt:(h&&h.createdAt)||Date.now(),
-    active:h&&Object.prototype.hasOwnProperty.call(h,'active')?Boolean(h.active):true
+    active:h&&Object.prototype.hasOwnProperty.call(h,'active')?Boolean(h.active):true,
+    slot:Number.isInteger(h&&h.slot)?h.slot:null
   };
 }
 function normalizeLogs(logs){
@@ -611,9 +623,9 @@ function normalizeLogs(logs){
   return out;
 }
 function normalizeState(s){
-  const out={version:APP_VERSION,profile:{name:'',titleId:null},xp:0,freeDays:0,ownedTitles:[],ownedIllusts:[],tasks:[],habits:[],habitLogs:{},chargeTickets:[],ui:{completedOpen:false,mode:'tasks'}};
+  const out={version:APP_VERSION,profile:{name:'',titleId:null},xp:0,freeDays:0,ownedTitles:[],ownedIllusts:[],tasks:[],habits:[],habitLogs:{},chargeTickets:[],ui:{completedOpen:false,mode:'tasks',importantDay:'',importantUsedIds:[]}};
   if(s&&typeof s==='object')Object.assign(out,s);
-  out.profile=Object.assign({name:'',titleId:null},(s&&s.profile)||{});
+  out.profile=Object.assign({name:'',titleId:null},(s&&s.profile)||{});out.ui=Object.assign({completedOpen:false,mode:'tasks',importantDay:'',importantUsedIds:[]},out.ui||{});
   out.xp=Number(out.xp)||0;out.freeDays=Number(out.freeDays)||0;
   out.ownedTitles=Array.isArray(out.ownedTitles)?[...new Set(out.ownedTitles)]:[];
   out.ownedIllusts=Array.isArray(out.ownedIllusts)?[...new Set(out.ownedIllusts)]:[];
@@ -892,13 +904,13 @@ function syncTaskMenuToggleUI(){
   todayChip.classList.toggle('on',today);impChip.classList.toggle('on',!!taskMenuImportant&&today);
 }
 function toggleMenuToday(){const due=document.getElementById('taskDueInput');if(!due||due.disabled)return;if(due.value===appDayStr()){due.value='';taskMenuImportant=false}else due.value=appDayStr();syncTaskMenuToggleUI()}
-function toggleMenuImportant(){const due=document.getElementById('taskDueInput');if(!due||due.disabled)return;if(due.value!==appDayStr())due.value=appDayStr();taskMenuImportant=!taskMenuImportant;syncTaskMenuToggleUI()}
+function toggleMenuImportant(){const due=document.getElementById('taskDueInput');if(!due||due.disabled)return;if(!taskMenuImportant&&importantCount()>=2&&!editingId){showUndo('重要タスクは今日2つまで',null);return}if(due.value!==appDayStr())due.value=appDayStr();taskMenuImportant=!taskMenuImportant;syncTaskMenuToggleUI()}
 function readTaskForm(){return{name:document.getElementById('taskNameInput').value.trim(),dueDate:document.getElementById('taskDueInput').value,taskType:document.getElementById('taskTypeInput').value,habitKind:document.getElementById('habitKindInput').value,repeatType:'daily',intervalDays:1,weekdays:[],importantRequested:!!taskMenuImportant}}
 function createTask(name,cfg={}){return normalizeTask(Object.assign(defaultTaskConfig(),cfg,{id:newId(),name,state:'idle',rewardDone:false,scheduledAwarded:false,createdAt:Date.now(),doneAt:null,taskType:'normal'}))}
-function usedHabitSlots(){return new Set(state.habits.map(h=>Number.isInteger(h.slot)?h.slot:null).filter(v=>v!==null&&v>=0&&v<6))}
-function firstEmptyHabitSlot(){const used=usedHabitSlots();for(let i=0;i<6;i++)if(!used.has(i))return i;return null}
-function normalizeHabitSlots(){const used=new Set();state.habits.forEach(h=>{if(Number.isInteger(h.slot)&&h.slot>=0&&h.slot<6&&!used.has(h.slot)){used.add(h.slot);return}let s=null;for(let i=0;i<6;i++){if(!used.has(i)){s=i;break}}h.slot=s===null?99+used.size:s;used.add(h.slot)})}
-function habitSlotList(){normalizeHabitSlots();const slots=Array(6).fill(null);state.habits.forEach(h=>{if(Number.isInteger(h.slot)&&h.slot>=0&&h.slot<6&&!slots[h.slot])slots[h.slot]=h});return slots}
+function usedHabitSlots(){return new Set(state.habits.map(h=>Number.isInteger(h.slot)?h.slot:null).filter(v=>v!==null&&v>=0&&v<9))}
+function firstEmptyHabitSlot(){const used=usedHabitSlots();for(let i=0;i<9;i++)if(!used.has(i))return i;return null}
+function normalizeHabitSlots(){const used=new Set();state.habits.forEach(h=>{if(Number.isInteger(h.slot)&&h.slot>=0&&h.slot<9&&!used.has(h.slot)){used.add(h.slot);return}let s=null;for(let i=0;i<9;i++){if(!used.has(i)){s=i;break}}h.slot=s===null?99+used.size:s;used.add(h.slot)})}
+function habitSlotList(){normalizeHabitSlots();const slots=Array(9).fill(null);state.habits.forEach(h=>{if(Number.isInteger(h.slot)&&h.slot>=0&&h.slot<9&&!slots[h.slot])slots[h.slot]=h});return slots}
 function createHabit(name,cfg={}){let slot=Number.isInteger(cfg.slot)?cfg.slot:firstEmptyHabitSlot();if(slot===null)slot=99+state.habits.length;return normalizeHabit({id:newId(),name,habitKind:cfg.habitKind||'do',slot,createdAt:Date.now(),active:true})}
 function openTaskMenu(id=null,kind=null,slot=null){
   clearTaskChargePreview(null,false);
@@ -951,7 +963,7 @@ function saveTaskMenu(){
     const oldDue=t.dueDate;
     t.name=cfg.name;t.dueDate=cfg.importantRequested?appDayStr():cfg.dueDate;t.taskType='normal';
     syncTaskDateFlags(t);
-    t.importantDate=cfg.importantRequested?appDayStr():'';
+    if(cfg.importantRequested){if(!claimImportant(t)){showToast('今日の重要は2つまで');return}}else t.importantDate='';
     maybeAwardSchedulePoint(t,oldDue,t.dueDate);
     showToast('タスク設定を保存した');
     saveState();render();closeTaskMenu();return;
@@ -963,7 +975,7 @@ function saveTaskMenu(){
     showToast('習慣を追加した');
     spawnPraise('add');
   }else{
-    if(cfg.importantRequested)cfg.dueDate=appDayStr();const t=createTask(cfg.name,cfg);syncTaskDateFlags(t);if(cfg.importantRequested)t.importantDate=appDayStr();state.tasks.unshift(t);maybeAwardSchedulePoint(t,'',t.dueDate);spawnPraise('add');showToast('タスクを追加した');
+    if(cfg.importantRequested)cfg.dueDate=appDayStr();const t=createTask(cfg.name,cfg);syncTaskDateFlags(t);if(cfg.importantRequested&&!claimImportant(t)){showToast('今日の重要は2つまで');return}state.tasks.unshift(t);maybeAwardSchedulePoint(t,'',t.dueDate);spawnPraise('add');showToast('タスクを追加した');
   }
   document.getElementById('mi').value='';resetPraiseInput();updateInputButtons('');bumpInputPrompt();saveState();render();closeTaskMenu();
 }
@@ -975,7 +987,7 @@ function maybeAwardSchedulePoint(task,oldDue,newDue){
 }
 function setTaskToday(id){const t=state.tasks.find(x=>x.id===id);if(!t||t.state==='done')return;clearTaskChargePreview(null,false);const old=t.dueDate;const day=appDayStr();t.todayDate=day;t.dueDate=day;if(!t.swipeCycle)t.swipeCycle=1;maybeAwardSchedulePoint(t,old,t.dueDate);saveState();render()}
 function unsetTaskToday(id){const t=state.tasks.find(x=>x.id===id);if(!t||t.state==='done')return;clearTaskChargePreview(null,false);t.todayDate='';t.importantDate='';t.swipeCycle=0;if(t.dueDate===appDayStr())t.dueDate='';saveState();render()}
-function setTaskImportant(id){const t=state.tasks.find(x=>x.id===id);if(!t||t.state==='done')return;clearTaskChargePreview(null,false);if(!isTaskToday(t)){setTaskToday(id)}if(isTaskImportant(t))return;if(importantCount()>=2){showUndo('重要タスクは今日2つまで',null);return}t.importantDate=appDayStr();t.swipeCycle=2;saveState();render()}
+function setTaskImportant(id){const t=state.tasks.find(x=>x.id===id);if(!t||t.state==='done')return;clearTaskChargePreview(null,false);const old=t.dueDate;if(!isTaskToday(t)){t.dueDate=appDayStr();t.todayDate=appDayStr();maybeAwardSchedulePoint(t,old,t.dueDate)}if(isTaskImportant(t))return;if(!claimImportant(t)){showUndo('重要タスクは今日2つまで',null);return}t.swipeCycle=2;saveState();render()}
 function unsetTaskImportant(id){const t=state.tasks.find(x=>x.id===id);if(!t)return;clearTaskChargePreview(null,false);t.importantDate='';t.swipeCycle=3;saveState();render()}
 function cycleTaskPriority(id){const t=state.tasks.find(x=>x.id===id);if(!t||t.state==='done')return;const day=appDayStr();if(!isTaskToday(t)){setTaskToday(id);showUndo('今日タスクにした',null);return}
   if(!isTaskImportant(t)&&t.swipeCycle!==3){setTaskImportant(id);showUndo('重要タスクにした',null);return}
@@ -1015,12 +1027,12 @@ function applyPrioritySwipe(task,big){
   const today=isTaskToday(task),imp=isTaskImportant(task);
   if(!today){
     const old=task.dueDate;task.dueDate=day;task.todayDate=day;task.swipeCycle=1;maybeAwardSchedulePoint(task,old,task.dueDate);
-    if(big&&importantCount()<2){task.importantDate=day;task.swipeCycle=2}
+    if(big){if(!claimImportant(task)){showUndo('重要タスクは今日2つまで',null)}else task.swipeCycle=2}
     saveState();render();return;
   }
   if(today&&!imp){
     if(big){task.todayDate='';task.importantDate='';task.swipeCycle=0;if(task.dueDate===day)task.dueDate=''}
-    else{if(importantCount()>=2){showUndo('重要タスクは今日2つまで',null);return}task.importantDate=day;task.swipeCycle=2}
+    else{if(!claimImportant(task)){showUndo('重要タスクは今日2つまで',null);return}task.swipeCycle=2}
     saveState();render();return;
   }
   if(big){task.todayDate='';task.importantDate='';task.swipeCycle=0;if(task.dueDate===day)task.dueDate=''}
@@ -1104,7 +1116,7 @@ function renderHabits(a){
   const head=document.createElement('div');head.className='habit-grid-head';head.innerHTML='<div><b>HABITS</b><span>長押しでBONUS / ダブルタップで裏面</span></div><span>'+habitStats().done+'/'+Math.max(1,state.habits.length)+'</span>';a.appendChild(head);
   const grid=document.createElement('div');grid.className='habit-grid';a.appendChild(grid);
   const list=habitSlotList();
-  for(let i=0;i<6;i++){grid.appendChild(list[i]?mkHabitTile(list[i]):mkEmptyHabitTile(i))}
+  for(let i=0;i<9;i++){grid.appendChild(list[i]?mkHabitTile(list[i]):mkEmptyHabitTile(i))}
 }
 function mkEmptyHabitTile(i){
   const el=document.createElement('div');el.className='habit-tile empty';
@@ -1133,7 +1145,7 @@ function mkHabitTile(h){
   el.addEventListener('click',e=>{if(e.target.closest('button'))return;e.stopPropagation();if(clickTimer){clearTimeout(clickTimer);clickTimer=null;flippedHabitId=flippedHabitId===h.id?null:h.id;render();return}clickTimer=setTimeout(()=>{clickTimer=null;if(flippedHabitId&&flippedHabitId!==h.id){flippedHabitId=null;render()}},230)});
   return el;
 }
-function todayTaskStats(){const todayTasks=state.tasks.filter(t=>isTaskToday(t)),done=todayTasks.filter(t=>t.state==='done').length;return{total:todayTasks.length,done,pending:Math.max(0,todayTasks.length-done),important:state.tasks.filter(t=>isTaskImportant(t)).length,items:todayTasks}}
+function todayTaskStats(){const todayTasks=state.tasks.filter(t=>isTaskToday(t)),done=todayTasks.filter(t=>t.state==='done').length;return{total:todayTasks.length,done,pending:Math.max(0,todayTasks.length-done),important:importantCount(),items:todayTasks}}
 function dotHtml(done,total){const max=5,filled=total?Math.round(done/total*max):0;let s='';for(let i=0;i<max;i++)s+='<span class="'+(i<filled?'dot-on':'dot-off')+'"></span>';return s}
 function renderBottomBar(){
   const title=document.querySelector('.habit-title'),status=document.querySelector('.habit-status'),row=document.getElementById('habitRow');

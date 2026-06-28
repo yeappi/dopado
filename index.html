@@ -134,6 +134,17 @@ body{position:fixed;inset:0;touch-action:manipulation}
 }
 #chargeMeter.charge-busy{box-shadow:inset 0 0 18px rgba(0,229,188,.12)}
 #chargeMeter.charge-off{filter:brightness(.72) saturate(.82)}
+#sf8.charge-interaction-lock #header,
+#sf8.charge-interaction-lock #ta,
+#sf8.charge-interaction-lock #bottomDock,
+#sf8.charge-interaction-lock #habitRow{
+  pointer-events:none!important;
+  user-select:none;
+  -webkit-user-select:none;
+}
+#sf8.charge-interaction-lock #statusBar{pointer-events:none}
+#sf8.charge-interaction-lock #chargeMeter{pointer-events:auto!important}
+
 #goBonusGate{position:absolute;inset:0;z-index:160;display:none;align-items:center;justify-content:center;background:rgba(50,50,55,.78);backdrop-filter:grayscale(1) blur(1px);-webkit-backdrop-filter:grayscale(1) blur(1px);touch-action:manipulation}
 #goBonusGate.show{display:flex}.go-bonus-card{text-align:center;font-family:'Orbitron',monospace;transform:rotate(-4deg);animation:goPop .38s cubic-bezier(.12,1.6,.3,1) both}.go-bonus-main{font-size:58px;letter-spacing:2px;font-weight:900;color:#fff;text-shadow:4px 4px 0 #000,0 0 26px rgba(255,255,255,.75)}.go-bonus-sub{font-size:12px;letter-spacing:4px;color:#ffd24a;text-shadow:2px 2px 0 #000;margin-top:8px}@keyframes goPop{from{opacity:0;transform:scale(2.4) rotate(-18deg)}to{opacity:1;transform:scale(1) rotate(-4deg)}}
 #bonusFrameOverlay{position:absolute;inset:0;z-index:170;background:#000;display:none;overflow:hidden}#bonusFrameOverlay.show{display:block}#bonusFrame{width:100%;height:100%;border:0;display:block;background:#000}
@@ -381,6 +392,26 @@ body{position:fixed;inset:0;touch-action:manipulation}
 .habit-grid-head{align-items:center;margin-bottom:10px}.habit-grid-head b{letter-spacing:3px}.habit-grid-head span{color:#7890b8!important}.habit-tile{min-height:134px}.habit-face{padding:10px!important;border-radius:18px;background:linear-gradient(180deg,#12182a,#090c16)!important}.habit-front{justify-content:space-between}.habit-front::before{height:38px}.habit-kind{display:none!important}.habit-name{font-size:14px!important;line-height:1.3!important;min-height:auto!important;max-height:40px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:normal;overflow-wrap:anywhere;color:#eff6ff!important}.habit-streak{margin-top:6px!important;font-size:26px!important;line-height:1;color:#00ffcc}.habit-streak small{display:block;margin:4px 0 0 0;font-size:7px;letter-spacing:1.5px}.habit-state{font-size:8px!important;letter-spacing:1.2px!important;margin-top:6px!important;padding-top:7px!important}.habit-tile.done .habit-streak{color:#ffd24a}.habit-tile.done .habit-face{border-color:#ff4c6b88!important;background:linear-gradient(180deg,rgba(255,72,104,.14),rgba(255,210,74,.06) 54%,#0b0b18)!important}.habit-back{display:grid!important;grid-template-columns:1fr;align-content:center;gap:8px!important;padding:12px!important;background:linear-gradient(180deg,#0f1422,#070912)!important}.habit-back .mini-btn{height:34px!important;font-size:12px!important;font-weight:900;letter-spacing:.5px}.habit-back .mini-btn.back{color:#c8d8f0;border-color:#46506f;background:#111827}.habit-tile-inner{transition:transform .42s cubic-bezier(.16,.95,.22,1.05)!important}.habit-tile.flipped{filter:drop-shadow(0 12px 22px rgba(0,0,0,.28))}
 #sf8[data-mode="habits"] .habit-title .mode-sample,#sf8[data-mode="tasks"] .habit-title .mode-sample{max-width:120px}
 
+
+/* ===== v13.10 habit success/fail semantics ===== */
+.habit-tile.kind-do:not(.done):not(.failed) .habit-face{border-color:rgba(0,229,188,.28)!important;background:linear-gradient(180deg,#0d1c22,#090d16)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 0 18px rgba(0,229,188,.06)!important}
+.habit-tile.kind-do:not(.done):not(.failed) .habit-front::before{background:linear-gradient(180deg,rgba(0,229,188,.12),transparent)!important}
+.habit-tile.kind-do:not(.done):not(.failed) .habit-state{color:#83dccc!important}
+.habit-tile.kind-avoid:not(.done):not(.failed) .habit-face{border-color:rgba(173,116,255,.28)!important;background:linear-gradient(180deg,#17132a,#090912)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 0 18px rgba(170,90,255,.06)!important}
+.habit-tile.kind-avoid:not(.done):not(.failed) .habit-front::before{background:linear-gradient(180deg,rgba(173,116,255,.12),transparent)!important}
+.habit-tile.kind-avoid:not(.done):not(.failed) .habit-state{color:#bda7ff!important}
+.habit-tile.kind-avoid:not(.done):not(.failed) .habit-name::before{content:'SEAL';display:inline-block;margin-right:6px;padding:2px 5px;border-radius:999px;border:1px solid rgba(173,116,255,.32);color:#c7b1ff;font-family:'Orbitron',monospace;font-size:7px;letter-spacing:1px;vertical-align:1px;background:rgba(0,0,0,.18)}
+.habit-tile.done .habit-face{border-color:#00ffcc88!important;background:linear-gradient(180deg,rgba(0,255,204,.13),rgba(255,210,74,.06) 58%,#0b0b18)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 0 22px rgba(0,255,204,.10)!important}
+.habit-tile.done .habit-state{color:#00ffcc!important}.habit-tile.done .habit-streak{color:#ffd24a!important}
+.habit-tile.failed .habit-face{border-color:#ff355f99!important;background:linear-gradient(180deg,rgba(255,53,95,.18),rgba(255,53,95,.08) 52%,#12070b)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 0 22px rgba(255,53,95,.12)!important}
+.habit-tile.failed .habit-state{color:#ff6f8c!important}.habit-tile.failed .habit-streak{color:#ff6f8c!important}
+.habit-tile.pressing .habit-face{border-color:#00ffccaa!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 0 1px rgba(0,255,204,.12),0 14px 24px rgba(0,0,0,.22)!important}
+.habit-tile.pressing .habit-face::after{content:''!important;position:absolute!important;left:0!important;right:0!important;bottom:0!important;height:var(--press,0%)!important;background:linear-gradient(0deg,rgba(0,255,204,.38),rgba(0,255,204,.08))!important;box-shadow:0 0 18px rgba(0,255,204,.16)!important;transition:height .08s linear!important;pointer-events:none!important}
+.habit-tile.fail-pressing .habit-face{border-color:#ff355f!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 0 1px rgba(255,53,95,.16),0 14px 24px rgba(0,0,0,.22)!important}
+.habit-tile.fail-pressing .habit-face::after{content:''!important;position:absolute!important;left:0!important;right:0!important;bottom:0!important;height:var(--failpress,0%)!important;background:linear-gradient(0deg,rgba(255,23,68,.48),rgba(255,23,68,.12))!important;box-shadow:0 0 18px rgba(255,23,68,.20)!important;transition:height .08s linear!important;pointer-events:none!important}
+.habit-back .mini-btn.fail{color:#ff6f8c!important;border-color:#ff4c6b66!important;background:#18070c!important;position:relative;overflow:hidden}
+.habit-back .mini-btn.fail::after{content:'';position:absolute;left:0;right:0;bottom:0;height:var(--failpress,0%);background:linear-gradient(0deg,rgba(255,23,68,.42),rgba(255,23,68,.08));pointer-events:none}
+
 </style>
 </head>
 <body>
@@ -524,6 +555,8 @@ let taskChargingId=null;
 let habitChargingId=null;
 let chargeState='OFF';
 let chargeBusy=false;
+let chargeInteractionLocked=false;
+let rewardUnlockPending=false;
 let chargeCanInterrupt=false;
 let currentChargeTicket=null;
 let taskMenuImportant=false;
@@ -713,7 +746,14 @@ function showReward(res,labelOverride){
   ov.classList.add('show');icon.classList.remove('animate');void icon.offsetWidth;icon.classList.add('animate');
   if(navigator.vibrate){if(res.tier==='gold'||res.tier==='red')navigator.vibrate([60,40,60,40,140]);else navigator.vibrate(50)}
 }
-function closeReward(){document.getElementById('rewardOverlay').classList.remove('show')}
+function closeReward(){
+  const ov=document.getElementById('rewardOverlay');
+  if(ov)ov.classList.remove('show');
+  if(rewardUnlockPending){
+    rewardUnlockPending=false;
+    finishChargeInteraction();
+  }
+}
 
 function renderHeader(){
   const nm=state.profile.name,t=titleById(state.profile.titleId),nameEl=document.getElementById('hdName');
@@ -1101,17 +1141,19 @@ function clearCompleted(){const removed=state.tasks.filter(t=>t.state==='done');
 
 
 let flippedHabitId=null;
-function habitTargetDate(h){return h.habitKind==='avoid'?yesterdayStr():todayStr()}
-function habitTargetLabel(h){return h.habitKind==='avoid'?'昨日':'今日'}
+function habitTargetDate(h){return appDayStr()}
+function habitTargetLabel(h){return '今日'}
 function habitLog(h){return state.habitLogs[h.id]&&state.habitLogs[h.id][habitTargetDate(h)]}
-function isHabitDone(h){const l=habitLog(h);return l&&l.status==='done'}
+function isHabitDone(h){const l=habitLog(h);return !!(l&&l.status==='done')}
+function isHabitFailed(h){const l=habitLog(h);return !!(l&&l.status==='failed')}
 function ensureHabitLogBox(id){if(!state.habitLogs[id])state.habitLogs[id]={};return state.habitLogs[id]}
 function setHabitDone(id){const h=state.habits.find(x=>x.id===id);if(!h)return;const box=ensureHabitLogBox(id),day=habitTargetDate(h);const shouldReward=!(box[day]&&box[day].rewardDone);box[day]={status:'done',checkedAt:Date.now(),rewardDone:true};habitChargingId=null;if(shouldReward)issueChargeTicket({id:h.id,name:h.name},{force:'bonus',type:'habit'});saveState();render();spawnPraise('done');if(shouldReward){setTimeout(()=>startNextChargeTicket(true),160)}}
+function setHabitFailed(id){const h=state.habits.find(x=>x.id===id);if(!h||h.habitKind!=='avoid')return;const box=ensureHabitLogBox(id),day=habitTargetDate(h);box[day]={status:'failed',checkedAt:Date.now(),rewardDone:false};habitChargingId=null;saveState();render();spawnPraise('add',{t:'記録した',c:'#ff6f8c'})}
 function undoHabit(id){const h=state.habits.find(x=>x.id===id);if(!h)return;if(state.habitLogs[id])delete state.habitLogs[id][habitTargetDate(h)];habitChargingId=null;saveState();render();showToast('習慣記録を戻した')}
 function tapHabit(id){if(appLockedForCompletion())return;clearTaskChargePreview(null,false);setHabitDone(id)}
 function habitStreak(h){let count=0,day=habitTargetDate(h);for(let i=0;i<90;i++){const box=state.habitLogs[h.id];if(box&&box[day]&&box[day].status==='done'){count++;day=addDaysStr(day,-1)}else break}return count}
-function habitStats(){const total=state.habits.length,done=state.habits.filter(isHabitDone).length;return{total,done,pending:Math.max(0,total-done)}}
-function habitMeta(h){const done=isHabitDone(h);return[{cls:'habit',txt:(h.habitKind==='avoid'?'やらない':'やる')+'・毎日'},{cls:done?'reward':'due',txt:habitTargetLabel(h)+' '+(done?'達成済':'未達成')}];}
+function habitStats(){const total=state.habits.length,done=state.habits.filter(isHabitDone).length,failed=state.habits.filter(isHabitFailed).length;return{total,done,failed,pending:Math.max(0,total-done-failed)}}
+function habitMeta(h){const done=isHabitDone(h),failed=isHabitFailed(h);return[{cls:'habit',txt:(h.habitKind==='avoid'?'やらない':'やる')+'・毎日'},{cls:done?'reward':failed?'warn':'due',txt:habitTargetLabel(h)+' '+(done?'達成済':failed?'失敗':'未達成')}];}
 function renderHabits(a){
   const head=document.createElement('div');head.className='habit-grid-head';head.innerHTML='<div><b>HABITS</b><span>長押しでBONUS / ダブルタップで裏面</span></div><span>'+habitStats().done+'/'+Math.max(1,state.habits.length)+'</span>';a.appendChild(head);
   const grid=document.createElement('div');grid.className='habit-grid';a.appendChild(grid);
@@ -1124,21 +1166,36 @@ function mkEmptyHabitTile(i){
   el.onclick=e=>{e.stopPropagation();flippedHabitId=null;openTaskMenu(null,'habit',i)};return el;
 }
 function mkHabitTile(h){
-  const done=isHabitDone(h),flipped=flippedHabitId===h.id;
-  const el=document.createElement('div');el.className='habit-tile'+(done?' done':'')+(flipped?' flipped':'');el.dataset.id=h.id;
-  el.innerHTML='<div class="habit-tile-inner"><div class="habit-face habit-front"><div class="habit-name">'+escapeHtml(h.name)+'</div><div class="habit-streak">'+habitStreak(h)+'<small>DAY STREAK</small></div><div class="habit-state">'+(h.habitKind==='avoid'?'NO':'DO')+' / '+(done?'BONUS LOCKED':'HOLD TO CHARGE')+'</div></div><div class="habit-face habit-back"><button class="mini-btn back">戻る</button><button class="mini-btn">⚙ 設定</button>'+(done?'<button class="mini-btn undo">↩ 達成取消</button>':'')+'<button class="mini-btn danger">× 削除</button></div></div>';
+  const done=isHabitDone(h),failed=isHabitFailed(h),flipped=flippedHabitId===h.id,isAvoid=h.habitKind==='avoid';
+  const el=document.createElement('div');el.className='habit-tile kind-'+(isAvoid?'avoid':'do')+(done?' done':'')+(failed?' failed':'')+(flipped?' flipped':'');el.dataset.id=h.id;
+  const stateLabel=done?'ACHIEVED':failed?'FAILED':(isAvoid?'HOLD TO SEAL':'HOLD TO CHARGE');
+  const backBtns='<button class="mini-btn back">戻る</button><button class="mini-btn">⚙ 設定</button>'
+    +(isAvoid&&!done&&!failed?'<button class="mini-btn fail">失敗を記録</button>':'')
+    +((done||failed)?'<button class="mini-btn undo">↩ 記録取消</button>':'')
+    +'<button class="mini-btn danger">× 削除</button>';
+  el.innerHTML='<div class="habit-tile-inner"><div class="habit-face habit-front"><div class="habit-name">'+escapeHtml(h.name)+'</div><div class="habit-streak">'+habitStreak(h)+'<small>DAY STREAK</small></div><div class="habit-state">'+(isAvoid?'SEAL':'DO')+' / '+stateLabel+'</div></div><div class="habit-face habit-back">'+backBtns+'</div></div>';
   const back=el.querySelector('.habit-back .back');if(back)back.onclick=e=>{e.stopPropagation();flippedHabitId=null;render()};
-  const edit=el.querySelector('.habit-back .mini-btn:not(.undo):not(.danger):not(.back)');if(edit)edit.onclick=e=>{e.stopPropagation();openTaskMenu(h.id,'habit')};
+  const edit=el.querySelector('.habit-back .mini-btn:not(.undo):not(.danger):not(.back):not(.fail)');if(edit)edit.onclick=e=>{e.stopPropagation();openTaskMenu(h.id,'habit')};
   const undo=el.querySelector('.habit-back .undo');if(undo)undo.onclick=e=>{e.stopPropagation();undoHabit(h.id)};
   const del=el.querySelector('.habit-back .danger');if(del)del.onclick=e=>{e.stopPropagation();deleteHabit(h.id)};
+  const failBtn=el.querySelector('.habit-back .fail');
   let timer=null,pressed=false,moved=false,sx=0,sy=0;
-  function clearPress(){if(timer){clearTimeout(timer);timer=null}pressed=false;el.classList.remove('pressing');el.style.removeProperty('--press')}
-  function startPress(x,y){if(done||flipped||appLockedForCompletion())return;sx=x;sy=y;moved=false;pressed=true;el.classList.add('pressing');el.style.setProperty('--press','0%');let start=Date.now();timer=setInterval(()=>{const pct=Math.min(100,(Date.now()-start)/650*100);el.style.setProperty('--press',pct+'%');if(pct>=100){clearInterval(timer);timer=null;clearPress();setHabitDone(h.id)}},50)}
-  el.addEventListener('touchstart',e=>{const t=e.touches&&e.touches[0];if(!t||e.target.closest('button'))return;startPress(t.clientX,t.clientY)},{passive:true});
+  function clearPress(){if(timer){clearInterval(timer);timer=null}pressed=false;el.classList.remove('pressing','fail-pressing');el.style.removeProperty('--press');el.style.removeProperty('--failpress');if(failBtn)failBtn.style.removeProperty('--failpress')}
+  function startSuccessPress(x,y){if(done||failed||flipped||appLockedForCompletion())return;sx=x;sy=y;moved=false;pressed=true;el.classList.add('pressing');el.style.setProperty('--press','0%');let start=Date.now();timer=setInterval(()=>{const pct=Math.min(100,(Date.now()-start)/650*100);el.style.setProperty('--press',pct+'%');if(pct>=100){clearPress();setHabitDone(h.id)}},50)}
+  function startFailPress(x,y){if(!isAvoid||done||failed||appLockedForCompletion())return;sx=x;sy=y;moved=false;pressed=true;el.classList.add('fail-pressing');el.style.setProperty('--failpress','0%');if(failBtn)failBtn.style.setProperty('--failpress','0%');let start=Date.now();timer=setInterval(()=>{const pct=Math.min(100,(Date.now()-start)/720*100);el.style.setProperty('--failpress',pct+'%');if(failBtn)failBtn.style.setProperty('--failpress',pct+'%');if(pct>=100){clearPress();setHabitFailed(h.id)}},50)}
+  if(failBtn){
+    failBtn.addEventListener('touchstart',e=>{const t=e.touches&&e.touches[0];if(!t)return;e.stopPropagation();startFailPress(t.clientX,t.clientY)},{passive:true});
+    failBtn.addEventListener('touchend',e=>{e.stopPropagation();clearPress()},{passive:true});
+    failBtn.addEventListener('touchcancel',clearPress,{passive:true});
+    failBtn.addEventListener('mousedown',e=>{e.stopPropagation();startFailPress(e.clientX,e.clientY)});
+    ['mouseup','mouseleave'].forEach(ev=>failBtn.addEventListener(ev,clearPress));
+    failBtn.onclick=e=>{e.stopPropagation()};
+  }
+  el.addEventListener('touchstart',e=>{const t=e.touches&&e.touches[0];if(!t||e.target.closest('button'))return;startSuccessPress(t.clientX,t.clientY)},{passive:true});
   el.addEventListener('touchmove',e=>{const t=e.touches&&e.touches[0];if(!t)return;if(Math.abs(t.clientX-sx)>12||Math.abs(t.clientY-sy)>12){moved=true;clearPress()}},{passive:true});
   el.addEventListener('touchend',e=>{clearPress()},{passive:true});
   el.addEventListener('touchcancel',clearPress,{passive:true});
-  el.addEventListener('mousedown',e=>{if(e.target.closest('button'))return;startPress(e.clientX,e.clientY)});
+  el.addEventListener('mousedown',e=>{if(e.target.closest('button'))return;startSuccessPress(e.clientX,e.clientY)});
   ['mouseup','mouseleave'].forEach(ev=>el.addEventListener(ev,clearPress));
   el.addEventListener('contextmenu',e=>e.preventDefault());
   let clickTimer=null;
@@ -1222,13 +1279,32 @@ function postToCharge(msg,tries=0){
   return false;
 }
 function resetChargeFrame(){postToCharge({type:'DOPAON_CHARGE_RESET'})}
+function setChargeInteractionLocked(on){
+  chargeInteractionLocked=!!on;
+  const root=document.getElementById('sf8');
+  if(root)root.classList.toggle('charge-interaction-lock',chargeInteractionLocked);
+}
+function startChargeInteractionLock(){
+  if(chargeInteractionLocked)return;
+  const input=document.getElementById('mi');
+  if(input)input.blur();
+  clearTaskChargePreview(null,false);
+  setChargeInteractionLocked(true);
+}
+function finishChargeInteraction(){
+  setChargeInteractionLocked(false);
+  if(state.chargeTickets&&state.chargeTickets.length)setTimeout(()=>startNextChargeTicket(true),260);
+}
 function startNextChargeTicket(auto=false){
   if(chargeBusy)return false;
   if(!state.chargeTickets||!state.chargeTickets.length)return false;
   const ticket=state.chargeTickets.shift();
   currentChargeTicket=ticket;
+  clearTaskChargePreview(null,false);
+  const input=document.getElementById('mi');if(input)input.blur();
   saveState();
   chargeBusy=true;chargeCanInterrupt=true;
+  setChargeInteractionLocked(false);
   renderChargeMini();
   postToCharge({type:'DOPAON_CHARGE_START',ticketId:ticket.id,force:ticket.force||null});
   return true;
@@ -1244,9 +1320,11 @@ async function handleChargeResult(kind){
       return;
     }
     if(kind==='white'||kind==='blue'){
-      const reward=grantReward(kind);saveState();renderHeader();showReward(reward,kind==='blue'?'Tia青':'Tia白');return;
+      startChargeInteractionLock();
+      const reward=grantReward(kind);saveState();renderHeader();rewardUnlockPending=true;showReward(reward,kind==='blue'?'Tia青':'Tia白');return;
     }
     if(kind==='bonus'){
+      startChargeInteractionLock();
       await showGoBonusGate();
       const prepared=await playBonusFrame();
       // reward already shown in bonus.html
@@ -1258,7 +1336,7 @@ async function handleChargeResult(kind){
     resetChargeFrame();
     renderChargeMini();
     saveState();
-    if(state.chargeTickets&&state.chargeTickets.length)setTimeout(()=>startNextChargeTicket(true),260);
+    if(!rewardUnlockPending)finishChargeInteraction();
   }
 }
 function showGoBonusGate(){
@@ -1280,7 +1358,7 @@ function keepTaskPreviewOnTarget(target){if(!target||!taskChargingId||currentMod
 document.addEventListener('click',e=>{const target=e.target;setTimeout(()=>{if(taskChargingId&&!keepTaskPreviewOnTarget(target))clearTaskChargePreview(null,true);if(currentMode()==='habits'&&flippedHabitId&&!target.closest('.habit-tile')){flippedHabitId=null;render()}},0);},true);
 window.addEventListener('message',e=>{
   const d=e.data||{};
-  if(d.type==='DOPAON_CHARGE_STATE'){chargeCanInterrupt=false;if(d.phase==='peka'){const bonus=!!(currentChargeTicket&&(currentChargeTicket.force==='bonus'||currentChargeTicket.type==='habit'||currentChargeTicket.type==='important'));startChargeParticles(bonus?'bonus':'normal')}return}
+  if(d.type==='DOPAON_CHARGE_STATE'){chargeCanInterrupt=false;if(d.phase==='peka'){startChargeInteractionLock();const bonus=!!(currentChargeTicket&&(currentChargeTicket.force==='bonus'||currentChargeTicket.type==='habit'||currentChargeTicket.type==='important'));startChargeParticles(bonus?'bonus':'normal')}return}
   if(d.type==='DOPAON_CHARGE_RESULT'){
     const kind=['miss','white','blue','bonus'].includes(d.kind)?d.kind:'miss';
     stopChargeParticles();

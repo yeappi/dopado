@@ -509,6 +509,19 @@ body{position:fixed;inset:0;touch-action:manipulation}
 .subtask-input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:#dce8ff;font-size:16px;line-height:1.35;font-family:inherit;padding:2px 0}
 .subtask-input::placeholder{color:#52637f}
 .subtask-input-hint{font-family:'Orbitron',monospace;font-size:7px;letter-spacing:1px;color:#52637f;margin-top:4px;text-align:right}
+
+/* ===== TUTORIAL v13 ===== */
+#tutOverlay{position:absolute;inset:0;z-index:500;pointer-events:none;display:none}
+#tutBg{position:absolute;inset:0;background:rgba(4,4,20,.68);opacity:0;transition:opacity .35s;pointer-events:none}
+#tutBubble{position:absolute;left:14px;right:14px;bottom:80px;background:#0c0c28;border:1.5px solid rgba(0,255,204,.6);border-radius:16px;padding:14px 16px 13px;box-shadow:0 12px 36px rgba(0,0,0,.7),0 0 0 1px rgba(0,255,204,.08);z-index:502;pointer-events:none;opacity:0;transition:opacity .25s,transform .25s;transform:translateY(8px)}
+#tutBubble.show{opacity:1;transform:translateY(0)}
+#tutBubble.top{bottom:auto;top:calc(env(safe-area-inset-top,0px) + 70px)}
+#tutPart{font-family:'Orbitron',monospace;font-size:7px;letter-spacing:2.5px;color:#00ffcc;margin-bottom:7px;opacity:.8}
+#tutMsg{font-size:14px;color:#eaf2ff;line-height:1.65;font-weight:600;white-space:pre-line}
+#tutHint{font-family:'Orbitron',monospace;font-size:9px;letter-spacing:1px;color:#00ffcc;margin-top:9px;opacity:.85}
+#tutSkip{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);right:14px;z-index:503;background:transparent;border:1px solid #2a3a5a;color:#4a6088;border-radius:999px;padding:5px 13px;font-family:'Orbitron',monospace;font-size:8px;letter-spacing:1.5px;cursor:pointer;pointer-events:all;display:none}
+#tutCounter{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 68px);left:50%;transform:translateX(-50%);font-family:'Orbitron',monospace;font-size:7px;letter-spacing:2px;color:#2a3a55;pointer-events:none;z-index:502;white-space:nowrap}
+.tut-glow{box-shadow:0 0 0 2.5px rgba(0,255,204,.9),0 0 20px rgba(0,255,204,.3)!important;position:relative!important;z-index:501!important;border-radius:inherit!important}
 </style>
 </head>
 <body>
@@ -594,6 +607,18 @@ body{position:fixed;inset:0;touch-action:manipulation}
     </div>
   </div>
 
+  <!-- TUTORIAL OVERLAY -->
+  <div id="tutOverlay">
+    <div id="tutBg"></div>
+    <div id="tutBubble">
+      <div id="tutPart"></div>
+      <div id="tutMsg"></div>
+      <div id="tutHint"></div>
+    </div>
+    <button id="tutSkip" onclick="tutSkip()">SKIP</button>
+    <div id="tutCounter"></div>
+  </div>
+
 </div>
 
 <script>
@@ -612,7 +637,7 @@ const TIERS={
   gold:{key:'gold',jp:'金',color:'#ffd24a',xp:60,days:45}
 };
 const TIER_ORDER=['white','blue','green','purple','red','gold'];
-const TITLES=[{id:'t01',text:'今はただの',tier:'white'},{id:'t02',text:'これでも',tier:'white'},{id:'t03',text:'ただの',tier:'white'},{id:'t04',text:'やたらと',tier:'white'},{id:'t05',text:'なんとなく',tier:'white'},{id:'t06',text:'迷える',tier:'white'},{id:'t07',text:'しがない',tier:'white'},{id:'t08',text:'野良の',tier:'blue'},{id:'t09',text:'紛れ込んだ',tier:'blue'},{id:'t10',text:'ひっそりした',tier:'blue'},{id:'t11',text:'気まぐれな',tier:'blue'},{id:'t12',text:'ふらりと来た',tier:'blue'},{id:'t13',text:'思いつきの',tier:'blue'},{id:'t14',text:'曲がった',tier:'blue'},{id:'t15',text:'手の込んだ',tier:'green'},{id:'t16',text:'一途な',tier:'green'},{id:'t17',text:'根拠のない',tier:'green'},{id:'t18',text:'風変わりな',tier:'green'},{id:'t19',text:'うっすらとした',tier:'green'},{id:'t20',text:'不器用な',tier:'green'},{id:'t21',text:'調教済みの',tier:'purple'},{id:'t22',text:'純然たる',tier:'purple'},{id:'t23',text:'果てしなく',tier:'purple'},{id:'t24',text:'底知れない',tier:'purple'},{id:'t25',text:'本物の',tier:'purple'},{id:'t26',text:'抗えない',tier:'red'},{id:'t27',text:'逃げ場のない',tier:'red'},{id:'t28',text:'選ばれた',tier:'red'},{id:'t29',text:'唯一無二の',tier:'gold'},{id:'t30',text:'伝説の',tier:'gold'}];
+const TITLES=[{id:'t01',text:'今はただの',tier:'white'},{id:'t02',text:'これでも',tier:'white'},{id:'t03',text:'ただの',tier:'white'},{id:'t04',text:'やたらと',tier:'white'},{id:'t05',text:'なんとなく',tier:'white'},{id:'t06',text:'迷える',tier:'white'},{id:'t07',text:'しがない',tier:'white'},{id:'t08',text:'野良の',tier:'blue'},{id:'t09',text:'紛れ込んだ',tier:'blue'},{id:'t10',text:'ひっそりした',tier:'blue'},{id:'t11',text:'気まぐれな',tier:'blue'},{id:'t12',text:'ふらりと来た',tier:'blue'},{id:'t13',text:'思いつきの',tier:'blue'},{id:'t14',text:'曲がった',tier:'blue'},{id:'t15',text:'手の込んだ',tier:'green'},{id:'t16',text:'一途な',tier:'green'},{id:'t17',text:'根拠のない',tier:'green'},{id:'t18',text:'風変わりな',tier:'green'},{id:'t19',text:'うっすらとした',tier:'green'},{id:'t20',text:'不器用な',tier:'green'},{id:'t21',text:'調教済みの',tier:'purple'},{id:'t22',text:'純然たる',tier:'purple'},{id:'t23',text:'果てしなく',tier:'purple'},{id:'t24',text:'底知れない',tier:'purple'},{id:'t25',text:'本物の',tier:'purple'},{id:'t26',text:'抗えない',tier:'red'},{id:'t27',text:'逃げ場のない',tier:'red'},{id:'t28',text:'選ばれた',tier:'red'},{id:'t29',text:'唯一無二の',tier:'gold'},{id:'t30',text:'伝説の',tier:'gold'},{id:'t_tut01',text:'挑戦する',tier:'red'}];
 const ILLUST_TIERS=['blue','green','purple','red','gold'];
 const WEEKDAYS=['日','月','火','水','木','金','土'];
 
@@ -859,7 +884,7 @@ function grantReward(tier){
 function runReward(){const tier=rollTier();if(!tier)return;const result=grantReward(tier);saveState();renderHeader();showReward(result)}
 function runLevelBonus(){const result=grantReward(rollBonusTier());saveState();renderHeader();showReward(result,'整理レベルアップ BONUS')}
 function tierIconSVG(tier){const c=TIERS[tier].color;return '<svg viewBox="0 0 100 100" style="color:'+c+'"><polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="none" stroke="'+c+'" stroke-width="3"/><polygon points="50,20 78,36 78,64 50,80 22,64 22,36" fill="'+c+'" opacity="0.14"/><text x="50" y="50" text-anchor="middle" dominant-baseline="central" font-family="Reggae One,sans-serif" font-size="30" font-weight="900" fill="'+c+'">'+TIERS[tier].jp+'</text></svg>'}
-function showReward(res,labelOverride){
+function showReward(res,labelOverride){tutHook('reward_shown',res);
   const ov=document.getElementById('rewardOverlay'),pop=ov.querySelector('.popup'),icon=document.getElementById('rwIcon'),tierLabel=document.getElementById('rwTierLabel'),typeEl=document.getElementById('rwType'),mainEl=document.getElementById('rwMain'),subEl=document.getElementById('rwSub');
   if(pop){pop.className='popup tier-'+res.tier}
   const T=TIERS[res.tier];tierLabel.textContent=T.jp+' TIER';tierLabel.style.color=T.color;icon.innerHTML=tierIconSVG(res.tier);mainEl.style.color='';mainEl.innerHTML='';subEl.textContent='';
@@ -870,7 +895,7 @@ function showReward(res,labelOverride){
   ov.classList.add('show');icon.classList.remove('animate');void icon.offsetWidth;icon.classList.add('animate');
   if(navigator.vibrate){if(res.tier==='gold'||res.tier==='red')navigator.vibrate([60,40,60,40,140]);else navigator.vibrate(50)}
 }
-function closeReward(){
+function closeReward(){tutHook('reward_closed');
   const ov=document.getElementById('rewardOverlay');
   if(ov)ov.classList.remove('show');
   if(rewardUnlockPending){
@@ -893,9 +918,9 @@ function renderTitleGrid(){const grid=document.getElementById('titleGrid'),cnt=d
 function illustPlaceholderSVG(tier){const c=TIERS[tier].color;return '<svg viewBox="0 0 100 100"><defs><radialGradient id="g'+tier+'" cx="50%" cy="42%" r="62%"><stop offset="0%" stop-color="'+c+'" stop-opacity="0.55"/><stop offset="100%" stop-color="'+c+'" stop-opacity="0.05"/></radialGradient></defs><rect width="100" height="100" fill="#06060e"/><rect width="100" height="100" fill="url(#g'+tier+')"/><polygon points="50,22 72,38 72,64 50,80 28,64 28,38" fill="none" stroke="'+c+'" stroke-width="2.5" opacity="0.9"/><circle cx="50" cy="51" r="9" fill="'+c+'" opacity="0.85"/></svg>'}
 function illustImageHTML(tier,alt){const src=ILLUST_ASSETS[tier];if(!src)return illustPlaceholderSVG(tier);return '<img src="'+src+'" alt="'+escapeHtml(alt||ILLUST_LABELS[tier]||tier)+'">'}
 function renderIllustGrid(){const grid=document.getElementById('illustGrid');grid.innerHTML='';ILLUST_TIERS.forEach(tier=>{const owned=state.ownedIllusts.includes(tier),wrap=document.createElement('div'),cell=document.createElement('div'),cap=document.createElement('div');cell.className='illust-cell'+(owned?'':' locked');cell.innerHTML=owned?illustImageHTML(tier,ILLUST_LABELS[tier]||tier):'<span class="lockmark">🔒</span>';cap.className='illust-cap';cap.textContent=ILLUST_LABELS[tier]||TIERS[tier].jp;cap.style.color=owned?TIERS[tier].color:'#4a6080';wrap.appendChild(cell);wrap.appendChild(cap);grid.appendChild(wrap)})}
-function onNameInput(){state.profile.name=document.getElementById('nameInput').value;renderNamePreview();renderHeader();saveState()}
-function openProfile(){document.getElementById('mi').blur();document.getElementById('nameInput').value=state.profile.name||'';renderProfileStats();renderNamePreview();renderTitleGrid();renderIllustGrid();document.getElementById('profileOverlay').classList.add('show');syncViewport()}
-function closeProfile(){document.getElementById('profileOverlay').classList.remove('show')}
+function onNameInput(){state.profile.name=document.getElementById('nameInput').value;renderNamePreview();renderHeader();saveState();if(state.profile.name)tutHook('name_changed')}
+function openProfile(){tutHook('profile_open');document.getElementById('mi').blur();document.getElementById('nameInput').value=state.profile.name||'';renderProfileStats();renderNamePreview();renderTitleGrid();renderIllustGrid();document.getElementById('profileOverlay').classList.add('show');syncViewport()}
+function closeProfile(){document.getElementById('profileOverlay').classList.remove('show');tutHook('profile_close')}
 
 function makeDopaonMessage(taskName){const isAfter=Math.random()<0.8,item=isAfter?rnd(DOPAON_AFTER):rnd(DOPAON_QUOTES);const nm=(state&&state.profile&&state.profile.name?state.profile.name:'自分');const timeLabel=isAfter?(item.time+'の'+nm):('今の'+nm);return{time:timeLabel,text:item.text}}
 let currentDopaonEl=null,currentDopaonAnim=null,currentDopaonTaskId=null,currentDopaonMsg=null,currentDopaonTimer=null,recentAddedTaskId=null,undoToastEl=null,undoTimer=null;
@@ -903,9 +928,9 @@ let openExtraTaskId=null,openExtraTab='subtasks',openSubtaskSwipeId=null,subtask
 function taskExtras(t){if(!t.extras)t.extras=normalizeTaskExtras(null);else t.extras=normalizeTaskExtras(t.extras);return t.extras}
 function taskHasExtras(t){const ex=taskExtras(t);return ex.subtasks.length>0||String(ex.memo||'').trim().length>0}
 function preferredExtraTab(t){const ex=taskExtras(t);return ex.subtasks.length?'subtasks':(String(ex.memo||'').trim()?'memo':'subtasks')}
-function closeTaskExtras(doRender=false){if(openExtraTaskId||openSubtaskSwipeId||subtaskInputTaskId){openExtraTaskId=null;openSubtaskSwipeId=null;subtaskInputTaskId=null;if(doRender)render();return true}return false}
-function toggleTaskExtras(id){const t=state.tasks.find(x=>x.id===id);if(!t)return;clearTaskChargePreview(null,false);openSubtaskSwipeId=null;subtaskInputTaskId=null;if(openExtraTaskId===id){openExtraTaskId=null;saveState();render();return}openExtraTaskId=id;openExtraTab=preferredExtraTab(t);saveState();render()}
-function setTaskExtraTab(id,tab){if(openExtraTaskId!==id)return;openExtraTab=tab==='memo'?'memo':'subtasks';openSubtaskSwipeId=null;subtaskInputTaskId=null;render()}
+function closeTaskExtras(doRender=false){if(openExtraTaskId||openSubtaskSwipeId||subtaskInputTaskId){openExtraTaskId=null;openSubtaskSwipeId=null;subtaskInputTaskId=null;if(doRender)render();tutHook('extras_close');return true}return false}
+function toggleTaskExtras(id){const t=state.tasks.find(x=>x.id===id);if(!t)return;clearTaskChargePreview(null,false);openSubtaskSwipeId=null;subtaskInputTaskId=null;if(openExtraTaskId===id){openExtraTaskId=null;saveState();render();return}openExtraTaskId=id;openExtraTab=preferredExtraTab(t);saveState();render();tutHook('extras_open',id)}
+function setTaskExtraTab(id,tab){if(openExtraTaskId!==id)return;openExtraTab=tab==='memo'?'memo':'subtasks';openSubtaskSwipeId=null;subtaskInputTaskId=null;render();if(tab==='memo')tutHook('memo_tab')}
 function startSubtaskInput(id){
   const t=state.tasks.find(x=>x.id===id);if(!t)return;
   openExtraTaskId=id;openExtraTab='subtasks';openSubtaskSwipeId=null;subtaskInputTaskId=id;render();
@@ -915,7 +940,7 @@ function commitSubtaskInput(id,value){
   const t=state.tasks.find(x=>x.id===id);if(!t)return;
   const text=String(value||'').trim();
   if(text){taskExtras(t).subtasks.unshift({id:newId(),text,done:false});saveState()}
-  subtaskInputTaskId=null;openExtraTaskId=id;openExtraTab='subtasks';render();
+  subtaskInputTaskId=null;openExtraTaskId=id;openExtraTab='subtasks';render();tutHook('subtask_saved');
 }
 function cancelSubtaskInput(id){if(subtaskInputTaskId===id){subtaskInputTaskId=null;render()}}
 function addSubtask(id){startSubtaskInput(id)}
@@ -1068,7 +1093,232 @@ async function resetAllData(){
     }
   }catch(e){}
   try{
-    if('serviceWorker' in navigator){
+    
+/* ================================================================
+   TUTORIAL SYSTEM v13
+   既存機能は一切変更しない。フックで進行するだけ。
+================================================================ */
+const TUT_TITLE_ID='t_tut01';
+
+const TUT_STEPS=[
+  // PART 1: 日常タスク
+  {id:'t_add',   part:'PART 1 · 日常タスク',msg:'まずは今日やることを\n1個入れてみよう',hint:'↓ 入力して ✓ ボタン',pos:'bot'},
+  {id:'t_today', part:'PART 1 · 日常タスク',msg:'今日やるなら\n"今日"にしておこう',hint:'→ 右スワイプ（短く）',pos:'bot'},
+  {id:'t_imp',   part:'PART 1 · 日常タスク',msg:'ここぞのタスクは\n重要にする',hint:'→ もう一度 右スワイプ',pos:'bot'},
+  {id:'t_ext',   part:'PART 1 · 日常タスク',msg:'細かいタスクや\nメモはここに入れられる',hint:'☰ ボタンを押してみよう',pos:'bot'},
+  {id:'t_sub',   part:'PART 1 · 日常タスク',msg:'子タスクを\n1つ追加してみよう',hint:'＋ タスクを追加 を押して入力',pos:'bot'},
+  {id:'t_mtab',  part:'PART 1 · 日常タスク',msg:'次はメモタブに\n切り替えよう',hint:'「メモ」タブをタップ',pos:'bot'},
+  {id:'t_memo',  part:'PART 1 · 日常タスク',msg:'なんでもいいから\n少し入力してみよう',hint:'メモ欄に入力',pos:'bot'},
+  {id:'t_cext',  part:'PART 1 · 日常タスク',msg:'よし。メニューを\n閉じよう',hint:'☰ を再タップ または ✕',pos:'bot'},
+  {id:'t_prep',  part:'PART 1 · 日常タスク',msg:'完了前に、終わった後の\n自分を少し想像する',hint:'完了ボタンを押してみよう',pos:'bot'},
+  {id:'t_done',  part:'PART 1 · 日常タスク',msg:'もう一度押すと完了。\nDOPADOが反応する',hint:'もう一度 完了ボタン',pos:'bot'},
+  // PART 2: チャージ / プロフィール
+  {id:'t_chrg',  part:'PART 2 · 報酬',msg:'タスク完了で\nチャージが走る。見ておこう',hint:'↑ チャージ機',pos:'bot'},
+  {id:'t_rwd',   part:'PART 2 · 報酬',msg:'チュートリアル報酬！\nタップして閉じよう',hint:'報酬ポップアップをタップ',pos:'top'},
+  {id:'t_prof',  part:'PART 2 · 報酬',msg:'獲得したものは\nプロフィールに残る',hint:'↑ 右上をタップ',pos:'bot'},
+  {id:'t_name',  part:'PART 2 · 報酬',msg:'名前を変えて\n自分のDOPADOにしよう',hint:'名前を入力',pos:'top'},
+  {id:'t_pcls',  part:'PART 2 · 報酬',msg:'完了！閉じよう',hint:'✕ を押して閉じる',pos:'top'},
+  // PART 3: 習慣 / BONUS
+  {id:'t_hab',   part:'PART 3 · 習慣 & BONUS',msg:'上のバーをタップして\n習慣画面へ',hint:'↑ バーをタップ',pos:'bot'},
+  {id:'t_cdo',   part:'PART 3 · 習慣 & BONUS',msg:'空きスロットをタップして\n「やること」の習慣を作ろう',hint:'＋ スロットをタップ → 「やること」',pos:'bot'},
+  {id:'t_lpdo',  part:'PART 3 · 習慣 & BONUS',msg:'やることは\n長押しで達成。溜めて離して。',hint:'タイルを長押し',pos:'bot'},
+  {id:'t_cavd',  part:'PART 3 · 習慣 & BONUS',msg:'次は「やらないこと」の\n習慣も作ろう',hint:'＋ スロットをタップ → 「やらないこと」',pos:'bot'},
+  {id:'t_dtap',  part:'PART 3 · 習慣 & BONUS',msg:'ダブルタップで\n裏面へ',hint:'タイルをダブルタップ',pos:'bot'},
+  {id:'t_fail',  part:'PART 3 · 習慣 & BONUS',msg:'失敗した時はここを長押し\n失敗は赤。達成は金。',hint:'「失敗を記録」を長押し',pos:'bot'},
+  {id:'t_bon',   part:'PART 3 · 習慣 & BONUS',msg:'習慣はBONUSの入口になる\n今すぐ体験しよう！',hint:'↑ チャージ機を見ておこう',pos:'bot'},
+  {id:'t_fin',   part:'COMPLETE',msg:'🔴 肩書き「挑戦する」獲得！\n\nこれは最初の一歩。\nよりレアなアイテムを目指せ！！',hint:'',pos:'top'},
+];
+
+let tut={active:false,step:0,taskId:null,habitDoId:null,habitAvoidId:null,bonusFired:false,nameEntered:false};
+
+function tutStart(){
+  tut={active:true,step:0,taskId:null,habitDoId:null,habitAvoidId:null,bonusFired:false,nameEntered:false};
+  const ov=document.getElementById('tutOverlay');
+  ov.style.display='block';
+  document.getElementById('tutSkip').style.display='block';
+  tutRender();
+}
+
+function tutSkip(){
+  tutCleanTemp();
+  tut.active=false;
+  state.onboarded=true;
+  saveState();
+  const ov=document.getElementById('tutOverlay');
+  ov.style.display='none';
+  document.getElementById('tutSkip').style.display='none';
+  tutGlow(null);
+  render();
+}
+
+function tutCleanTemp(){
+  if(tut.taskId){state.tasks=state.tasks.filter(x=>x.id!==tut.taskId)}
+  if(tut.habitDoId){state.habits=state.habits.filter(x=>x.id!==tut.habitDoId);delete state.habitLogs[tut.habitDoId]}
+  if(tut.habitAvoidId){state.habits=state.habits.filter(x=>x.id!==tut.habitAvoidId);delete state.habitLogs[tut.habitAvoidId]}
+  saveState();
+}
+
+function tutComplete(){
+  if(!state.ownedTitles.includes(TUT_TITLE_ID))state.ownedTitles.push(TUT_TITLE_ID);
+  if(!state.profile.titleId)state.profile.titleId=TUT_TITLE_ID;
+  tutCleanTemp();
+  tut.active=false;
+  state.onboarded=true;
+  saveState();
+}
+
+function tutFinish(){
+  tutSetBubble(TUT_STEPS[tut.step]);
+  tutGlow(null);
+  document.getElementById('tutBg').style.opacity='0.82';
+  tutComplete();
+  renderHeader();
+  render();
+  setTimeout(()=>{
+    document.getElementById('tutOverlay').style.display='none';
+    document.getElementById('tutSkip').style.display='none';
+    document.getElementById('tutBg').style.opacity='0';
+    tutGlow(null);
+    showToast('チュートリアル完了！おめでとう！');
+  },4500);
+}
+
+function tutRender(){
+  if(!tut.active)return;
+  const st=TUT_STEPS[tut.step];if(!st)return;
+  if(st.id==='t_fin'){tutFinish();return}
+  // bg
+  const bg=document.getElementById('tutBg');
+  bg.style.opacity=(st.id==='t_chrg'||st.id==='t_bon'||st.id==='t_rwd')?'0':'0.52';
+  tutSetBubble(st);
+  tutGlowForStep(st.id);
+}
+
+function tutSetBubble(st){
+  const bbl=document.getElementById('tutBubble');
+  document.getElementById('tutPart').textContent=st.part||'';
+  document.getElementById('tutMsg').textContent=st.msg||'';
+  document.getElementById('tutHint').textContent=st.hint||'';
+  document.getElementById('tutCounter').textContent=(tut.step+1)+' / '+TUT_STEPS.length;
+  // position
+  bbl.classList.toggle('top',st.pos==='top');
+  bbl.classList.add('show');
+}
+
+function tutGlow(el){
+  document.querySelectorAll('.tut-glow').forEach(x=>x.classList.remove('tut-glow'));
+  if(el)el.classList.add('tut-glow');
+}
+function tutGlowForStep(sid){
+  // render後にDOM確認が必要なのでrAFで
+  requestAnimationFrame(()=>{
+    let el=null;
+    const taskEl=tut.taskId?document.querySelector('[data-id="'+tut.taskId+'"]'):null;
+    const doEl=tut.habitDoId?document.querySelector('.habit-tile[data-id="'+tut.habitDoId+'"]'):null;
+    const avEl=tut.habitAvoidId?document.querySelector('.habit-tile[data-id="'+tut.habitAvoidId+'"]'):null;
+    if(sid==='t_add')el=document.getElementById('mi');
+    else if(sid==='t_today'||sid==='t_imp')el=taskEl;
+    else if(sid==='t_ext'){el=taskEl&&taskEl.querySelector('.task-menu-toggle')}
+    else if(sid==='t_prep'||sid==='t_done'){const btn=taskEl&&taskEl.querySelector('.task-btn');el=btn||taskEl}
+    else if(sid==='t_chrg'||sid==='t_bon')el=document.getElementById('chargeMeter');
+    else if(sid==='t_prof')el=document.querySelector('.identity');
+    else if(sid==='t_name')el=document.getElementById('nameInput');
+    else if(sid==='t_hab')el=document.getElementById('habitRow');
+    else if(sid==='t_lpdo')el=doEl;
+    else if(sid==='t_dtap'||sid==='t_fail')el=avEl;
+    tutGlow(el);
+  });
+}
+
+function tutAdvance(){
+  if(!tut.active)return;
+  tut.step++;
+  if(tut.step>=TUT_STEPS.length){tutFinish();return}
+  tutRender();
+}
+
+// 既存コードから呼ばれるフック関数
+function tutHook(evt,data){
+  if(!tut.active)return;
+  const sid=TUT_STEPS[tut.step]&&TUT_STEPS[tut.step].id;
+  switch(evt){
+    case'task_added':
+      if(sid==='t_add'){tut.taskId=data.id;tutAdvance()}
+      break;
+    case'priority_swiped':
+      if(sid==='t_today'&&data.id===tut.taskId&&isTaskToday(data))tutAdvance();
+      else if(sid==='t_imp'&&data.id===tut.taskId&&isTaskImportant(data))tutAdvance();
+      break;
+    case'extras_open':
+      if(sid==='t_ext'&&data===tut.taskId)tutAdvance();
+      break;
+    case'subtask_saved':
+      if(sid==='t_sub')tutAdvance();
+      break;
+    case'memo_tab':
+      if(sid==='t_mtab')tutAdvance();
+      break;
+    case'memo_input':
+      if(sid==='t_memo')tutAdvance();
+      break;
+    case'extras_close':
+      if(sid==='t_cext')tutAdvance();
+      break;
+    case'task_charging':
+      if(sid==='t_prep'&&data===tut.taskId)tutAdvance();
+      break;
+    case'task_done':
+      if(sid==='t_done'&&data===tut.taskId)tutAdvance();
+      break;
+    case'reward_shown':
+      if(sid==='t_chrg')tutAdvance();
+      else if(sid==='t_bon')tutAdvance();
+      break;
+    case'reward_closed':
+      if(sid==='t_rwd')tutAdvance();
+      break;
+    case'profile_open':
+      if(sid==='t_prof')tutAdvance();
+      break;
+    case'name_changed':
+      if(sid==='t_name'&&!tut.nameEntered){tut.nameEntered=true;tutAdvance()}
+      break;
+    case'profile_close':
+      if(sid==='t_pcls')tutAdvance();
+      break;
+    case'mode_habits':
+      if(sid==='t_hab')tutAdvance();
+      break;
+    case'habit_added':
+      if(sid==='t_cdo'&&data.habitKind==='do'){tut.habitDoId=data.id;tutAdvance()}
+      else if(sid==='t_cavd'&&data.habitKind==='avoid'){tut.habitAvoidId=data.id;tutAdvance()}
+      break;
+    case'habit_done':
+      if(sid==='t_lpdo'&&data===tut.habitDoId)tutAdvance();
+      break;
+    case'habit_flip':
+      if(sid==='t_dtap'&&data===tut.habitAvoidId)tutAdvance();
+      break;
+    case'habit_failed':
+      if(sid==='t_fail'&&data===tut.habitAvoidId){
+        tutAdvance();
+        // 少し待ってBONUSを自動発火
+        setTimeout(()=>{
+          if(tut.active&&!tut.bonusFired&&TUT_STEPS[tut.step]&&TUT_STEPS[tut.step].id==='t_bon'){
+            tut.bonusFired=true;
+            tutRender();
+            setTimeout(()=>{
+              issueChargeTicket({id:'tut_bonus',name:'TUTORIAL BONUS'},{force:'bonus',type:'habit'});
+              setTimeout(()=>startNextChargeTicket(true),120);
+            },700);
+          }
+        },500);
+      }
+      break;
+  }
+}
+
+if('serviceWorker' in navigator){
       const regs=await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map(reg=>reg.unregister()));
     }
@@ -1189,12 +1439,12 @@ function cycleTaskPriority(id){const t=state.tasks.find(x=>x.id===id);if(!t||t.s
   unsetTaskToday(id);showUndo('今日タグを外した',null);
 }
 
-function doQuickAdd(opts={}){closeTaskExtras(false);const v=vl();if(!v)return null;let created=null,kind='task';if(currentMode()==='habits'){const slot=firstEmptyHabitSlot();if(slot===null){showToast('空き習慣スロットがない');return null}created=createHabit(v,{habitKind:'do',slot});state.habits.push(created);kind='habit';if(!opts.silent)showToast('習慣を追加した')}else{created=createTask(v);syncTaskDateFlags(created);state.tasks.unshift(created);if(!opts.silent)showToast('タスクを追加した')}document.getElementById('mi').value='';resetPraiseInput();updateInputButtons('');bumpInputPrompt();saveState();render();spawnPraise('add');return{kind,item:created,name:v}}
+function doQuickAdd(opts={}){closeTaskExtras(false);const v=vl();if(!v)return null;let created=null,kind='task';if(currentMode()==='habits'){const slot=firstEmptyHabitSlot();if(slot===null){showToast('空き習慣スロットがない');return null}created=createHabit(v,{habitKind:'do',slot});state.habits.push(created);kind='habit';if(!opts.silent)showToast('習慣を追加した')}else{created=createTask(v);syncTaskDateFlags(created);state.tasks.unshift(created);if(!opts.silent)showToast('タスクを追加した')}document.getElementById('mi').value='';resetPraiseInput();updateInputButtons('');bumpInputPrompt();saveState();render();spawnPraise('add');if(kind==='habit')tutHook('habit_added',created);else tutHook('task_added',created);return{kind,item:created,name:v}}
 function doDopa(){const v=vl();if(!v)return;doQuickAdd({silent:false})}
 function deleteTask(id,fromMenu=false){if(openExtraTaskId===id)closeTaskExtras(false);const idx=state.tasks.findIndex(x=>x.id===id);if(idx<0)return;const removed=state.tasks[idx];state.tasks.splice(idx,1);if(currentDopaonTaskId===id||taskChargingId===id)clearTaskChargePreview(null,false);saveState();render();if(fromMenu)closeTaskMenu();showUndo('タスクを削除した',()=>{state.tasks.splice(Math.min(idx,state.tasks.length),0,removed);saveState();render()})}
 function deleteHabit(id,fromMenu=false){const idx=state.habits.findIndex(x=>x.id===id);if(idx<0)return;const removed=state.habits[idx];const logs=state.habitLogs[id];state.habits.splice(idx,1);delete state.habitLogs[id];saveState();render();if(fromMenu)closeTaskMenu();showUndo('習慣を削除した',()=>{state.habits.push(removed);if(logs)state.habitLogs[id]=logs;saveState();render()})}
 function undoTask(id){closeTaskExtras(false);const t=state.tasks.find(x=>x.id===id);if(!t)return;t.state='idle';t.doneAt=null;taskChargingId=null;saveState();render();spawnPraise('add',{t:'戻した！',c:'#00ffcc'});showToast('完了を取り消した。再完了しても再抽選なし')}
-function tap(id){if(appLockedForCompletion())return;closeTaskExtras(false);const t=state.tasks.find(x=>x.id===id);if(!t)return;if(t.state==='idle'){clearTaskChargePreview(id,false);t.state='charging';taskChargingId=id;currentDopaonTaskId=id;currentDopaonMsg=makeDopaonMessage(t.name);saveState();render()}else if(t.state==='charging'){clearInlineDopaon(false);t.state='done';t.doneAt=Date.now();const shouldReward=!t.rewardDone;const forceBonus=isTaskImportant(t);t.rewardDone=true;taskChargingId=null;if(shouldReward)issueChargeTicket(t,{force:forceBonus?'bonus':null,type:forceBonus?'important':'task'});saveState();render();setTimeout(()=>spawnPraise('done'),60);if(shouldReward){setTimeout(()=>startNextChargeTicket(true),160)}}}
+function tap(id){if(appLockedForCompletion())return;closeTaskExtras(false);const t=state.tasks.find(x=>x.id===id);if(!t)return;if(t.state==='idle'){clearTaskChargePreview(id,false);t.state='charging';taskChargingId=id;currentDopaonTaskId=id;currentDopaonMsg=makeDopaonMessage(t.name);saveState();render();tutHook('task_charging',id)}else if(t.state==='charging'){clearInlineDopaon(false);t.state='done';t.doneAt=Date.now();const shouldReward=!t.rewardDone;const forceBonus=isTaskImportant(t);t.rewardDone=true;taskChargingId=null;if(shouldReward)issueChargeTicket(t,{force:forceBonus?'bonus':null,type:forceBonus?'important':'task'});saveState();render();tutHook('task_done',id);setTimeout(()=>spawnPraise('done'),60);if(shouldReward){setTimeout(()=>startNextChargeTicket(true),160)}}}
 function formatDateLabel(s){if(!s)return '';const d=new Date(s+'T00:00:00');if(Number.isNaN(d.getTime()))return s;return (d.getMonth()+1)+'/'+d.getDate()+'('+WEEKDAYS[d.getDay()]+')'}
 function taskMeta(t){const tags=[];const today=appDayStr();if(isTaskToday(t))tags.push({cls:'today',txt:'今日'});if(t.dueDate){const overdue=t.state!=='done'&&t.dueDate<today;tags.push({cls:'due '+(overdue?'warn':''),txt:overdue?'期限超過':formatDateLabel(t.dueDate)})}return tags}
 function sortTasks(list){return list.slice().sort((a,b)=>{const ba=isTaskImportant(a)?0:isTaskToday(a)?1:!a.dueDate?2:3,bb=isTaskImportant(b)?0:isTaskToday(b)?1:!b.dueDate?2:3;if(ba!==bb)return ba-bb;if(ba===3&&a.dueDate!==b.dueDate)return a.dueDate.localeCompare(b.dueDate);return (b.createdAt||0)-(a.createdAt||0)})}
@@ -1231,12 +1481,12 @@ function applyPrioritySwipe(task,big){
     const old=task.dueDate;task.dueDate=day;task.todayDate=day;task.swipeCycle=1;maybeAwardSchedulePoint(task,old,task.dueDate);
     if(big){if(!claimImportant(task)){showUndo(importantFullText(),null);render();return}else{task.swipeCycle=2;showUndo(importantUsageText(task),null)}}
     else showUndo('今日タスクにした',null);
-    saveState();render();return;
+    saveState();render();tutHook('priority_swiped',task);return;
   }
   if(today&&!imp){
     if(big){task.todayDate='';task.importantDate='';task.swipeCycle=0;if(task.dueDate===day)task.dueDate='';showUndo('今日タグを外した',null)}
     else{if(!canClaimImportant(task)||!claimImportant(task)){showUndo(importantFullText(),null);render();return}task.swipeCycle=2;showUndo(importantUsageText(task),null)}
-    saveState();render();return;
+    saveState();render();tutHook('priority_swiped',task);return;
   }
   if(big){task.todayDate='';task.importantDate='';task.swipeCycle=0;if(task.dueDate===day)task.dueDate='';showUndo('今日も重要も外した',null)}
   else{task.importantDate='';task.swipeCycle=3;showUndo('重要を外した',null)}
@@ -1289,7 +1539,7 @@ function renderTaskExtra(task){
   [['subtasks','追加タスク'],['memo','メモ']].forEach(([key,label])=>{const b=document.createElement('button');b.type='button';const has=(key==='subtasks'?ex.subtasks.length>0:String(ex.memo||'').trim().length>0);b.className='task-extra-tab'+(openExtraTab===key?' on':'')+(has?' has-content':'');b.textContent=label;b.onclick=e=>{e.stopPropagation();setTaskExtraTab(task.id,key)};tabs.appendChild(b)});
   box.appendChild(tabs);
   if(openExtraTab==='memo'){
-    const ta=document.createElement('textarea');ta.className='task-memo';ta.placeholder='メモを書く...';ta.value=ex.memo||'';ta.oninput=e=>updateTaskMemo(task.id,e.target.value);ta.onclick=e=>e.stopPropagation();ta.ontouchstart=e=>e.stopPropagation();
+    const ta=document.createElement('textarea');ta.className='task-memo';ta.placeholder='メモを書く...';ta.value=ex.memo||'';ta.oninput=e=>{updateTaskMemo(task.id,e.target.value);if(e.target.value)tutHook('memo_input')};ta.onclick=e=>e.stopPropagation();ta.ontouchstart=e=>e.stopPropagation();
     box.appendChild(ta);const note=document.createElement('div');note.className='task-memo-note';note.textContent='AUTO SAVE';box.appendChild(note);return box;
   }
   const add=document.createElement('button');add.type='button';add.className='subtask-add';add.textContent='＋ タスクを追加';add.onclick=e=>{e.stopPropagation();addSubtask(task.id)};box.appendChild(add);
@@ -1352,8 +1602,8 @@ function habitLog(h){return state.habitLogs[h.id]&&state.habitLogs[h.id][habitTa
 function isHabitDone(h){const l=habitLog(h);return !!(l&&l.status==='done')}
 function isHabitFailed(h){const l=habitLog(h);return !!(l&&l.status==='failed')}
 function ensureHabitLogBox(id){if(!state.habitLogs[id])state.habitLogs[id]={};return state.habitLogs[id]}
-function setHabitDone(id){const h=state.habits.find(x=>x.id===id);if(!h)return;const box=ensureHabitLogBox(id),day=habitTargetDate(h);const shouldReward=!(box[day]&&box[day].rewardDone);box[day]={status:'done',checkedAt:Date.now(),rewardDone:true};habitChargingId=null;if(shouldReward)issueChargeTicket({id:h.id,name:h.name},{force:'bonus',type:'habit'});saveState();render();spawnPraise('done');if(shouldReward){setTimeout(()=>startNextChargeTicket(true),160)}}
-function setHabitFailed(id){const h=state.habits.find(x=>x.id===id);if(!h||h.habitKind!=='avoid')return;const box=ensureHabitLogBox(id),day=habitTargetDate(h);box[day]={status:'failed',checkedAt:Date.now(),rewardDone:false};habitChargingId=null;saveState();render();spawnPraise('add',{t:'記録した',c:'#ff6f8c'})}
+function setHabitDone(id){const h=state.habits.find(x=>x.id===id);if(!h)return;const box=ensureHabitLogBox(id),day=habitTargetDate(h);const shouldReward=!(box[day]&&box[day].rewardDone);box[day]={status:'done',checkedAt:Date.now(),rewardDone:true};habitChargingId=null;tutHook('habit_done',id);if(shouldReward)issueChargeTicket({id:h.id,name:h.name},{force:'bonus',type:'habit'});saveState();render();spawnPraise('done');if(shouldReward){setTimeout(()=>startNextChargeTicket(true),160)}}
+function setHabitFailed(id){const h=state.habits.find(x=>x.id===id);if(!h||h.habitKind!=='avoid')return;const box=ensureHabitLogBox(id),day=habitTargetDate(h);box[day]={status:'failed',checkedAt:Date.now(),rewardDone:false};habitChargingId=null;saveState();render();spawnPraise('add',{t:'記録した',c:'#ff6f8c'});tutHook('habit_failed',id)}
 function undoHabit(id){const h=state.habits.find(x=>x.id===id);if(!h)return;if(state.habitLogs[id])delete state.habitLogs[id][habitTargetDate(h)];habitChargingId=null;saveState();render();showToast('習慣記録を戻した')}
 function tapHabit(id){if(appLockedForCompletion())return;clearTaskChargePreview(null,false);setHabitDone(id)}
 function habitStreak(h){let count=0,day=habitTargetDate(h);for(let i=0;i<90;i++){const box=state.habitLogs[h.id];if(box&&box[day]&&box[day].status==='done'){count++;day=addDaysStr(day,-1)}else break}return count}
@@ -1404,7 +1654,7 @@ function mkHabitTile(h){
   ['mouseup','mouseleave'].forEach(ev=>el.addEventListener(ev,clearPress));
   el.addEventListener('contextmenu',e=>e.preventDefault());
   let clickTimer=null;
-  el.addEventListener('click',e=>{if(e.target.closest('button'))return;e.stopPropagation();if(clickTimer){clearTimeout(clickTimer);clickTimer=null;flippedHabitId=flippedHabitId===h.id?null:h.id;render();return}clickTimer=setTimeout(()=>{clickTimer=null;if(flippedHabitId&&flippedHabitId!==h.id){flippedHabitId=null;render()}},230)});
+  el.addEventListener('click',e=>{if(e.target.closest('button'))return;e.stopPropagation();if(clickTimer){clearTimeout(clickTimer);clickTimer=null;const _prev=flippedHabitId;flippedHabitId=flippedHabitId===h.id?null:h.id;render();if(flippedHabitId===h.id&&_prev!==h.id)tutHook('habit_flip',h.id);return}clickTimer=setTimeout(()=>{clickTimer=null;if(flippedHabitId&&flippedHabitId!==h.id){flippedHabitId=null;render()}},230)});
   return el;
 }
 function todayTaskStats(){const todayTasks=state.tasks.filter(t=>isTaskToday(t)),done=todayTasks.filter(t=>t.state==='done').length;return{total:todayTasks.length,done,pending:Math.max(0,todayTasks.length-done),important:importantCount(),items:todayTasks}}
@@ -1430,7 +1680,7 @@ function renderBottomBar(){
   renderChargeMini();
   renderInputPrompt();
 }
-function toggleMainMode(){if(chargeBusy)return;closeTaskExtras(false);clearTaskChargePreview(null,false);state.ui.mode=currentMode()==='tasks'?'habits':'tasks';taskChargingId=null;habitChargingId=null;flippedHabitId=null;saveState();render()}
+function toggleMainMode(){if(chargeBusy)return;closeTaskExtras(false);clearTaskChargePreview(null,false);state.ui.mode=currentMode()==='tasks'?'habits':'tasks';taskChargingId=null;habitChargingId=null;flippedHabitId=null;saveState();render();if(currentMode()==='habits')tutHook('mode_habits')}
 
 
 
@@ -1634,7 +1884,7 @@ function _obNext(){
   if(_obPage<OB_PAGES.length-1){_obPage++;_obRender();}
   else{state.onboarded=true;saveState();document.getElementById('onboardOverlay').classList.remove('show');}
 }
-function checkOnboarding(){if(!state.onboarded){_obPage=0;_obRender();document.getElementById('onboardOverlay').classList.add('show');}}
+function checkOnboarding(){if(!state.onboarded){tutStart();}}
 if('serviceWorker' in navigator){
   navigator.serviceWorker.getRegistrations
     ? navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{})

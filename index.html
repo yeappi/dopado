@@ -76,6 +76,15 @@ body{position:fixed;inset:0;touch-action:manipulation}
 /* v10: 入力欄の流れる文言がホーム画面/チュートリアルで外へズレて見えるのを防ぐ */
 #miPrompt{max-width:calc(100% - 124px);clip-path:inset(0 round 18px)}
 #miPrompt span{white-space:nowrap;max-width:100%}
+
+/* tutorial中は入力欄の流れる文言を完全に消す（ホーム画面版のズレ対策） */
+#sf8.tutorial-active #miPrompt,
+#sf8.tutorial-final #miPrompt,
+body.tutorial-active #miPrompt{
+  display:none!important;
+  opacity:0!important;
+  visibility:hidden!important;
+}
 .rw-icon img,.illust-cell img{width:100%;height:100%;object-fit:cover;display:block}
 .rw-icon img{border-radius:16px;border:2px solid rgba(255,255,255,.18);box-shadow:0 10px 22px rgba(0,0,0,.35)}
 .illust-cell img{border-radius:10px}
@@ -533,6 +542,44 @@ body{position:fixed;inset:0;touch-action:manipulation}
 .task.tut-swipe-right::after{content:'右へスワイプ ▶▶▶';position:absolute;right:10px;top:50%;transform:translateY(-50%);z-index:504;padding:7px 10px;border-radius:999px;background:rgba(255,210,74,.96);color:#07070f;font-family:'Orbitron',monospace;font-size:10px;font-weight:900;letter-spacing:.8px;box-shadow:0 0 18px rgba(255,210,74,.55);pointer-events:none;animation:tutSwipeCue 1s ease-in-out infinite}
 .task.tut-swipe-right .task-card{box-shadow:0 0 0 2px rgba(255,210,74,.82),0 0 28px rgba(255,210,74,.30),inset 0 1px 0 rgba(255,255,255,.035)!important}
 @keyframes tutSwipeCue{0%,100%{opacity:.78;transform:translateY(-50%) translateX(0)}50%{opacity:1;transform:translateY(-50%) translateX(10px)}}
+
+/* v12: miPromptを入力欄の高さに固定。safe-area込みのPWAで下へズレるのを防ぐ */
+#inputBar{overflow:hidden!important}
+#miPrompt{
+  left:62px!important;
+  right:62px!important;
+  top:8px!important;
+  height:38px!important;
+  line-height:38px!important;
+  transform:none!important;
+  max-width:none!important;
+  border-radius:19px!important;
+  overflow:hidden!important;
+  clip-path:none!important;
+  display:block;
+}
+#miPrompt span{
+  display:block!important;
+  width:100%!important;
+  height:38px!important;
+  line-height:38px!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+#miPrompt::after{
+  top:0!important;
+  bottom:0!important;
+  height:38px!important;
+  filter:blur(2px);
+}
+#miPrompt.hide{opacity:0!important}
+#sf8.tutorial-active #miPrompt,
+#sf8.tutorial-final #miPrompt,
+body.tutorial-active #miPrompt{
+  display:none!important;
+}
+
 </style>
 </head>
 <body>
@@ -642,7 +689,7 @@ const LEVEL_STEP=10;
 // ===== ONE-TIME DATA RESET FOR TUTORIAL MIGRATION =====
 // この値を変えた時だけ、同じ端末で再度1回だけ初期化される。
 // v6: 最終チュートリアル導線調整。既存テストデータをもう一度だけ確実に初期化する。
-const DATA_RESET_VERSION = 'tutorial-v9';
+const DATA_RESET_VERSION = 'tutorial-v10';
 const DATA_RESET_DONE_KEY = 'dopado_data_reset_done_version';
 const DATA_RESET_CANARY_KEY = 'dopado_clean_start_version';
 
@@ -1840,6 +1887,20 @@ function isSafari() { return isIOS() && /Safari/.test(navigator.userAgent) && !/
 function tutIsActive() { return !!tut.active; }
 function tutIsTempHabit(id) { return id === tut.habitDoId || id === tut.habitAvoidId; }
 
+function setTutorialUiActive(on, finalMode=false) {
+  const app = document.getElementById('sf8');
+  if (app) {
+    app.classList.toggle('tutorial-active', !!on);
+    app.classList.toggle('tutorial-final', !!finalMode);
+  }
+  document.body.classList.toggle('tutorial-active', !!on);
+  const prompt = document.getElementById('miPrompt');
+  if (prompt) {
+    prompt.classList.toggle('hide', !!on);
+    prompt.style.display = on ? 'none' : '';
+  }
+}
+
 /* ---------- 起動 ---------- */
 function tutStart() {
   const skipHome = isStandalone() || localStorage.getItem('dopado_home_prompt_seen') === '1';
@@ -1850,6 +1911,7 @@ function tutStart() {
   _tutFinalCalled = false;
   const ov = document.getElementById('tutOverlay');
   if (ov) ov.style.display = 'block';
+  setTutorialUiActive(true);
   const sk = document.getElementById('tutSkip');
   if (sk) sk.style.display = 'block';
   tutRender();
@@ -1889,6 +1951,7 @@ function tutSkip() {
 }
 
 function _tutHideForBonus() {
+  setTutorialUiActive(true);
   // BONUS演出中はチュートリアル文言を完全に隠す。
   // iframeの上に吹き出しが残ると、フリーズしたように見えるため。
   const ov = document.getElementById('tutOverlay');
@@ -1904,6 +1967,7 @@ function _tutHideForBonus() {
 function _tutHideOverlay() {
   const ov = document.getElementById('tutOverlay');
   if (ov) ov.style.display = 'none';
+  setTutorialUiActive(false);
   const sk = document.getElementById('tutSkip');
   if (sk) sk.style.display = 'none';
   const bg = document.getElementById('tutBg');
@@ -2000,6 +2064,7 @@ function _tutShowFinalMessage() {
   _tutFinalCalled = false;
   const ov = document.getElementById('tutOverlay');
   if (ov) ov.style.display = 'block';
+  setTutorialUiActive(true, true);
   const st = { id: 't_fin', part: 'COMPLETE',
     msg: `🔴 肩書き「挑戦する」を獲得しました！！
 

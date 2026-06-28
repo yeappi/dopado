@@ -477,6 +477,20 @@ body{position:fixed;inset:0;touch-action:manipulation}
   color:#ff3b5c!important;
 }
 
+
+
+/* ===== v13.12.1 task extras polish / tag visual restore ===== */
+.task.done .task-card{opacity:1!important;background:#080812!important;border-color:#17172f!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.025)!important}
+.task.done .task-main{opacity:.58!important}.task.done .task-action{opacity:.62!important}.task.done.open-tools .task-card{transform:translateX(-116px)!important}
+.task.today-task:not(.important-task) .task-card{border-left:1px solid #1e1e38!important;border-color:#1e1e38!important;background:linear-gradient(180deg,#101022,#0b0b18)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.035)!important}
+.task.important-task:not(.done) .task-card{border-color:#ff3b5c88!important;background:linear-gradient(135deg,rgba(255,59,92,.14),#0f0f20 46%)!important;box-shadow:0 0 26px rgba(255,59,92,.12),inset 0 1px 0 rgba(255,255,255,.035)!important}
+.task.important-task.done .task-card{border-color:#542033!important;background:linear-gradient(135deg,rgba(255,59,92,.06),#080812 50%)!important}
+.tag.today{color:#66ccff!important;border-color:rgba(102,204,255,.46)!important;background:rgba(102,204,255,.07)!important}.tag.important{color:#ff6f8c!important;border-color:rgba(255,80,112,.50)!important;background:rgba(255,80,112,.075)!important}.tag.due{color:#c8d8f0!important;border-color:rgba(200,216,240,.24)!important;background:rgba(200,216,240,.04)!important}.tag.warn{color:#ff6f8c!important;border-color:rgba(255,80,112,.50)!important;background:rgba(255,80,112,.075)!important}
+.task-menu-toggle{width:28px!important;height:28px!important;border-radius:10px!important;font-size:15px!important;line-height:1!important;margin-right:3px!important;background:rgba(255,255,255,.025)!important;flex:0 0 28px!important}.task-menu-toggle.has-extra{background:rgba(255,210,74,.08)!important}.task-menu-toggle.open{background:rgba(0,255,204,.075)!important}
+.task-extra-tab.has-content:not(.on){color:#ffd24a!important;border-color:rgba(255,210,74,.44)!important;background:rgba(255,210,74,.065)!important;box-shadow:0 0 12px rgba(255,210,74,.07)!important}.task-extra-tab.has-content:not(.on)::after{content:'•';margin-left:6px;color:#ffd24a}
+.subtask-delete{left:auto!important;right:0!important;background:#3a0711!important;color:#ff6f8c!important}.subtask-wrap.swiped .subtask-row{transform:translateX(-62px)!important}.subtask-row.swipe-done{transform:translateX(42px)!important;border-color:rgba(0,255,204,.40)!important;box-shadow:0 0 14px rgba(0,255,204,.10)!important}.subtask-row.swipe-undo{transform:translateX(42px)!important;border-color:rgba(255,210,74,.42)!important;box-shadow:0 0 14px rgba(255,210,74,.10)!important}
+.task-memo{font-size:16px!important;line-height:1.45!important;resize:none!important;touch-action:manipulation!important}
+
 </style>
 </head>
 <body>
@@ -858,7 +872,7 @@ function preferredExtraTab(t){const ex=taskExtras(t);return ex.subtasks.length?'
 function closeTaskExtras(doRender=false){if(openExtraTaskId||openSubtaskSwipeId){openExtraTaskId=null;openSubtaskSwipeId=null;if(doRender)render();return true}return false}
 function toggleTaskExtras(id){const t=state.tasks.find(x=>x.id===id);if(!t)return;clearTaskChargePreview(null,false);openSubtaskSwipeId=null;if(openExtraTaskId===id){openExtraTaskId=null;saveState();render();return}openExtraTaskId=id;openExtraTab=preferredExtraTab(t);saveState();render()}
 function setTaskExtraTab(id,tab){if(openExtraTaskId!==id)return;openExtraTab=tab==='memo'?'memo':'subtasks';openSubtaskSwipeId=null;render()}
-function addSubtask(id){const t=state.tasks.find(x=>x.id===id);if(!t)return;const text=(prompt('追加タスクを入力')||'').trim();if(!text)return;taskExtras(t).subtasks.push({id:newId(),text,done:false});openExtraTaskId=id;openExtraTab='subtasks';saveState();render()}
+function addSubtask(id){const t=state.tasks.find(x=>x.id===id);if(!t)return;const text=(prompt('追加タスクを入力')||'').trim();if(!text)return;taskExtras(t).subtasks.unshift({id:newId(),text,done:false});openExtraTaskId=id;openExtraTab='subtasks';saveState();render()}
 function toggleSubtaskDone(taskId,subId){const t=state.tasks.find(x=>x.id===taskId);if(!t)return;const st=taskExtras(t).subtasks.find(x=>x.id===subId);if(!st)return;st.done=!st.done;openSubtaskSwipeId=null;saveState();render()}
 function deleteSubtask(taskId,subId){const t=state.tasks.find(x=>x.id===taskId);if(!t)return;const ex=taskExtras(t);const idx=ex.subtasks.findIndex(x=>x.id===subId);if(idx<0)return;ex.subtasks.splice(idx,1);openSubtaskSwipeId=null;saveState();render()}
 function updateTaskMemo(id,value){const t=state.tasks.find(x=>x.id===id);if(!t)return;taskExtras(t).memo=value;saveState()}
@@ -1223,7 +1237,7 @@ function mkC(task){
 function renderTaskExtra(task){
   const ex=taskExtras(task),box=document.createElement('div');box.className='task-extra';box.onclick=e=>e.stopPropagation();
   const tabs=document.createElement('div');tabs.className='task-extra-tabs';
-  [['subtasks','追加タスク'],['memo','メモ']].forEach(([key,label])=>{const b=document.createElement('button');b.type='button';b.className='task-extra-tab'+(openExtraTab===key?' on':'');b.textContent=label;b.onclick=e=>{e.stopPropagation();setTaskExtraTab(task.id,key)};tabs.appendChild(b)});
+  [['subtasks','追加タスク'],['memo','メモ']].forEach(([key,label])=>{const b=document.createElement('button');b.type='button';const has=(key==='subtasks'?ex.subtasks.length>0:String(ex.memo||'').trim().length>0);b.className='task-extra-tab'+(openExtraTab===key?' on':'')+(has?' has-content':'');b.textContent=label;b.onclick=e=>{e.stopPropagation();setTaskExtraTab(task.id,key)};tabs.appendChild(b)});
   box.appendChild(tabs);
   if(openExtraTab==='memo'){
     const ta=document.createElement('textarea');ta.className='task-memo';ta.placeholder='メモを書く...';ta.value=ex.memo||'';ta.oninput=e=>updateTaskMemo(task.id,e.target.value);ta.onclick=e=>e.stopPropagation();ta.ontouchstart=e=>e.stopPropagation();
@@ -1241,12 +1255,15 @@ function renderSubtaskRow(taskId,st){
   const row=document.createElement('div');row.className='subtask-row';
   const check=document.createElement('span');check.className='subtask-check';check.textContent=st.done?'✓':'';row.appendChild(check);
   const txt=document.createElement('span');txt.className='subtask-text';txt.textContent=st.text;row.appendChild(txt);
-  row.onclick=e=>{e.stopPropagation();toggleSubtaskDone(taskId,st.id)};
+  check.onclick=e=>{e.stopPropagation();toggleSubtaskDone(taskId,st.id)};
   let sx=0,sy=0,dx=0,tracking=false,drag=false;
-  row.addEventListener('touchstart',e=>{e.stopPropagation();const t=e.touches&&e.touches[0];if(!t)return;sx=t.clientX;sy=t.clientY;dx=0;tracking=true;drag=false},{passive:true});
-  row.addEventListener('touchmove',e=>{e.stopPropagation();if(!tracking||!e.touches||!e.touches[0])return;const t=e.touches[0];dx=t.clientX-sx;const dy=t.clientY-sy;if(!drag){if(Math.abs(dx)<8)return;if(Math.abs(dx)<Math.abs(dy)*1.15){tracking=false;return}drag=true}if(dx>0){e.preventDefault();row.style.transform='translateX('+Math.min(62,dx).toFixed(1)+'px)'}},{passive:false});
-  row.addEventListener('touchend',e=>{e.stopPropagation();if(!tracking)return;tracking=false;row.style.transform='';if(drag&&dx>42){openSubtaskSwipeId=st.id;render()}else if(drag){openSubtaskSwipeId=null;render()}},{passive:true});
-  row.addEventListener('touchcancel',()=>{tracking=false;row.style.transform=''},{passive:true});
+  row.addEventListener('touchstart',e=>{e.stopPropagation();const t=e.touches&&e.touches[0];if(!t)return;sx=t.clientX;sy=t.clientY;dx=0;tracking=true;drag=false;row.classList.remove('swipe-done','swipe-undo')},{passive:true});
+  row.addEventListener('touchmove',e=>{e.stopPropagation();if(!tracking||!e.touches||!e.touches[0])return;const t=e.touches[0];dx=t.clientX-sx;const dy=t.clientY-sy;if(!drag){if(Math.abs(dx)<8)return;if(Math.abs(dx)<Math.abs(dy)*1.15){tracking=false;return}drag=true}e.preventDefault();
+    if(dx<0){openSubtaskSwipeId=null;row.classList.remove('swipe-done','swipe-undo');row.style.transform='translateX('+Math.max(-62,dx).toFixed(1)+'px)'}
+    else if(dx>0){row.style.transform='translateX('+Math.min(46,dx).toFixed(1)+'px)';row.classList.toggle('swipe-done',!st.done&&dx>34);row.classList.toggle('swipe-undo',st.done&&dx>34)}
+  },{passive:false});
+  row.addEventListener('touchend',e=>{e.stopPropagation();if(!tracking)return;tracking=false;row.style.transform='';row.classList.remove('swipe-done','swipe-undo');if(drag&&dx<-42){openSubtaskSwipeId=st.id;render();return}if(drag&&dx>42){openSubtaskSwipeId=null;toggleSubtaskDone(taskId,st.id);return}if(drag){openSubtaskSwipeId=null;render()}},{passive:true});
+  row.addEventListener('touchcancel',()=>{tracking=false;row.style.transform='';row.classList.remove('swipe-done','swipe-undo')},{passive:true});
   wrap.appendChild(row);return wrap;
 }
 

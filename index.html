@@ -632,44 +632,6 @@ const BACKUP_KEY='dopaon_state_v6_backup';
 const LEGACY_KEYS=['dopaon_state_v5','dopaon_state_v4','dopaon_state_v3','dopaon_state_v2','dopaon_state_v1'];
 const LEVEL_STEP=10;
 
-// ===== ONE-TIME DATA RESET FOR TUTORIAL MIGRATION =====
-// この値を変えない限り、同じ端末では二度と自動削除されない。
-const DATA_RESET_VERSION = 'tutorial-v1';
-const DATA_RESET_DONE_KEY = 'dopado_data_reset_done_version';
-
-function oneTimeDataResetForTutorial() {
-  try {
-    const doneVersion = localStorage.getItem(DATA_RESET_DONE_KEY);
-
-    // すでにこのバージョンのリセットを実行済みなら、絶対に何もしない。
-    if (doneVersion === DATA_RESET_VERSION) return;
-
-    const prefixes = ['dopaon_', 'dopado_', 'DOPAON_', 'DOPADO_'];
-
-    Object.keys(localStorage).forEach(key => {
-      // 実行済みフラグ自体は消さない。
-      if (key === DATA_RESET_DONE_KEY) return;
-
-      if (prefixes.some(p => key.startsWith(p))) {
-        localStorage.removeItem(key);
-      }
-    });
-
-    Object.keys(sessionStorage).forEach(key => {
-      if (prefixes.some(p => key.startsWith(p))) {
-        sessionStorage.removeItem(key);
-      }
-    });
-
-    // 削除が終わった後に、今回のリセットは済んだ印を残す。
-    localStorage.setItem(DATA_RESET_DONE_KEY, DATA_RESET_VERSION);
-  } catch (e) {
-    // localStorageが使えない環境でもアプリを止めない。
-    console.warn('oneTimeDataResetForTutorial failed', e);
-  }
-}
-
-
 const TIERS={
   white:{key:'white',jp:'白',color:'#e8e8f5',xp:2,days:3},
   blue:{key:'blue',jp:'青',color:'#3b9eff',xp:3,days:7},
@@ -2176,7 +2138,6 @@ if('serviceWorker' in navigator){
     ? navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{})
     : navigator.serviceWorker.ready.then(r=>r.unregister()).catch(()=>{});
 }
-oneTimeDataResetForTutorial();
 loadState();cleanStaleTutorialData();initBaseViewport(true);syncViewport();renderHeader();render();renderChargeMini();resetPraiseInput();renderInputPrompt(true);scheduleInputPromptRotation();
 checkOnboarding();
 

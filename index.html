@@ -9,8 +9,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="DOPADO" />
 <meta name="mobile-web-app-capable" content="yes" />
-<link rel="manifest" href="./manifest.webmanifest?v=13" />
-<link rel="apple-touch-icon" href="./icon.png?v=13" />
+<link rel="manifest" href="./manifest.webmanifest?v=13-1" />
+<link rel="apple-touch-icon" href="./icon.png?v=13-1" />
 
 <title>DOPADO TASK SYSTEM</title>
 
@@ -249,6 +249,46 @@ body{position:fixed;inset:0;touch-action:manipulation}
 .task-dopaon{position:relative;margin-top:0;padding:9px 34px 9px 10px;border-radius:10px;background:linear-gradient(180deg,rgba(0,229,188,.075),rgba(255,210,74,.045));border:1px solid rgba(0,229,188,.22);border-left:3px solid #00e5bc;box-shadow:0 0 18px rgba(0,229,188,.06);animation:dopaInlineIn .32s cubic-bezier(.18,.9,.25,1) both;pointer-events:auto}.task-dopaon .dream-time{font-size:7px;letter-spacing:1.7px;color:#00e5bc;margin-bottom:3px;text-align:left;text-shadow:0 0 8px rgba(0,229,188,.35)}.task-dopaon .dream-quote{font-size:12px;line-height:1.65;color:#dcecff;text-align:left;text-shadow:0 0 8px rgba(255,255,255,.06)}.dopa-close{position:absolute;right:7px;bottom:7px;width:22px;height:22px;border-radius:6px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.25);color:#9bb0c8;font-size:12px;font-weight:900;line-height:1;display:flex;align-items:center;justify-content:center;padding:0}
 #sf8[data-mode="habits"] .task-card{background:linear-gradient(180deg,#ffffffee,#e8f9ffee);border-color:#a4deea;color:#163545;box-shadow:0 10px 20px rgba(20,120,145,.10)}#sf8[data-mode="habits"] .task-name{color:#163545}#sf8[data-mode="habits"] .task.habit .task-card{border-left:4px solid #0c98b5}#sf8[data-mode="habits"] .tag{background:#f4fdff;border-color:#9eddea;color:#227386}#sf8[data-mode="habits"] .task.done .task-card{opacity:.58;background:#d7eff6}
 
+
+/* ===== v13.1: structure fix / deadline-today / habit grid / praise lanes ===== */
+.task.today-task .task-card{border-left:1px solid #1e1e38!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.035)}
+.task.important-task .task-card{border-color:#ff3b5c88!important;}
+.task-card{display:block!important;padding:13px 12px 12px 14px!important;min-height:76px!important;}
+.task-top-row{display:flex;align-items:center;gap:12px;min-height:46px;width:100%;}
+.task-top-row .task-name{font-size:15px;line-height:1.55;flex:1;min-width:0;padding-right:4px;}
+.task-top-row .task-action{flex:0 0 auto;align-self:center;padding-top:0;}
+.task-main{width:100%;gap:8px!important;}
+.task-meta{justify-content:flex-start!important;margin-top:-2px!important;gap:5px!important;}
+.task-meta .tag.today{color:#66ccff;border-color:#66ccff66;background:#071621;}
+.task-meta .tag.important{color:#ff5c78;border-color:#ff3b5c66;background:#1a0710;}
+.task-dopaon{width:100%;margin-top:8px!important;padding:10px 34px 10px 11px!important;}
+.task-dopaon .dream-quote{display:block;width:100%;}
+.task.open-tools .task-card{transform:translateX(-122px)!important;}
+.task-tools-panel{width:122px!important;}
+.task-swipe-bg{font-size:10px!important;}
+#sf8[data-mode="habits"]{background:linear-gradient(180deg,#00d8ad 0%,#00bf9e 55%,#009f86 100%)!important;color:#071016!important;}
+#sf8[data-mode="habits"] .header{background:linear-gradient(180deg,#00d8ad,#00c29f)!important;border-bottom-color:rgba(7,16,22,.22)!important;color:#071016!important;}
+#sf8[data-mode="habits"] #ta{background:radial-gradient(circle at 50% 0%,rgba(255,255,255,.20),transparent 45%)!important;}
+#sf8[data-mode="habits"] #statusBar{background:#071016!important;border-bottom-color:#0b352e!important;}
+#sf8[data-mode="habits"] #habitRow{background:linear-gradient(135deg,#071016,#0b2025)!important;}
+#sf8[data-mode="habits"] #bottomDock,#sf8[data-mode="habits"] #inputBar{background:#00b894!important;border-top-color:rgba(7,16,22,.25)!important;}
+#sf8[data-mode="habits"] #mi{background:rgba(7,16,22,.90)!important;border-color:rgba(7,16,22,.35)!important;color:#eafff9!important;}
+.habit-grid-head{background:rgba(7,16,22,.92)!important;border-color:rgba(7,16,22,.25)!important;color:#dffff7!important;}
+.habit-grid-head b{color:#00ffcc!important}.habit-grid-head span{color:#93dacb!important}.habit-grid-head button{background:#071016!important;color:#00ffcc!important;border-color:#071016!important;}
+.habit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;padding-bottom:18px;}
+.habit-tile{height:136px;border:1.5px solid rgba(7,16,22,.28);border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.82),rgba(220,255,246,.64));color:#071016;box-shadow:0 10px 22px rgba(0,60,50,.16),inset 0 1px 0 rgba(255,255,255,.42);padding:13px 10px;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;position:relative;overflow:hidden;touch-action:manipulation;}
+.habit-tile::after{content:'';position:absolute;right:-18px;bottom:-18px;width:72px;height:72px;border-radius:50%;border:1px solid rgba(7,16,22,.12)}
+.habit-tile-name{font-weight:900;font-size:14px;line-height:1.35;word-break:break-word;position:relative;z-index:1;}
+.habit-streak{font-family:'Orbitron',monospace;display:flex;align-items:flex-end;gap:3px;position:relative;z-index:1;}
+.habit-streak b{font-size:27px;line-height:.9;color:#071016}.habit-streak span{font-size:10px;font-weight:900;margin-bottom:2px;color:#11352f;}
+.habit-state{font-family:'Orbitron',monospace;font-size:9px;letter-spacing:1.3px;font-weight:900;color:#13534a;position:relative;z-index:1;}
+.habit-tile.done{background:linear-gradient(180deg,#071016,#092b27);color:#00ffcc;border-color:rgba(7,16,22,.62);box-shadow:0 12px 24px rgba(0,40,34,.24),0 0 0 1px rgba(0,255,204,.16) inset;}
+.habit-tile.done .habit-tile-name,.habit-tile.done .habit-streak b{color:#00ffcc}.habit-tile.done .habit-streak span,.habit-tile.done .habit-state{color:#90ffee;}
+.habit-tile.charging{outline:2px solid #ffd24a;box-shadow:0 0 18px rgba(255,210,74,.32),0 12px 24px rgba(0,40,34,.22);}
+.empty-tile{align-items:center;justify-content:center;gap:8px;border-style:dashed;background:rgba(255,255,255,.22);font-weight:900;font-size:13px;}
+.empty-tile .plus{font-size:28px;line-height:1;}
+#sf8[data-mode="habits"] .completed{display:none;}
+
 </style>
 </head>
 <body>
@@ -269,7 +309,7 @@ body{position:fixed;inset:0;touch-action:manipulation}
       <div class="habit-status"><span class="dot-on"></span><span class="dot-off"></span><span class="dot-off"></span><span class="counter">1/3</span><span style="font-size:13px;color:#3a5070;margin-left:auto;">›</span></div>
     </div>
     <div class="meter charge-frame-shell charge-off" id="chargeMeter" aria-label="チャージ抽選窓">
-      <iframe id="chargeFrame" src="./charge.html?v=13" title="DOPADO CHARGE"></iframe>
+      <iframe id="chargeFrame" src="./charge.html?v=13-1" title="DOPADO CHARGE"></iframe>
     </div>
   </div>
   <div id="bottomDock">
@@ -390,15 +430,21 @@ function addDaysStr(base,delta){const d=new Date(base+'T00:00:00');d.setDate(d.g
 function yesterdayStr(){return addDaysStr(todayStr(),-1)}
 function appDayStr(d=new Date()){const x=new Date(d);x.setHours(x.getHours()-5);return dateStr(x)}
 function prevAppDayStr(){return addDaysStr(appDayStr(),-1)}
-function isTaskToday(t){return !!(t&&t.todayDate===appDayStr()&&t.dueDate===appDayStr())}
+function isTaskToday(t){return !!(t&&t.dueDate===appDayStr())}
 function isTaskImportant(t){return !!(t&&t.importantDate===appDayStr()&&isTaskToday(t))}
+function syncTaskDateFlags(t){
+  if(!t)return;
+  const day=appDayStr();
+  t.todayDate=(t.dueDate===day)?day:'';
+  if(t.importantDate&&!isTaskToday(t))t.importantDate='';
+}
 function expireDailyFlags(target=state){
   const day=appDayStr();
   if(!target||!Array.isArray(target.tasks))return;
   target.tasks.forEach(t=>{
-    if(t.todayDate&&t.todayDate!==day&&t.state!=='done'){t.todayDate='';t.importantDate='';t.swipeCycle=0;if(t.dueDate)t.dueDate='';}
+    syncTaskDateFlags(t);
     if(t.importantDate&&t.importantDate!==day)t.importantDate='';
-    if(t.importantDate&&!t.todayDate)t.importantDate='';
+    if(t.importantDate&&!isTaskToday(t))t.importantDate='';
   });
 }
 function importantCount(){expireDailyFlags(state);return state.tasks.filter(t=>t.state!=='done'&&isTaskImportant(t)).length}
@@ -571,7 +617,7 @@ function showDopaonMessage(taskName,taskId){
 }
 
 let isComposing=false,lastCountedLen=0,compBaseLen=0,lastDirectPraiseAt=0,lastPraiseOpAt=0,lastCompData='',livePraise=0,praiseQueue=0,praiseDrainTimer=null,busyLanes=new Set(),activePraise=new Set(),baseViewportHeight=0;
-const NS='http://www.w3.org/2000/svg',FF="'Reggae One', system-ui, sans-serif",PRAISE_LIFE=2800,MAX_PRAISE=6,PRAISE_COOLDOWN=55,MAX_PRAISE_QUEUE=24,P_MARGIN=8;
+const NS='http://www.w3.org/2000/svg',FF="'Reggae One', system-ui, sans-serif",PRAISE_LIFE=2800,MAX_PRAISE=4,PRAISE_COOLDOWN=55,MAX_PRAISE_QUEUE=24,P_MARGIN=8;
 function viewportHeight(){return window.visualViewport?window.visualViewport.height:window.innerHeight}
 function viewportTop(){return window.visualViewport?window.visualViewport.offsetTop:0}
 function initBaseViewport(force){const h=Math.max(window.innerHeight,viewportHeight());if(force||!baseViewportHeight){baseViewportHeight=h;return}const inputFocused=document.activeElement===document.getElementById('mi');if(!inputFocused&&h>baseViewportHeight)baseViewportHeight=h}
@@ -583,15 +629,15 @@ function textSize(mode){if(mode==='done')return 26+Math.floor(Math.random()*7);i
 function getTextBox(groups,fs){const pad=Math.ceil(fs*.55),lh=Math.ceil(fs*1.34),maxMark=groups.reduce((m,g)=>g.side?Math.max(m,charLen(g.t)):m,1);return{w:Math.ceil(Math.max(fs,maxMark*fs*.62)+pad*2),h:Math.ceil(groups.length*lh+pad),pad,lh}}
 function txPair(svg,x,y,fs,txt,col){const outer=Math.max(4,fs*.24),inner=Math.max(2,fs*.11);[["none","white",outer],[col,"#111",inner]].forEach(([fill,stroke,sw])=>{const t=document.createElementNS(NS,'text');t.setAttribute('x',x);t.setAttribute('y',y);t.setAttribute('text-anchor','middle');t.setAttribute('dominant-baseline','central');t.setAttribute('font-family',FF);t.setAttribute('font-size',fs);t.setAttribute('font-weight','900');t.setAttribute('fill',fill);t.setAttribute('stroke',stroke);t.setAttribute('stroke-width',sw);t.setAttribute('stroke-linejoin','round');if(fill!=='none')t.setAttribute('paint-order','stroke');t.textContent=txt;svg.appendChild(t)})}
 function drawPraiseText(svg,item,groups,box,fs){let cy=box.pad/2+box.lh/2;groups.forEach(g=>{const len=Math.max(1,charLen(g.t)),fitFs=g.side?Math.min(fs,Math.max(10,(box.w-box.pad*.65)/(len*.62))):fs;txPair(svg,box.w/2,cy,fitFs,g.t,item.c);cy+=box.lh})}
-function getPraiseOrigin(){const pc=document.getElementById('pc'),dock=document.getElementById('bottomDock');if(!pc||!dock)return{x:180,y:360};const pcRect=pc.getBoundingClientRect(),dockRect=dock.getBoundingClientRect();return{x:clamp(dockRect.left+dockRect.width/2-pcRect.left,48,pc.clientWidth-48),y:clamp(dockRect.top-pcRect.top+20,pc.clientHeight*.55,pc.clientHeight+86)}}
+function getPraiseOrigin(){const pc=document.getElementById('pc');return{x:pc?pc.clientWidth/2:180,y:pc?pc.clientHeight+90:360}}
 function getLanes(origin){const pc=document.getElementById('pc'),W=pc.clientWidth,H=pc.clientHeight;
-  // 9レーン：上3 + 中3 + 横2 + 斜め1 で全体に散らす
-  const targets=[
-    {x:W*.15,y:H*.12},{x:W*.5,y:H*.08},{x:W*.85,y:H*.12},
-    {x:W*.2,y:H*.35},{x:W*.5,y:H*.32},{x:W*.8,y:H*.35},
-    {x:W*.08,y:H*.55},{x:W*.92,y:H*.55},{x:W*.5,y:H*.55}
-  ];
-  return targets.map((t,i)=>{const dx=t.x-origin.x,dy=t.y-origin.y;return{index:i,angle:Math.atan2(dy,dx)*180/Math.PI,len:Math.hypot(dx,dy),tx:t.x,ty:t.y}})
+  const xs=[.06,.20,.34,.445,.5,.555,.66,.80,.94].map(v=>W*v);
+  return xs.map((x,i)=>{
+    const targetY=[.16,.24,.34,.43,.52,.40,.31,.22,.14][i]*H;
+    const srcY=H+80,srcX=x;
+    const dx=x-srcX,dy=targetY-srcY;
+    return{index:i,angle:Math.atan2(dy,dx)*180/Math.PI,len:Math.hypot(dx,dy),tx:x,ty:targetY,srcX,srcY};
+  })
 }
 function getPointOnLane(origin,lane,d){const r=lane.angle*Math.PI/180;return{x:origin.x+Math.cos(r)*d,y:origin.y+Math.sin(r)*d}}
 function fitsInPraiseArea(x,y,w,h){const pc=document.getElementById('pc');return x-w/2>P_MARGIN&&x+w/2<pc.clientWidth-P_MARGIN&&y-h/2>P_MARGIN&&y+h/2<pc.clientHeight-P_MARGIN}
@@ -726,7 +772,7 @@ function saveTaskMenu(){
       showToast('習慣へ移した');
     }else{
       const oldDue=t.dueDate;
-      t.name=cfg.name;t.dueDate=cfg.dueDate;t.taskType='normal';
+      t.name=cfg.name;t.dueDate=cfg.dueDate;t.taskType='normal';syncTaskDateFlags(t);
       maybeAwardSchedulePoint(t,oldDue,t.dueDate);
       showToast('タスク設定を保存した');
     }
@@ -737,7 +783,7 @@ function saveTaskMenu(){
     showToast('習慣を追加した');
     spawnPraise('add');
   }else{
-    const t=createTask(cfg.name,cfg);state.tasks.unshift(t);maybeAwardSchedulePoint(t,'',t.dueDate);spawnPraise('add');showToast('タスクを追加した');
+    const t=createTask(cfg.name,cfg);syncTaskDateFlags(t);state.tasks.unshift(t);maybeAwardSchedulePoint(t,'',t.dueDate);spawnPraise('add');showToast('タスクを追加した');
   }
   document.getElementById('mi').value='';resetPraiseInput();updateInputButtons('');saveState();render();closeTaskMenu();
 }
@@ -751,10 +797,10 @@ function maybeAwardSchedulePoint(task,oldDue,newDue){
   if(newLv>oldLv){showToast('整理Lv.UP！ボーナス抽選');setTimeout(runLevelBonus,160)}
   else showToast('整理 +1PT / 次Lvまで '+(LEVEL_STEP-(state.xp%LEVEL_STEP))+'PT');
 }
-function setTaskToday(id){const t=state.tasks.find(x=>x.id===id);if(!t||t.state==='done')return;const old=t.dueDate;const day=appDayStr();t.todayDate=day;t.dueDate=day;if(!t.swipeCycle)t.swipeCycle=1;maybeAwardSchedulePoint(t,old,t.dueDate);saveState();render()}
-function unsetTaskToday(id){const t=state.tasks.find(x=>x.id===id);if(!t||t.state==='done')return;t.todayDate='';t.importantDate='';t.swipeCycle=0;if(t.dueDate===appDayStr())t.dueDate='';saveState();render()}
-function setTaskImportant(id){const t=state.tasks.find(x=>x.id===id);if(!t||t.state==='done')return;if(!isTaskToday(t)){setTaskToday(id)}if(isTaskImportant(t))return;if(importantCount()>=2){showUndo('重要タスクは今日2つまで',null);return}t.importantDate=appDayStr();t.swipeCycle=2;saveState();render()}
-function unsetTaskImportant(id){const t=state.tasks.find(x=>x.id===id);if(!t)return;t.importantDate='';t.swipeCycle=3;saveState();render()}
+function setTaskToday(id){const t=state.tasks.find(x=>x.id===id);if(!t||t.state==='done')return;clearInlineDopaon(false);const old=t.dueDate;const day=appDayStr();t.dueDate=day;t.todayDate=day;if(!t.swipeCycle)t.swipeCycle=1;maybeAwardSchedulePoint(t,old,t.dueDate);saveState();render()}
+function unsetTaskToday(id){const t=state.tasks.find(x=>x.id===id);if(!t||t.state==='done')return;clearInlineDopaon(false);t.todayDate='';t.importantDate='';t.swipeCycle=0;if(t.dueDate===appDayStr())t.dueDate='';saveState();render()}
+function setTaskImportant(id){const t=state.tasks.find(x=>x.id===id);if(!t||t.state==='done')return;clearInlineDopaon(false);if(!isTaskToday(t)){setTaskToday(id)}if(isTaskImportant(t))return;if(importantCount()>=2){showUndo('重要タスクは今日2つまで',null);return}t.importantDate=appDayStr();t.swipeCycle=2;saveState();render()}
+function unsetTaskImportant(id){const t=state.tasks.find(x=>x.id===id);if(!t)return;clearInlineDopaon(false);t.importantDate='';t.swipeCycle=3;saveState();render()}
 function cycleTaskPriority(id){const t=state.tasks.find(x=>x.id===id);if(!t||t.state==='done')return;const day=appDayStr();if(!isTaskToday(t)){setTaskToday(id);showUndo('今日タスクにした',null);return}
   if(!isTaskImportant(t)&&t.swipeCycle!==3){setTaskImportant(id);showUndo('重要タスクにした',null);return}
   if(isTaskImportant(t)){unsetTaskImportant(id);showUndo('重要を外した',null);return}
@@ -762,13 +808,26 @@ function cycleTaskPriority(id){const t=state.tasks.find(x=>x.id===id);if(!t||t.s
 }
 
 function doQuickAdd(opts={}){const v=vl();if(!v)return null;let created=null,kind='task';if(currentMode()==='habits'){created=createHabit(v,{habitKind:'do'});state.habits.unshift(created);kind='habit';if(!opts.silent)showToast('習慣を追加した')}else{created=createTask(v);state.tasks.unshift(created);if(!opts.silent)showToast('タスクを追加した')}document.getElementById('mi').value='';resetPraiseInput();updateInputButtons('');saveState();render();spawnPraise('add');return{kind,item:created,name:v}}
-function doDopa(){const v=vl();if(!v)return;const res=doQuickAdd({silent:true});if(res&&res.kind==='task'&&res.item)showDopaonMessage(v,res.item.id);else showDopaonMessage(v)}
+function doDopa(){const v=vl();if(!v)return;doQuickAdd({silent:false})}
 function deleteTask(id,fromMenu=false){const idx=state.tasks.findIndex(x=>x.id===id);if(idx<0)return;const removed=state.tasks[idx];state.tasks.splice(idx,1);if(currentDopaonTaskId===id)clearInlineDopaon(false);saveState();render();if(fromMenu)closeTaskMenu();showUndo('タスクを削除した',()=>{state.tasks.splice(Math.min(idx,state.tasks.length),0,removed);saveState();render()})}
 function deleteHabit(id,fromMenu=false){const idx=state.habits.findIndex(x=>x.id===id);if(idx<0)return;const removed=state.habits[idx];const logs=state.habitLogs[id];state.habits.splice(idx,1);delete state.habitLogs[id];saveState();render();if(fromMenu)closeTaskMenu();showUndo('習慣を削除した',()=>{state.habits.splice(Math.min(idx,state.habits.length),0,removed);if(logs)state.habitLogs[id]=logs;saveState();render()})}
 function undoTask(id){const t=state.tasks.find(x=>x.id===id);if(!t)return;t.state='idle';t.doneAt=null;taskChargingId=null;saveState();render();spawnPraise('add',{t:'戻した！',c:'#00ffcc'});showToast('完了を取り消した。再完了しても再抽選なし')}
-function tap(id){if(chargeBusy&&!chargeCanInterrupt)return;const t=state.tasks.find(x=>x.id===id);if(!t)return;if(t.state==='idle'){t.state='charging';taskChargingId=id;saveState();render()}else if(t.state==='charging'){t.state='done';t.doneAt=Date.now();const shouldReward=!t.rewardDone;const forceBonus=isTaskImportant(t);t.rewardDone=true;taskChargingId=null;if(shouldReward)issueChargeTicket(t,{force:forceBonus?'bonus':null,type:forceBonus?'important':'task'});saveState();render();setTimeout(()=>spawnPraise('done'),60);if(shouldReward){if(chargeBusy&&chargeCanInterrupt){resetChargeFrame();chargeBusy=false;chargeCanInterrupt=false;renderChargeMini();setTimeout(()=>startNextChargeTicket(true),60)}else setTimeout(()=>startNextChargeTicket(true),160)}}}
+function tap(id){
+  if(chargeBusy&&!chargeCanInterrupt)return;
+  const t=state.tasks.find(x=>x.id===id);if(!t)return;
+  if(currentDopaonTaskId&&currentDopaonTaskId!==id)clearInlineDopaon(false);
+  if(t.state==='idle'){
+    t.state='charging';taskChargingId=id;
+    currentDopaonTaskId=id;currentDopaonMsg=makeDopaonMessage(t.name);
+    saveState();render();return;
+  }
+  if(t.state==='charging'){
+    clearInlineDopaon(false);
+    t.state='done';t.doneAt=Date.now();const shouldReward=!t.rewardDone;const forceBonus=isTaskImportant(t);t.rewardDone=true;taskChargingId=null;if(shouldReward)issueChargeTicket(t,{force:forceBonus?'bonus':null,type:forceBonus?'important':'task'});saveState();render();setTimeout(()=>spawnPraise('done'),60);if(shouldReward){if(chargeBusy&&chargeCanInterrupt){resetChargeFrame();chargeBusy=false;chargeCanInterrupt=false;renderChargeMini();setTimeout(()=>startNextChargeTicket(true),60)}else setTimeout(()=>startNextChargeTicket(true),160)}
+  }
+}
 function formatDateLabel(s){if(!s)return '';const d=new Date(s+'T00:00:00');if(Number.isNaN(d.getTime()))return s;return (d.getMonth()+1)+'/'+d.getDate()+'('+WEEKDAYS[d.getDay()]+')'}
-function taskMeta(t){const tags=[];if(isTaskToday(t))tags.push({cls:'today',txt:'今日'});else if(t.dueDate){const today=appDayStr();const overdue=t.state!=='done'&&t.dueDate<today;tags.push({cls:'due '+(overdue?'warn':''),txt:overdue?'期限超過':formatDateLabel(t.dueDate)})}return tags}
+function taskMeta(t){const tags=[];const today=appDayStr();if(isTaskToday(t))tags.push({cls:'today',txt:'今日'});else if(t.dueDate){const overdue=t.state!=='done'&&t.dueDate<today;tags.push({cls:'due '+(overdue?'warn':''),txt:overdue?'期限超過':formatDateLabel(t.dueDate)})}return tags}
 function sortTasks(list){return list.slice().sort((a,b)=>{const ba=isTaskImportant(a)?0:isTaskToday(a)?1:!a.dueDate?2:3,bb=isTaskImportant(b)?0:isTaskToday(b)?1:!b.dueDate?2:3;if(ba!==bb)return ba-bb;if(ba===3&&a.dueDate!==b.dueDate)return a.dueDate.localeCompare(b.dueDate);return (b.createdAt||0)-(a.createdAt||0)})}
 function render(){expireDailyFlags(state);const a=document.getElementById('ta');a.innerHTML='';const sf8=document.getElementById('sf8');if(sf8)sf8.dataset.mode=currentMode();if(currentMode()==='habits')renderHabits(a);else renderTasks(a);renderBottomBar();}
 function renderTasks(a){
@@ -810,54 +869,59 @@ function mkC(task){
   el.dataset.id=task.id;
   const bg=document.createElement('div');bg.className='task-swipe-bg';bg.textContent='';el.appendChild(bg);
   const panel=document.createElement('div');panel.className='task-tools-panel';
-  if(iD){const u=document.createElement('button');u.className='mini-btn undo';u.textContent='↩';u.onclick=e=>{e.stopPropagation();undoTask(task.id)};panel.appendChild(u)}
-  const edit=document.createElement('button');edit.className='mini-btn';edit.textContent='⚙';edit.onclick=e=>{e.stopPropagation();openTaskMenu(task.id,'task')};panel.appendChild(edit);
+  if(iD){const u=document.createElement('button');u.className='mini-btn undo';u.textContent='↩';u.onclick=e=>{e.stopPropagation();clearInlineDopaon(false);undoTask(task.id)};panel.appendChild(u)}
+  const edit=document.createElement('button');edit.className='mini-btn';edit.textContent='⚙';edit.onclick=e=>{e.stopPropagation();clearInlineDopaon(false);openTaskMenu(task.id,'task')};panel.appendChild(edit);
   const del=document.createElement('button');del.className='mini-btn danger';del.textContent='×';del.onclick=e=>{e.stopPropagation();deleteTask(task.id)};panel.appendChild(del);
   el.appendChild(panel);
+
   const card=document.createElement('div');card.className='task-card';
   const main=document.createElement('div');main.className='task-main';
-  const row=document.createElement('div');row.className='task-title-row';
-  const nm=document.createElement('div');nm.className='task-name';nm.textContent=task.name;row.appendChild(nm);
+  const top=document.createElement('div');top.className='task-top-row';
+  const nm=document.createElement('div');nm.className='task-name';nm.textContent=task.name;top.appendChild(nm);
+  const w=document.createElement('div');w.className='task-action';
+  if(!iD){
+    const b=document.createElement('button');
+    b.className='task-btn'+(iC?' cbtn':'')+(!iC&&todayActive?' dpa-ready':'')+(!iC&&important?' dpa-important':'');
+    b.onclick=e=>{e.stopPropagation();tap(task.id)};
+    b.setAttribute('aria-label',iC?'完了確定':'夢物語を開く');
+    b.innerHTML=iC?'<span style="font-family:\'Orbitron\',monospace;font-size:7px;font-weight:700;">確定</span>':(todayActive?'<span class="dpa-label">dpa</span>':'<span style="font-size:17px;">✓</span>');
+    w.appendChild(b);if(iC){const h=document.createElement('span');h.className='push';h.textContent='PUSH';w.appendChild(h)}
+  }else{const ic=document.createElement('span');ic.className='done-mark';ic.textContent='✓';w.appendChild(ic)}
+  top.appendChild(w);main.appendChild(top);
+
   const meta=document.createElement('div');meta.className='task-meta';
-  if(todayActive)meta.appendChild(tagEl('today','今日'));
+  taskMeta(task).forEach(m=>meta.appendChild(tagEl(m.cls,m.txt)));
   if(important)meta.appendChild(tagEl('important','重要'));
-  taskMeta(task).forEach(m=>{if(m.cls.indexOf('today')<0)meta.appendChild(tagEl(m.cls,m.txt))});
-  if(meta.children.length)row.appendChild(meta);
-  main.appendChild(row);
+  if(meta.children.length)main.appendChild(meta);
+
   if(!iD&&currentDopaonTaskId===task.id&&currentDopaonMsg){
     const dp=document.createElement('div');dp.className='task-dopaon';
     dp.innerHTML='<span class="dream-time">'+escapeHtml(currentDopaonMsg.time)+'</span><span class="dream-quote">「'+escapeHtml(currentDopaonMsg.text)+'」</span><button type="button" class="dopa-close" aria-label="夢物語を閉じる">×</button>';
     const close=dp.querySelector('.dopa-close');if(close)close.onclick=e=>{e.stopPropagation();closeInlineDopaon(task.id)};
     main.appendChild(dp);
   }
-  card.appendChild(main);
-  const w=document.createElement('div');w.className='task-action';
-  if(!iD){
-    const b=document.createElement('button');
-    b.className='task-btn'+(iC?' cbtn':'')+(!iC&&todayActive?' dpa-ready':'')+(!iC&&important?' dpa-important':'');
-    b.onclick=e=>{e.stopPropagation();tap(task.id)};
-    b.setAttribute('aria-label',iC?'完了確定':'チャージ開始');
-    b.innerHTML=iC?'<span style="font-family:\'Orbitron\',monospace;font-size:7px;font-weight:700;">確定</span>':(todayActive?'<span class="dpa-label">dpa</span>':'<span style="font-size:17px;">✓</span>');
-    w.appendChild(b);if(iC){const h=document.createElement('span');h.className='push';h.textContent='PUSH';w.appendChild(h)}
-  }else{const ic=document.createElement('span');ic.className='done-mark';ic.textContent='✓';w.appendChild(ic)}
-  card.appendChild(w);el.appendChild(card);attachTaskSwipe(el,task);return el;
+  card.appendChild(main);el.appendChild(card);attachTaskSwipe(el,task);return el;
 }
 function attachTaskSwipe(el,task){
   const card=el.querySelector('.task-card'),bg=el.querySelector('.task-swipe-bg');
   const isHabit=!!(task&&task._isHabit);
-  let sx=0,sy=0,dx=0,dy=0,drag=false,tracking=false;
+  let sx=0,sy=0,dx=0,dy=0,drag=false,tracking=false,gestureDir='';
+  const RIGHT_SMALL=92,RIGHT_BIG=152,LEFT_OPEN=-92;
   function closeOthers(){document.querySelectorAll('.task.open-tools').forEach(x=>{if(x!==el)x.classList.remove('open-tools')})}
   function resetVisual(){el.classList.remove('swiping','swipe-right-preview','swipe-left-preview','tier1','tier2','remove');if(card)card.style.transform='';if(bg)bg.textContent=''}
-  el.addEventListener('touchstart',e=>{if(e.target.closest('button'))return;const t=e.touches&&e.touches[0];if(!t)return;sx=t.clientX;sy=t.clientY;dx=dy=0;drag=false;tracking=true;closeOthers()},{passive:true});
-  el.addEventListener('touchmove',e=>{if(!tracking||!e.touches||!e.touches[0])return;const t=e.touches[0];dx=t.clientX-sx;dy=t.clientY-sy;if(!drag){if(Math.abs(dx)<8)return;if(Math.abs(dx)<Math.abs(dy)*1.15){tracking=false;return}drag=true;el.classList.add('swiping');}
+  el.addEventListener('touchstart',e=>{if(e.target.closest('button'))return;const t=e.touches&&e.touches[0];if(!t)return;sx=t.clientX;sy=t.clientY;dx=dy=0;drag=false;tracking=true;gestureDir='';closeOthers()},{passive:true});
+  el.addEventListener('touchmove',e=>{if(!tracking||!e.touches||!e.touches[0])return;const t=e.touches[0];dx=t.clientX-sx;dy=t.clientY-sy;if(!drag){if(Math.abs(dx)<12)return;if(Math.abs(dx)<Math.abs(dy)*1.2){tracking=false;return}drag=true;gestureDir=dx<0?'left':'right';el.classList.add('swiping');}
     e.preventDefault();
-    if(dx>0&&!isHabit&&task.state!=='done'){
-      const x=Math.min(dx,136),big=x>96,p=priorityPreview(task,big);el.classList.remove('swipe-left-preview','tier1','tier2','remove');el.classList.add('swipe-right-preview',p.cls);if(bg)bg.textContent=p.txt;if(card)card.style.transform='translateX('+x.toFixed(1)+'px)';
-    }else if(dx<0){
+    if(gestureDir==='right'&&dx>0&&!isHabit&&task.state!=='done'){
+      const x=Math.min(dx,190),big=x>RIGHT_BIG,p=priorityPreview(task,big);el.classList.remove('swipe-left-preview','tier1','tier2','remove');el.classList.add('swipe-right-preview',p.cls);if(bg)bg.textContent=x>RIGHT_SMALL?p.txt:'もう少し';if(card)card.style.transform='translateX('+x.toFixed(1)+'px)';
+    }else if(gestureDir==='left'&&dx<0){
       const x=Math.max(dx,-128);el.classList.remove('swipe-right-preview','tier1','tier2','remove');el.classList.add('swipe-left-preview');if(bg)bg.textContent='管理';if(card)card.style.transform='translateX('+x.toFixed(1)+'px)';
     }else{resetVisual();}
   },{passive:false});
-  el.addEventListener('touchend',e=>{if(!tracking)return;tracking=false;if(!drag){return}const finalDx=dx;const big=Math.abs(finalDx)>96;resetVisual();if(finalDx>48&&!isHabit&&task.state!=='done'){applyPrioritySwipe(task,big);return}if(finalDx<-54){el.classList.add('open-tools');return}el.classList.remove('open-tools')},{passive:true});
+  el.addEventListener('touchend',e=>{if(!tracking)return;tracking=false;if(!drag){return}const finalDx=dx;const big=finalDx>RIGHT_BIG;resetVisual();
+    if(gestureDir==='right'&&finalDx>RIGHT_SMALL&&!isHabit&&task.state!=='done'){applyPrioritySwipe(task,big);return}
+    if(gestureDir==='left'&&finalDx<LEFT_OPEN){clearInlineDopaon(false);el.classList.add('open-tools');return}
+    el.classList.remove('open-tools')},{passive:true});
   el.addEventListener('touchcancel',()=>{tracking=false;resetVisual()},{passive:true});
 }
 function toggleCompleted(){state.ui.completedOpen=!state.ui.completedOpen;saveState();render()}
@@ -874,29 +938,41 @@ function undoHabit(id){const h=state.habits.find(x=>x.id===id);if(!h)return;if(s
 function tapHabit(id){if(chargeBusy&&!chargeCanInterrupt)return;const h=state.habits.find(x=>x.id===id);if(!h||isHabitDone(h))return;if(habitChargingId!==id){habitChargingId=id;render();return}setHabitDone(id)}
 function habitStats(){const total=state.habits.length,done=state.habits.filter(isHabitDone).length;return{total,done,pending:Math.max(0,total-done)}}
 function habitMeta(h){const done=isHabitDone(h);return[{cls:'habit',txt:(h.habitKind==='avoid'?'やらない':'やる')+'・毎日'},{cls:done?'reward':'due',txt:habitTargetLabel(h)+' '+(done?'達成済':'未達成')}];}
-function renderHabits(a){
-  const head=document.createElement('div');head.className='mode-head';head.innerHTML='<div><b>HABITS</b><span>毎日の習慣チェック</span></div><button onclick="openTaskMenu(null,\'habit\')">+ 習慣</button>';a.appendChild(head);
-  if(!state.habits.length){const e=document.createElement('div');e.className='empty';e.innerHTML='<div class="empty-icon">○</div><div class="empty-text">習慣を追加しよう</div>';a.appendChild(e);return}
-  state.habits.forEach(h=>a.appendChild(mkHabitCard(h)));
+function habitStreak(h){
+  const logs=state.habitLogs[h.id]||{};
+  let d=habitTargetDate(h),n=0;
+  for(let i=0;i<365;i++){
+    if(logs[d]&&logs[d].status==='done'){n++;d=addDaysStr(d,-1)}else break;
+  }
+  return n;
 }
-function mkHabitCard(h){
-  const done=isHabitDone(h),charging=habitChargingId===h.id;
-  const el=document.createElement('div');el.className='task habit'+(done?' done':'')+(charging?' charging':'');
-  const bg=document.createElement('div');bg.className='task-swipe-bg';el.appendChild(bg);
-  const panel=document.createElement('div');panel.className='task-tools-panel';
-  if(done){const u=document.createElement('button');u.className='mini-btn undo';u.textContent='↩';u.onclick=e=>{e.stopPropagation();undoHabit(h.id)};panel.appendChild(u)}
-  const edit=document.createElement('button');edit.className='mini-btn';edit.textContent='⚙';edit.onclick=e=>{e.stopPropagation();openTaskMenu(h.id,'habit')};panel.appendChild(edit);
-  const del=document.createElement('button');del.className='mini-btn danger';del.textContent='×';del.onclick=e=>{e.stopPropagation();deleteHabit(h.id)};panel.appendChild(del);
-  el.appendChild(panel);
-  const card=document.createElement('div');card.className='task-card';
-  const main=document.createElement('div');main.className='task-main';
-  const row=document.createElement('div');row.className='task-title-row';
-  const nm=document.createElement('div');nm.className='task-name';nm.textContent=h.name;row.appendChild(nm);
-  const meta=document.createElement('div');meta.className='task-meta';habitMeta(h).forEach(m=>meta.appendChild(tagEl(m.cls,m.txt)));row.appendChild(meta);main.appendChild(row);card.appendChild(main);
-  const w=document.createElement('div');w.className='task-action';
-  if(!done){const b=document.createElement('button');b.className='task-btn'+(charging?' cbtn':'')+' dpa-ready';b.onclick=e=>{e.stopPropagation();tapHabit(h.id)};b.innerHTML=charging?'<span style="font-family:\'Orbitron\',monospace;font-size:7px;font-weight:700;">確定</span>':'<span class="dpa-label">dpa</span>';w.appendChild(b);if(charging){const p=document.createElement('span');p.className='push';p.textContent='PUSH';w.appendChild(p)}}
-  else{const ic=document.createElement('span');ic.className='done-mark';ic.textContent='✓';w.appendChild(ic)}
-  card.appendChild(w);el.appendChild(card);attachTaskSwipe(el,{id:h.id,_isHabit:true});return el;
+function renderHabits(a){
+  const head=document.createElement('div');head.className='mode-head habit-grid-head';head.innerHTML='<div><b>HABITS</b><span>長押しで達成 / ダブルタップで設定</span></div><button onclick="openTaskMenu(null,\'habit\')">+ 習慣</button>';a.appendChild(head);
+  const grid=document.createElement('div');grid.className='habit-grid';a.appendChild(grid);
+  for(let i=0;i<12;i++){
+    const h=state.habits[i];
+    if(h)grid.appendChild(mkHabitTile(h));
+    else{
+      const empty=document.createElement('button');empty.type='button';empty.className='habit-tile empty-tile';empty.innerHTML='<span class="plus">＋</span><span>習慣</span>';empty.onclick=()=>openTaskMenu(null,'habit');grid.appendChild(empty);
+    }
+  }
+}
+function mkHabitTile(h){
+  const done=isHabitDone(h),charging=habitChargingId===h.id,streak=habitStreak(h);
+  const el=document.createElement('div');el.className='habit-tile'+(done?' done':'')+(charging?' charging':'');
+  el.innerHTML='<div class="habit-tile-name">'+escapeHtml(h.name)+'</div><div class="habit-streak"><b>'+streak+'</b><span>日</span></div><div class="habit-state">'+(done?'達成':'長押し')+'</div>';
+  let pressTimer=null,longDone=false,lastTap=0;
+  function clearPress(){if(pressTimer){clearTimeout(pressTimer);pressTimer=null}}
+  function startPress(e){e.preventDefault();longDone=false;clearPress();pressTimer=setTimeout(()=>{longDone=true;clearInlineDopaon(false);tapHabit(h.id)},520)}
+  function endPress(){clearPress();setTimeout(()=>{longDone=false},60)}
+  el.addEventListener('touchstart',startPress,{passive:false});
+  el.addEventListener('touchend',endPress,{passive:true});
+  el.addEventListener('touchcancel',endPress,{passive:true});
+  el.addEventListener('mousedown',startPress);
+  el.addEventListener('mouseup',endPress);
+  el.addEventListener('mouseleave',endPress);
+  el.addEventListener('click',e=>{if(longDone)return;const now=Date.now();if(now-lastTap<330){clearInlineDopaon(false);openTaskMenu(h.id,'habit');lastTap=0}else lastTap=now});
+  return el;
 }
 function todayTaskStats(){const todayTasks=state.tasks.filter(t=>isTaskToday(t)),done=todayTasks.filter(t=>t.state==='done').length;return{total:todayTasks.length,done,pending:Math.max(0,todayTasks.length-done),important:state.tasks.filter(t=>isTaskImportant(t)).length,items:todayTasks}}
 function dotHtml(done,total){const max=5,filled=total?Math.round(done/total*max):0;let s='';for(let i=0;i<max;i++)s+='<span class="'+(i<filled?'dot-on':'dot-off')+'"></span>';return s}
@@ -906,11 +982,11 @@ function renderBottomBar(){
   row.setAttribute('aria-label',currentMode()==='tasks'?'習慣画面へ':'日常タスク画面へ');
   if(currentMode()==='habits'){
     const st=todayTaskStats(),sample=st.items.length?rnd(st.items):rnd(state.tasks.filter(t=>t.state!=='done'));
-    title.textContent='DAILY TASKへ'+(sample?'：'+sample.name:'');
+    title.textContent='DAILY TASK'+(sample?' / '+sample.name:'');
     status.innerHTML=dotHtml(st.done,st.total)+'<span class="counter">今日 '+st.done+'/'+st.total+' / 重要 '+(st.important||0)+'/2</span><span style="font-size:13px;color:#3a5070;margin-left:auto;">›</span>';
   }else{
     const st=habitStats(),sample=state.habits.length?rnd(state.habits):null;
-    title.textContent=sample?'HABIT MODEへ：'+sample.name:'HABIT MODEへ';
+    title.textContent=sample?'HABIT MODE / '+sample.name:'HABIT MODE';
     status.innerHTML=dotHtml(st.done,st.total)+'<span class="counter">習慣 '+st.total+' / 達成 '+st.done+'/'+st.total+'</span><span style="font-size:13px;color:#3a5070;margin-left:auto;">›</span>';
   }
   renderChargeMini();

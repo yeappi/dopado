@@ -122,6 +122,28 @@ html{width:260px;height:260px;overflow:hidden;background:transparent;}
     animation: bonusRedFlash 0.18s linear infinite;
 }
 
+#meter.peka-slow {
+    animation: pekaSlowFlash 1.35s ease-in-out infinite;
+}
+
+@keyframes pekaSlowFlash {
+    0%, 100% {
+        filter: brightness(1.08);
+        box-shadow:
+            0 0 0 1px rgba(0, 229, 188, 0.95),
+            0 0 18px rgba(0, 229, 188, 0.90),
+            0 0 42px rgba(0, 229, 188, 0.55),
+            0 0 72px rgba(0, 200, 165, 0.30);
+    }
+    54% {
+        filter: brightness(0.88);
+        box-shadow:
+            0 0 0 1px rgba(0, 229, 188, 0.40),
+            0 0 8px rgba(0, 229, 188, 0.22),
+            0 0 18px rgba(0, 200, 165, 0.10);
+    }
+}
+
 @keyframes bonusRedFlash {
     0%, 100% {
         background: conic-gradient(var(--bonus-red) 0% 100%, rgba(255,7,58,0.15) 100% 100%);
@@ -640,35 +662,35 @@ function setMeter(pct) {
     const col = forcedBonusMode ? '#ff073a' : '#00E5BC';
     const emp = forcedBonusMode ? 'rgba(255,7,58,0.13)' : 'rgba(0,229,188,0.12)';
 
-    els.meter.classList.remove('full', 'max-hold', 'bonus-flash');
+    els.meter.classList.remove('full', 'max-hold', 'bonus-flash', 'peka-slow');
     els.meter.style.background = meterBg(col, safePct, emp);
 }
 
 function setMeterMaxHold() {
-    els.meter.classList.remove('full', 'bonus-flash');
+    els.meter.classList.remove('full', 'bonus-flash', 'peka-slow');
     els.meter.classList.add('max-hold');
     els.meter.style.background = meterBg(forcedBonusMode ? '#ff073a' : '#00E5BC', 100, forcedBonusMode ? 'rgba(255,7,58,0.13)' : 'rgba(0,229,188,0.12)');
 }
 
 function setMeterFull() {
-    els.meter.classList.remove('max-hold', 'bonus-flash');
+    els.meter.classList.remove('max-hold', 'bonus-flash', 'peka-slow');
     els.meter.style.background = meterBg(forcedBonusMode ? '#ff073a' : '#00E5BC', 100, forcedBonusMode ? 'rgba(255,7,58,0.13)' : 'rgba(0,229,188,0.16)');
     if(!forcedBonusMode) els.meter.classList.add('full');
     else els.meter.classList.add('max-hold');
 }
 
 function setBonusFlash() {
-    els.meter.classList.remove('full', 'max-hold');
+    els.meter.classList.remove('full', 'max-hold', 'peka-slow');
     els.meter.classList.add('bonus-flash');
 }
 
 function setWhiteResultMeter() {
-    els.meter.classList.remove('bonus-flash', 'full', 'max-hold');
+    els.meter.classList.remove('bonus-flash', 'full', 'max-hold', 'peka-slow');
     els.meter.style.background = meterBg('#b8793a', 100, 'rgba(184,121,58,0.15)');
 }
 
 function setBlueResultMeter() {
-    els.meter.classList.remove('bonus-flash', 'full', 'max-hold');
+    els.meter.classList.remove('bonus-flash', 'full', 'max-hold', 'peka-slow');
     els.meter.style.background = meterBg('#3aa0ff', 100, 'rgba(58,160,255,0.15)');
 }
 
@@ -682,7 +704,7 @@ function clearPekaVisuals() {
         clearTimeout(resultEmitTimer);
         resultEmitTimer = null;
     }
-    els.meter.classList.remove('full', 'max-hold', 'flashing', 'bonus-flash');
+    els.meter.classList.remove('full', 'max-hold', 'flashing', 'bonus-flash', 'peka-slow');
     els.logo.classList.remove('peka');
 }
 
@@ -858,6 +880,7 @@ function triggerPeka() {
 
     setChargePulse(false);
     setMeterFull();
+    els.meter.classList.add('peka-slow');
     els.logo.classList.add('peka');
     setStatus('PUSH TO SPIN');
 
@@ -870,6 +893,7 @@ function startSpin() {
 
     clearResultLightTimer();
     els.logo.classList.remove('peka');
+    els.meter.classList.remove('peka-slow');
     setReadySignal(false);
 
     els.reelStrip.style.transform = '';

@@ -500,6 +500,20 @@ html{width:260px;height:260px;overflow:hidden;background:transparent;}
     color: #ffd700;
     border: 1px solid #996600;
 }
+
+#chargeFx{position:absolute;inset:0;z-index:2;pointer-events:none;mix-blend-mode:screen;opacity:0;transition:opacity .18s ease}
+#chargeFx.on{opacity:1}
+#meter.idle-pulse{animation:meterIdlePulse 1.6s ease-in-out infinite}
+@keyframes meterIdlePulse{0%,100%{box-shadow:0 0 0 1px rgba(0,229,188,0.42),0 0 10px rgba(0,229,188,0.28),0 0 22px rgba(0,200,165,0.12)}50%{box-shadow:0 0 0 1px rgba(0,229,188,0.68),0 0 18px rgba(0,229,188,0.52),0 0 34px rgba(0,200,165,0.22)}}
+#meter.charge-focus{animation:meterChargeFocus .56s linear infinite}
+@keyframes meterChargeFocus{0%,100%{filter:brightness(1)}50%{filter:brightness(1.12)}}
+#logo.ready-signal .corner{animation:cornerIdleBlink 1.35s ease-in-out infinite}
+#logo.ready-signal .dodo-text{animation:dodoIdleFloat 1.35s ease-in-out infinite}
+#logo.ready-signal .dodo-label{animation:dodoIdleGlow 1.35s ease-in-out infinite}
+@keyframes cornerIdleBlink{0%,100%{opacity:.8;filter:drop-shadow(0 0 2px rgba(0,229,188,.75)) drop-shadow(0 0 6px rgba(0,229,188,.5)) drop-shadow(0 0 10px rgba(0,200,165,.22))}45%{opacity:1;filter:drop-shadow(0 0 3px rgba(0,229,188,.96)) drop-shadow(0 0 10px rgba(0,229,188,.82)) drop-shadow(0 0 20px rgba(0,200,165,.42))}}
+@keyframes dodoIdleGlow{0%,100%{opacity:.86;text-shadow:0 0 8px rgba(0,229,188,.32),0 0 16px rgba(0,229,188,.08)}50%{opacity:1;text-shadow:0 0 12px rgba(0,229,188,.56),0 0 24px rgba(0,229,188,.22)}}
+@keyframes dodoIdleFloat{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.025)}}
+
 </style>
 </head>
 
@@ -507,6 +521,7 @@ html{width:260px;height:260px;overflow:hidden;background:transparent;}
 <div class="pachinko-panel">
     <div class="gimmick-container" onclick="handleGimmickClick()">
         <div id="meter"></div>
+        <canvas id="chargeFx" width="260" height="260" aria-hidden="true"></canvas>
 
         <div class="metal-bezel">
             <div class="metal-inner">
@@ -558,6 +573,7 @@ html{width:260px;height:260px;overflow:hidden;background:transparent;}
 const els = {
     meter: document.getElementById('meter'),
     logo: document.getElementById('logo'),
+    fx: document.getElementById('chargeFx'),
     reelContainer: document.getElementById('reel-container'),
     reelStrip: document.getElementById('reel-strip'),
     status: document.getElementById('status'),
@@ -576,9 +592,21 @@ let pendingOutcome = null;
 let resultLightTimer = null;
 let resultEmitTimer = null;
 let forcedBonusMode = false;
+let fxRaf = null;
+let fxParticles = [];
+let fxActive = false;
+
+function resizeFx(){const c=els.fx;if(!c)return;const dpr=Math.max(1,window.devicePixelRatio||1);c.width=Math.round(260*dpr);c.height=Math.round(260*dpr);c.style.width='260px';c.style.height='260px';const ctx=c.getContext('2d');if(ctx)ctx.setTransform(dpr,0,0,dpr,0,0)}
+function setReadySignal(on){els.logo.classList.toggle('ready-signal',!!on);els.meter.classList.toggle('idle-pulse',!!on)}
+function spawnFxParticle(){const center={x:130,y:130};const side=Math.floor(Math.random()*4);let x=0,y=0;if(side===0){x=Math.random()*260;y=-12}else if(side===1){x=272;y=Math.random()*260}else if(side===2){x=Math.random()*260;y=272}else{x=-12;y=Math.random()*260}const dx=center.x-x,dy=center.y-y,dist=Math.max(1,Math.hypot(dx,dy));const speed=2.2+Math.random()*2.8;return{x,y,px:x,py:y,vx:dx/dist*speed,vy:dy/dist*speed,life:34+Math.random()*18,age:0,alpha:.22+Math.random()*.26}}
+function drawChargeFx(){const c=els.fx;if(!c)return;const ctx=c.getContext('2d');if(!ctx)return;ctx.clearRect(0,0,260,260);if(!fxActive){fxRaf=null;return}while(fxParticles.length<18)fxParticles.push(spawnFxParticle());ctx.lineCap='round';for(let i=fxParticles.length-1;i>=0;i--){const p=fxParticles[i];p.px=p.x;p.py=p.y;p.x+=p.vx;p.y+=p.vy;p.age++;const fade=1-p.age/p.life;if(fade<=0||Math.hypot(130-p.x,130-p.y)<12){fxParticles.splice(i,1);continue}ctx.beginPath();ctx.moveTo(p.px,p.py);ctx.lineTo(p.x,p.y);ctx.strokeStyle=forcedBonusMode?`rgba(255,80,120,${(p.alpha*fade).toFixed(3)})`:`rgba(0,229,188,${(p.alpha*fade).toFixed(3)})`;ctx.lineWidth=1+fade*.65;ctx.stroke()}fxRaf=requestAnimationFrame(drawChargeFx)}
+function startChargeFx(){fxActive=true;fxParticles=[];if(els.fx)els.fx.classList.add('on');els.meter.classList.add('charge-focus');if(!fxRaf)fxRaf=requestAnimationFrame(drawChargeFx)}
+function stopChargeFx(){fxActive=false;els.meter.classList.remove('charge-focus');if(els.fx)els.fx.classList.remove('on');const c=els.fx,ctx=c&&c.getContext('2d');if(ctx)ctx.clearRect(0,0,260,260);if(fxRaf){cancelAnimationFrame(fxRaf);fxRaf=null}fxParticles=[]}
+resizeFx();window.addEventListener('resize',resizeFx);
 
 updateDisplay();
 setMeter(0);
+setReadySignal(true);
 if (PARENT_CONTROLLED) setStatus('STANDBY');
 
 function emitChargeResult(kind) {
@@ -759,12 +787,15 @@ function startCharge(forceOutcome) {
     if (state !== 'OFF') return;
 
     clearPekaVisuals();
+    stopChargeFx();
+    setReadySignal(false);
 
     state = 'ROLLING';
     emitChargeState('rolling');
     pendingOutcome = forceOutcome;
     forcedBonusMode = forceOutcome === 'bonus';
     setStatus(forcedBonusMode ? 'BONUS CHARGE' : 'CHARGING...');
+    startChargeFx();
 
     const pattern = decideChargePattern(forceOutcome);
 
@@ -815,7 +846,9 @@ function chargeToMaxThenMiss() {
             animateMeterDown(100, 650, () => {
                 state = 'OFF';
                 emitChargeState('miss');
+                stopChargeFx();
                 setStatus('MISS');
+                setReadySignal(true);
                 scheduleEmit('miss', 350);
             });
         }, 1000);
@@ -831,7 +864,9 @@ function chargePartialThenMiss() {
         animateMeterDown(peak, 520, () => {
             state = 'OFF';
             emitChargeState('miss');
+            stopChargeFx();
             setStatus('MISS');
+            setReadySignal(true);
             scheduleEmit('miss', 350);
         });
     });
@@ -841,6 +876,7 @@ function triggerPeka() {
     state = 'PEKA';
     emitChargeState('peka');
 
+    stopChargeFx();
     setMeterFull();
     els.logo.classList.add('peka');
     setStatus('PUSH TO SPIN');
@@ -854,6 +890,7 @@ function startSpin() {
 
     clearResultLightTimer();
     els.logo.classList.remove('peka');
+    setReadySignal(false);
 
     els.reelStrip.style.transform = '';
     els.reelContainer.style.display = 'block';
@@ -952,6 +989,7 @@ function stopAsBlue() {
 function resetToOff() {
     stopRaf();
     clearPekaVisuals();
+    stopChargeFx();
     resetReel();
 
     setMeter(0);
@@ -961,11 +999,13 @@ function resetToOff() {
     emitChargeState('off');
     pendingOutcome = null;
     forcedBonusMode = false;
+    setReadySignal(true);
 }
 
 function forceResult(type) {
     stopRaf();
     clearPekaVisuals();
+    stopChargeFx();
     resetReel();
 
     setMeter(0);

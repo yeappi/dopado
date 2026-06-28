@@ -620,6 +620,9 @@ let pendingOutcome = null;
 let resultLightTimer = null;
 let resultEmitTimer = null;
 let forcedBonusMode = false;
+let resultSent = false;
+let inputGuardUntil = 0;
+let spinCanStopAt = 0;
 function setReadySignal(on){els.meter.classList.toggle('idle-pulse',!!on)}
 function setChargePulse(on){els.meter.classList.toggle('charge-focus',!!on)}
 
@@ -629,7 +632,8 @@ setReadySignal(true);
 if (PARENT_CONTROLLED) setStatus('STANDBY');
 
 function emitChargeResult(kind) {
-    if (!PARENT_CONTROLLED) return;
+    if (!PARENT_CONTROLLED || resultSent) return;
+    resultSent = true;
     window.parent.postMessage({ type: 'DOPAON_CHARGE_RESULT', kind }, '*');
 }
 function emitChargeState(phase) {
@@ -637,8 +641,12 @@ function emitChargeState(phase) {
     window.parent.postMessage({ type: 'DOPAON_CHARGE_STATE', phase }, '*');
 }
 
-function scheduleEmit(kind, ms) {
+function clearResultEmitTimer() {
     if (resultEmitTimer) clearTimeout(resultEmitTimer);
+    resultEmitTimer = null;
+}
+function scheduleEmit(kind, ms) {
+    clearResultEmitTimer();
     resultEmitTimer = setTimeout(() => {
         resultEmitTimer = null;
         emitChargeResult(kind);
@@ -781,6 +789,10 @@ function animateMeterDown(fromPct, duration, onDone) {
 }
 
 function handleGimmickClick() {
+    const now = Date.now();
+    if (now < inputGuardUntil) return;
+    inputGuardUntil = now + 170;
+
     if (state === 'OFF') {
         if (PARENT_CONTROLLED) return;
         startCharge(null);
@@ -789,21 +801,26 @@ function handleGimmickClick() {
 
     if (state === 'PEKA') {
         startSpin();
+        inputGuardUntil = Date.now() + 520;
         return;
     }
 
     if (state === 'SPINNING') {
+        if (Date.now() < spinCanStopAt) return;
         stopSpinManual();
+        inputGuardUntil = Date.now() + 520;
         return;
     }
 
-    if (state === 'STOPPED') {
-        resetToOff();
-    }
+    // STOPPED / ROLLING / result wait: ignore extra taps until parent resets.
 }
 
 function startCharge(forceOutcome) {
     if (state !== 'OFF') return;
+    resultSent = false;
+    clearResultEmitTimer();
+    inputGuardUntil = Date.now() + 240;
+    spinCanStopAt = 0;
 
     clearPekaVisuals();
     setReadySignal(false);
@@ -904,7 +921,9 @@ function triggerPeka() {
 }
 
 function startSpin() {
+    if (state !== 'PEKA') return;
     state = 'SPINNING';
+    spinCanStopAt = Date.now() + 520;
     emitChargeState('spinning');
 
     clearResultLightTimer();
@@ -1008,6 +1027,7 @@ function stopAsBlue() {
 
 function resetToOff() {
     stopRaf();
+    clearResultEmitTimer();
     clearPekaVisuals();
     setChargePulse(false);
     resetReel();
@@ -1019,11 +1039,18 @@ function resetToOff() {
     emitChargeState('off');
     pendingOutcome = null;
     forcedBonusMode = false;
+    resultSent = false;
+    inputGuardUntil = 0;
+    spinCanStopAt = 0;
     setReadySignal(true);
 }
 
 function forceResult(type) {
     stopRaf();
+    clearResultEmitTimer();
+    resultSent = false;
+    inputGuardUntil = 0;
+    spinCanStopAt = 0;
     clearPekaVisuals();
     setChargePulse(false);
     resetReel();

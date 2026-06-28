@@ -632,10 +632,9 @@ const BACKUP_KEY='dopaon_state_v6_backup';
 const LEGACY_KEYS=['dopaon_state_v5','dopaon_state_v4','dopaon_state_v3','dopaon_state_v2','dopaon_state_v1'];
 const LEVEL_STEP=10;
 
-
 // ===== ONE-TIME DATA RESET FOR TUTORIAL MIGRATION =====
 // この値を変えた時だけ、同じ端末で再度1回だけ初期化される。
-const DATA_RESET_VERSION = 'tutorial-v2';
+const DATA_RESET_VERSION = 'tutorial-v3';
 const DATA_RESET_DONE_KEY = 'dopado_data_reset_done_version';
 
 function oneTimeDataResetForTutorial() {
@@ -1466,8 +1465,8 @@ function mkHabitTile(h){
   const failBtn=el.querySelector('.habit-back .fail');
   let timer=null,pressed=false,moved=false,sx=0,sy=0;
   function clearPress(){if(timer){clearInterval(timer);timer=null}pressed=false;el.classList.remove('pressing','fail-pressing');el.style.removeProperty('--press');el.style.removeProperty('--failpress');if(failBtn)failBtn.style.removeProperty('--failpress')}
-  function startSuccessPress(x,y){if(done||failed||flipped||appLockedForCompletion())return;sx=x;sy=y;moved=false;pressed=true;el.classList.add('pressing');el.style.setProperty('--press','0%');let start=Date.now();timer=setInterval(()=>{const pct=Math.min(100,(Date.now()-start)/650*100);el.style.setProperty('--press',pct+'%');if(pct>=100){clearPress();setHabitDone(h.id)}},50)}
-  function startFailPress(x,y){if(!isAvoid||done||failed||appLockedForCompletion())return;sx=x;sy=y;moved=false;pressed=true;el.classList.add('fail-pressing');el.style.setProperty('--failpress','0%');if(failBtn)failBtn.style.setProperty('--failpress','0%');let start=Date.now();timer=setInterval(()=>{const pct=Math.min(100,(Date.now()-start)/720*100);el.style.setProperty('--failpress',pct+'%');if(failBtn)failBtn.style.setProperty('--failpress',pct+'%');if(pct>=100){clearPress();setHabitFailed(h.id)}},50)}
+  function startSuccessPress(x,y){if(done||failed||flipped||appLockedForCompletion())return;if(tut&&tut.active&&h.id===tut.habitAvoidId){const _cs=tutCurrentStep();if(!_cs||_cs.id!=='t_lpavd'){showToast(_cs&&_cs.id==='t_fail'?'裏面の「失敗を記録」を長押し':'まだここは達成しないでね');return}}sx=x;sy=y;moved=false;pressed=true;el.classList.add('pressing');el.style.setProperty('--press','0%');let start=Date.now();timer=setInterval(()=>{const pct=Math.min(100,(Date.now()-start)/650*100);el.style.setProperty('--press',pct+'%');if(pct>=100){clearPress();setHabitDone(h.id)}},50)}
+  function startFailPress(x,y){if(!isAvoid||done||failed||appLockedForCompletion())return;if(tut&&tut.active&&h.id===tut.habitAvoidId){const _cs=tutCurrentStep();if(!_cs||_cs.id!=='t_fail'){showToast('ここではまだ失敗を記録しないでね');return}}sx=x;sy=y;moved=false;pressed=true;el.classList.add('fail-pressing');el.style.setProperty('--failpress','0%');if(failBtn)failBtn.style.setProperty('--failpress','0%');let start=Date.now();timer=setInterval(()=>{const pct=Math.min(100,(Date.now()-start)/720*100);el.style.setProperty('--failpress',pct+'%');if(failBtn)failBtn.style.setProperty('--failpress',pct+'%');if(pct>=100){clearPress();setHabitFailed(h.id)}},50)}
   if(failBtn){
     failBtn.addEventListener('touchstart',e=>{const t=e.touches&&e.touches[0];if(!t)return;e.stopPropagation();startFailPress(t.clientX,t.clientY)},{passive:true});
     failBtn.addEventListener('touchend',e=>{e.stopPropagation();clearPress()},{passive:true});
@@ -1673,12 +1672,14 @@ window.addEventListener('message',e=>{
   }
   if(d.type==='DOPAON_BONUS_PREPARE_REWARD'){
     const isTutFinalBonus=tut&&tut.active&&tut.bonusFired;
-    const tier=TIER_ORDER.includes(d.tier)?d.tier:(isTutFinalBonus?'red':rollBonusTier());
+    const tier=isTutFinalBonus?'red':(TIER_ORDER.includes(d.tier)?d.tier:rollBonusTier());
     let reward;
     if(isTutFinalBonus){
-      // チュートリアル最終BONUSも、BONUS側が出した結果色と報酬色を必ず一致させる。
-      // 赤肩書き「挑戦する」はBONUS後の完了メッセージで別途付与する。
-      reward=grantReward(tier);
+      // チュートリアル最終BONUSは必ず赤肩書き「挑戦する」を実際の報酬として表示・付与する。
+      const titleObj=TITLES.find(t=>t.id===TUT_TITLE_ID)||{id:TUT_TITLE_ID,text:'挑戦する',tier:'red'};
+      if(!state.ownedTitles.includes(TUT_TITLE_ID))state.ownedTitles.push(TUT_TITLE_ID);
+      state.profile.titleId=TUT_TITLE_ID;
+      reward={kind:'title',tier:'red',title:titleObj};
     }else{
       reward=grantReward(tier);
     }
@@ -1755,7 +1756,7 @@ const TUT_PART1_STEPS = [
 ];
 
 const TUT_PART2_STEPS = [
-  { id: 't_chrg', part: 'PART 2 · 報酬',   msg: 'タスク完了でチャージが走る\n見ておこう', hint: '↑ チャージ機' },
+  { id: 't_chrg', part: 'PART 2 · 報酬',   msg: '上の右側にあるチャージ機をタップ！\n抽選結果を見てみよう', hint: '画面右上の小さいチャージ機をタップ' },
   { id: 't_rwd',  part: 'PART 2 · 報酬',   msg: 'チュートリアル報酬ゲット！\nタップして閉じよう', hint: 'ポップアップをタップ', pos: 'top' },
   { id: 't_prof', part: 'PART 2 · 報酬',   msg: '獲得したものは\nプロフィールに残る', hint: '↑ 右上をタップ' },
   { id: 't_name', part: 'PART 2 · 報酬',   msg: '名前を変えて\n自分のDOPADOにしよう', hint: '名前欄に入力', pos: 'top' },
@@ -1771,7 +1772,7 @@ const TUT_PART3_STEPS = [
   { id: 't_fail',  part: 'PART 3 · 習慣 & BONUS', msg: '破った時はここを長押し\nで失敗を記録できる', hint: '光っている「失敗を記録」を長押し' },
   { id: 't_failmsg',part:'PART 3 · 習慣 & BONUS', msg: '失敗は赤で残る。\nでも、報酬は出ない。\nDOPADOが光るのは、次に成功した時。', hint: '', btn: '次へ' },
   { id: 't_lpavd', part: 'PART 3 · 習慣 & BONUS', msg: '次は守れた時の記録。\n表面を長押しして\n「守れた / 達成」を掴もう', hint: '光っているタイルを長押し' },
-  { id: 't_bon',   part: 'PART 3 · 習慣 & BONUS', msg: '成功！！\n習慣の達成はBONUSにつながる', hint: '↑ チャージ機を見ておこう' },
+  { id: 't_bon',   part: 'PART 3 · 習慣 & BONUS', msg: '成功！！\n習慣の達成はBONUSにつながる', hint: '画面右上のチャージ機をタップしてBONUSへ' },
 ];
 
 /* ---------- iOS判定 ---------- */
@@ -2077,6 +2078,24 @@ function tutShouldSuppressHabitReward(habitId) {
   return tutIsTempHabit(habitId);
 }
 
+function tutClearChargeResidue() {
+  // Part2報酬後にプロフィールへ移動した時、チャージ演出やチュートリアルチケットが残らないよう掃除する。
+  try {
+    if (Array.isArray(state.chargeTickets)) {
+      state.chargeTickets = state.chargeTickets.filter(t => !tutIsTutorialTicket(t));
+    }
+    if (currentChargeTicket && tutIsTutorialTicket(currentChargeTicket)) currentChargeTicket = null;
+    chargeBusy = false;
+    chargeCanInterrupt = false;
+    rewardUnlockPending = false;
+    stopChargeParticles();
+    resetChargeFrame();
+    setChargeInteractionLocked(false);
+    renderChargeMini();
+    saveState();
+  } catch(e) {}
+}
+
 /* ---------- フック ---------- */
 function tutHook(evt, data) {
   if (!tut.active || tut.phase === 'home') return;
@@ -2120,13 +2139,13 @@ function tutHook(evt, data) {
       if (sid === 't_rwd') tutAdvance();
       break;
     case 'profile_open':
-      if (sid === 't_prof') tutAdvance();
+      if (sid === 't_prof') { tutClearChargeResidue(); tutAdvance(); }
       break;
     case 'name_changed':
       if (sid === 't_name' && !tut.nameEntered) { tut.nameEntered = true; tutAdvance(); }
       break;
     case 'profile_close':
-      if (sid === 't_pcls') tutAdvance();
+      if (sid === 't_pcls') { tutClearChargeResidue(); tutAdvance(); }
       break;
     case 'mode_habits':
       if (sid === 't_hab') tutAdvance();

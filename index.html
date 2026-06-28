@@ -412,6 +412,44 @@ body{position:fixed;inset:0;touch-action:manipulation}
 .habit-back .mini-btn.fail{color:#ff6f8c!important;border-color:#ff4c6b66!important;background:#18070c!important;position:relative;overflow:hidden}
 .habit-back .mini-btn.fail::after{content:'';position:absolute;left:0;right:0;bottom:0;height:var(--failpress,0%);background:linear-gradient(0deg,rgba(255,23,68,.42),rgba(255,23,68,.08));pointer-events:none}
 
+
+
+/* ===== v13.11.3 habit clarity + important swipe feedback ===== */
+.habit-tile.kind-avoid:not(.done):not(.failed) .habit-name::before{content:none!important;display:none!important}
+.habit-tile.done .habit-face{
+  border-color:#ffd24a!important;
+  border-width:2px!important;
+  background:linear-gradient(180deg,rgba(255,210,74,.26),rgba(255,210,74,.10) 52%,rgba(12,10,18,.56))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 0 0 1px rgba(255,210,74,.28),0 0 28px rgba(255,210,74,.20)!important;
+  overflow:hidden!important;
+}
+.habit-tile.done .habit-front::before{
+  height:100%!important;
+  background:linear-gradient(180deg,rgba(255,210,74,.20),rgba(255,210,74,.05))!important;
+  opacity:.86!important;
+}
+.habit-tile.done .habit-front::after{
+  content:'✓'!important;
+  position:absolute!important;
+  left:50%!important;
+  top:50%!important;
+  transform:translate(-50%,-50%)!important;
+  font-family:Arial, sans-serif!important;
+  font-size:74px!important;
+  line-height:1!important;
+  font-weight:900!important;
+  color:rgba(255,210,74,.72)!important;
+  text-shadow:0 0 18px rgba(255,210,74,.36),0 2px 0 rgba(0,0,0,.12)!important;
+  pointer-events:none!important;
+  z-index:1!important;
+}
+.habit-tile.done .habit-name,.habit-tile.done .habit-streak,.habit-tile.done .habit-state{position:relative!important;z-index:2!important}
+.habit-tile.done .habit-name{color:#fff8d6!important;text-shadow:0 1px 6px rgba(0,0,0,.42)!important}
+.habit-tile.done .habit-state{color:#ffd24a!important;border-top-color:rgba(255,210,74,.28)!important}
+.habit-tile.done .habit-streak{color:#ffe48a!important;text-shadow:0 0 14px rgba(255,210,74,.25)!important}
+.task.swipe-right-preview.max .task-swipe-bg{background:#251408!important;color:#ffd24a!important}
+.task.swipe-right-preview.full .task-swipe-bg{background:#221018!important;color:#ff8aa0!important}
+
 </style>
 </head>
 <body>
@@ -433,7 +471,7 @@ body{position:fixed;inset:0;touch-action:manipulation}
       <div class="habit-status"><span class="mode-gate-copy"><span class="pending">習慣をセット</span></span><span class="gate-arrows" aria-hidden="true"><i>›</i><i>›</i><i>›</i></span></div>
     </div>
     <div class="meter charge-frame-shell charge-off" id="chargeMeter" aria-label="チャージ抽選窓">
-      <iframe id="chargeFrame" src="./charge.html?v=13-11-2" title="DOPADO CHARGE"></iframe>
+      <iframe id="chargeFrame" src="./charge.html?v=13-11-3" title="DOPADO CHARGE"></iframe>
     </div>
   </div>
   <div id="bottomDock">
@@ -604,6 +642,9 @@ function syncImportantUsage(){
 }
 function importantCount(){expireDailyFlags(state);syncImportantUsage();return state.ui.importantUsedIds.length}
 function canClaimImportant(t){syncImportantUsage();return !!(t&&t.importantDate===appDayStr())||importantCount()<2}
+function importantNextCount(t){syncImportantUsage();return Math.min(2,importantCount()+((t&&t.importantDate===appDayStr())?0:1))}
+function importantUsageText(t){return '重要 '+importantNextCount(t)+'/2'}
+function importantFullText(){return '重要 上限 2/2'}
 function claimImportant(t){if(!t)return false;syncImportantUsage();const day=appDayStr();if(t.importantDate!==day&&importantCount()>=2)return false;t.importantDate=day;t.dueDate=day;t.todayDate=day;if(!state.ui.importantUsedIds.includes(t.id))state.ui.importantUsedIds.push(t.id);state.ui.importantUsedIds=[...new Set(state.ui.importantUsedIds)].slice(0,2);return true}
 
 function levelFromXp(xp){return Math.floor((Number(xp)||0)/LEVEL_STEP)}
@@ -944,7 +985,7 @@ function syncTaskMenuToggleUI(){
   todayChip.classList.toggle('on',today);impChip.classList.toggle('on',!!taskMenuImportant&&today);
 }
 function toggleMenuToday(){const due=document.getElementById('taskDueInput');if(!due||due.disabled)return;if(due.value===appDayStr()){due.value='';taskMenuImportant=false}else due.value=appDayStr();syncTaskMenuToggleUI()}
-function toggleMenuImportant(){const due=document.getElementById('taskDueInput');if(!due||due.disabled)return;if(!taskMenuImportant&&importantCount()>=2&&!editingId){showUndo('重要タスクは今日2つまで',null);return}if(due.value!==appDayStr())due.value=appDayStr();taskMenuImportant=!taskMenuImportant;syncTaskMenuToggleUI()}
+function toggleMenuImportant(){const due=document.getElementById('taskDueInput');if(!due||due.disabled)return;if(!taskMenuImportant){let current=false;if(editingId&&editingKind!=='habit'){const t=state.tasks.find(x=>x.id===editingId);current=!!(t&&t.importantDate===appDayStr())}if(!current&&importantCount()>=2){showUndo(importantFullText(),null);return}if(due.value!==appDayStr())due.value=appDayStr()}taskMenuImportant=!taskMenuImportant;syncTaskMenuToggleUI()}
 function readTaskForm(){return{name:document.getElementById('taskNameInput').value.trim(),dueDate:document.getElementById('taskDueInput').value,taskType:document.getElementById('taskTypeInput').value,habitKind:document.getElementById('habitKindInput').value,repeatType:'daily',intervalDays:1,weekdays:[],importantRequested:!!taskMenuImportant}}
 function createTask(name,cfg={}){return normalizeTask(Object.assign(defaultTaskConfig(),cfg,{id:newId(),name,state:'idle',rewardDone:false,scheduledAwarded:false,createdAt:Date.now(),doneAt:null,taskType:'normal'}))}
 function usedHabitSlots(){return new Set(state.habits.map(h=>Number.isInteger(h.slot)?h.slot:null).filter(v=>v!==null&&v>=0&&v<9))}
@@ -1000,10 +1041,11 @@ function saveTaskMenu(){
   }
   if(editingId&&editingKind!=='habit'){
     const t=state.tasks.find(x=>x.id===editingId);if(!t){closeTaskMenu();return}
+    if(cfg.importantRequested&&t.importantDate!==appDayStr()&&importantCount()>=2){showToast(importantFullText());return}
     const oldDue=t.dueDate;
     t.name=cfg.name;t.dueDate=cfg.importantRequested?appDayStr():cfg.dueDate;t.taskType='normal';
     syncTaskDateFlags(t);
-    if(cfg.importantRequested){if(!claimImportant(t)){showToast('今日の重要は2つまで');return}}else t.importantDate='';
+    if(cfg.importantRequested){if(!claimImportant(t)){showToast(importantFullText());return}}else t.importantDate='';
     maybeAwardSchedulePoint(t,oldDue,t.dueDate);
     showToast('タスク設定を保存した');
     saveState();render();closeTaskMenu();return;
@@ -1027,10 +1069,10 @@ function maybeAwardSchedulePoint(task,oldDue,newDue){
 }
 function setTaskToday(id){const t=state.tasks.find(x=>x.id===id);if(!t||t.state==='done')return;clearTaskChargePreview(null,false);const old=t.dueDate;const day=appDayStr();t.todayDate=day;t.dueDate=day;if(!t.swipeCycle)t.swipeCycle=1;maybeAwardSchedulePoint(t,old,t.dueDate);saveState();render()}
 function unsetTaskToday(id){const t=state.tasks.find(x=>x.id===id);if(!t||t.state==='done')return;clearTaskChargePreview(null,false);t.todayDate='';t.importantDate='';t.swipeCycle=0;if(t.dueDate===appDayStr())t.dueDate='';saveState();render()}
-function setTaskImportant(id){const t=state.tasks.find(x=>x.id===id);if(!t||t.state==='done')return;clearTaskChargePreview(null,false);const old=t.dueDate;if(!isTaskToday(t)){t.dueDate=appDayStr();t.todayDate=appDayStr();maybeAwardSchedulePoint(t,old,t.dueDate)}if(isTaskImportant(t))return;if(!claimImportant(t)){showUndo('重要タスクは今日2つまで',null);return}t.swipeCycle=2;saveState();render()}
+function setTaskImportant(id){const t=state.tasks.find(x=>x.id===id);if(!t||t.state==='done')return;clearTaskChargePreview(null,false);if(isTaskImportant(t))return;if(!canClaimImportant(t)){showUndo(importantFullText(),null);return}const old=t.dueDate;if(!isTaskToday(t)){t.dueDate=appDayStr();t.todayDate=appDayStr();maybeAwardSchedulePoint(t,old,t.dueDate)}if(!claimImportant(t)){showUndo(importantFullText(),null);return}t.swipeCycle=2;showUndo(importantUsageText(t),null);saveState();render()}
 function unsetTaskImportant(id){const t=state.tasks.find(x=>x.id===id);if(!t)return;clearTaskChargePreview(null,false);t.importantDate='';t.swipeCycle=3;saveState();render()}
 function cycleTaskPriority(id){const t=state.tasks.find(x=>x.id===id);if(!t||t.state==='done')return;const day=appDayStr();if(!isTaskToday(t)){setTaskToday(id);showUndo('今日タスクにした',null);return}
-  if(!isTaskImportant(t)&&t.swipeCycle!==3){setTaskImportant(id);showUndo('重要タスクにした',null);return}
+  if(!isTaskImportant(t)&&t.swipeCycle!==3){setTaskImportant(id);return}
   if(isTaskImportant(t)){unsetTaskImportant(id);showUndo('重要を外した',null);return}
   unsetTaskToday(id);showUndo('今日タグを外した',null);
 }
@@ -1055,9 +1097,15 @@ function renderTasks(a){
 }
 function tagEl(cls,txt){const tag=document.createElement('span');tag.className='tag '+cls;tag.textContent=txt;return tag}
 function priorityPreview(task,big){
-  const today=isTaskToday(task),imp=isTaskImportant(task);
-  if(!today)return big?{cls:'tier2',txt:'今日＋重要'}:{cls:'tier1',txt:'今日にする'};
-  if(today&&!imp)return big?{cls:'remove',txt:'今日を外す'}:{cls:'tier2',txt:'重要にする'};
+  const today=isTaskToday(task),imp=isTaskImportant(task),full=!canClaimImportant(task)&&!imp;
+  if(!today){
+    if(big&&full)return{cls:'full',txt:importantFullText()};
+    return big?{cls:'max',txt:'今日＋'+importantUsageText(task)}:{cls:'tier1',txt:'今日にする'};
+  }
+  if(today&&!imp){
+    if(!big&&full)return{cls:'full',txt:importantFullText()};
+    return big?{cls:'remove',txt:'今日を外す'}:{cls:'max',txt:importantUsageText(task)};
+  }
   return big?{cls:'remove',txt:'今日も外す'}:{cls:'remove',txt:'重要を外す'};
 }
 function applyPrioritySwipe(task,big){
@@ -1066,17 +1114,19 @@ function applyPrioritySwipe(task,big){
   const day=appDayStr();
   const today=isTaskToday(task),imp=isTaskImportant(task);
   if(!today){
+    if(big&&!canClaimImportant(task)){showUndo(importantFullText(),null);render();return}
     const old=task.dueDate;task.dueDate=day;task.todayDate=day;task.swipeCycle=1;maybeAwardSchedulePoint(task,old,task.dueDate);
-    if(big){if(!claimImportant(task)){showUndo('重要タスクは今日2つまで',null)}else task.swipeCycle=2}
+    if(big){if(!claimImportant(task)){showUndo(importantFullText(),null);render();return}else{task.swipeCycle=2;showUndo(importantUsageText(task),null)}}
+    else showUndo('今日タスクにした',null);
     saveState();render();return;
   }
   if(today&&!imp){
-    if(big){task.todayDate='';task.importantDate='';task.swipeCycle=0;if(task.dueDate===day)task.dueDate=''}
-    else{if(!claimImportant(task)){showUndo('重要タスクは今日2つまで',null);return}task.swipeCycle=2}
+    if(big){task.todayDate='';task.importantDate='';task.swipeCycle=0;if(task.dueDate===day)task.dueDate='';showUndo('今日タグを外した',null)}
+    else{if(!canClaimImportant(task)||!claimImportant(task)){showUndo(importantFullText(),null);return}task.swipeCycle=2;showUndo(importantUsageText(task),null)}
     saveState();render();return;
   }
-  if(big){task.todayDate='';task.importantDate='';task.swipeCycle=0;if(task.dueDate===day)task.dueDate=''}
-  else{task.importantDate='';task.swipeCycle=3}
+  if(big){task.todayDate='';task.importantDate='';task.swipeCycle=0;if(task.dueDate===day)task.dueDate='';showUndo('今日も重要も外した',null)}
+  else{task.importantDate='';task.swipeCycle=3;showUndo('重要を外した',null)}
   saveState();render();
 }
 function mkC(task){
@@ -1123,14 +1173,14 @@ function attachTaskSwipe(el,task){
   let sx=0,sy=0,dx=0,dy=0,drag=false,tracking=false,gestureDir='';
   const RIGHT_SMALL=96,RIGHT_BIG=162,LEFT_OPEN=-94;
   function closeOthers(){document.querySelectorAll('.task.open-tools').forEach(x=>{if(x!==el)x.classList.remove('open-tools')})}
-  function resetVisual(){el.classList.remove('swiping','swipe-right-preview','swipe-left-preview','tier1','tier2','remove');if(card)card.style.transform='';if(bg)bg.textContent=''}
+  function resetVisual(){el.classList.remove('swiping','swipe-right-preview','swipe-left-preview','tier1','tier2','remove','max','full');if(card)card.style.transform='';if(bg)bg.textContent=''}
   el.addEventListener('touchstart',e=>{if(e.target.closest('button'))return;const t=e.touches&&e.touches[0];if(!t)return;sx=t.clientX;sy=t.clientY;dx=dy=0;drag=false;tracking=true;gestureDir='';closeOthers()},{passive:true});
   el.addEventListener('touchmove',e=>{if(!tracking||!e.touches||!e.touches[0])return;const t=e.touches[0];dx=t.clientX-sx;dy=t.clientY-sy;if(!drag){if(Math.abs(dx)<10)return;if(Math.abs(dx)<Math.abs(dy)*1.25){tracking=false;return}drag=true;gestureDir=dx>0?'right':'left';el.classList.add('swiping');}
     e.preventDefault();
     if(gestureDir==='right'&&dx>0&&!isHabit&&task.state!=='done'){
-      const x=Math.min(dx,186),big=x>=RIGHT_BIG,armed=x>=RIGHT_SMALL,p=priorityPreview(task,big);el.classList.remove('swipe-left-preview','tier1','tier2','remove');el.classList.add('swipe-right-preview',armed?p.cls:'tier1');if(bg)bg.textContent=armed?p.txt:'もう少し';if(card)card.style.transform='translateX('+x.toFixed(1)+'px)';
+      const x=Math.min(dx,186),big=x>=RIGHT_BIG,armed=x>=RIGHT_SMALL,p=priorityPreview(task,big);el.classList.remove('swipe-left-preview','tier1','tier2','remove','max','full');el.classList.add('swipe-right-preview',armed?p.cls:'tier1');if(bg)bg.textContent=armed?p.txt:'もう少し';if(card)card.style.transform='translateX('+x.toFixed(1)+'px)';
     }else if(gestureDir==='left'&&dx<0){
-      const x=Math.max(dx,-132);el.classList.remove('swipe-right-preview','tier1','tier2','remove');el.classList.add('swipe-left-preview');if(bg)bg.textContent='管理';if(card)card.style.transform='translateX('+x.toFixed(1)+'px)';
+      const x=Math.max(dx,-132);el.classList.remove('swipe-right-preview','tier1','tier2','remove','max','full');el.classList.add('swipe-left-preview');if(bg)bg.textContent='管理';if(card)card.style.transform='translateX('+x.toFixed(1)+'px)';
     }
   },{passive:false});
   el.addEventListener('touchend',e=>{if(!tracking)return;tracking=false;if(!drag)return;const finalDx=dx,dir=gestureDir;const big=finalDx>=RIGHT_BIG;resetVisual();if(dir==='right'&&finalDx>=RIGHT_SMALL&&!isHabit&&task.state!=='done'){applyPrioritySwipe(task,big);return}if(dir==='left'&&finalDx<=LEFT_OPEN){clearInlineDopaon(false);el.classList.add('open-tools');return}if(dir==='left')el.classList.remove('open-tools')},{passive:true});
@@ -1168,12 +1218,12 @@ function mkEmptyHabitTile(i){
 function mkHabitTile(h){
   const done=isHabitDone(h),failed=isHabitFailed(h),flipped=flippedHabitId===h.id,isAvoid=h.habitKind==='avoid';
   const el=document.createElement('div');el.className='habit-tile kind-'+(isAvoid?'avoid':'do')+(done?' done':'')+(failed?' failed':'')+(flipped?' flipped':'');el.dataset.id=h.id;
-  const stateLabel=done?'ACHIEVED':failed?'FAILED':(isAvoid?'HOLD TO SEAL':'HOLD TO CHARGE');
+  const stateLabel=done?'ACHIEVED':failed?'FAILED':(isAvoid?'長押しで達成':'長押しで達成');
   const backBtns='<button class="mini-btn back">戻る</button><button class="mini-btn">⚙ 設定</button>'
     +(isAvoid&&!done&&!failed?'<button class="mini-btn fail">失敗を記録</button>':'')
     +((done||failed)?'<button class="mini-btn undo">↩ 記録取消</button>':'')
     +'<button class="mini-btn danger">× 削除</button>';
-  el.innerHTML='<div class="habit-tile-inner"><div class="habit-face habit-front"><div class="habit-name">'+escapeHtml(h.name)+'</div><div class="habit-streak">'+habitStreak(h)+'<small>DAY STREAK</small></div><div class="habit-state">'+(isAvoid?'SEAL':'DO')+' / '+stateLabel+'</div></div><div class="habit-face habit-back">'+backBtns+'</div></div>';
+  el.innerHTML='<div class="habit-tile-inner"><div class="habit-face habit-front"><div class="habit-name">'+escapeHtml(h.name)+'</div><div class="habit-streak">'+habitStreak(h)+'<small>DAY STREAK</small></div><div class="habit-state">'+stateLabel+'</div></div><div class="habit-face habit-back">'+backBtns+'</div></div>';
   const back=el.querySelector('.habit-back .back');if(back)back.onclick=e=>{e.stopPropagation();flippedHabitId=null;render()};
   const edit=el.querySelector('.habit-back .mini-btn:not(.undo):not(.danger):not(.back):not(.fail)');if(edit)edit.onclick=e=>{e.stopPropagation();openTaskMenu(h.id,'habit')};
   const undo=el.querySelector('.habit-back .undo');if(undo)undo.onclick=e=>{e.stopPropagation();undoHabit(h.id)};

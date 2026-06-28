@@ -513,15 +513,19 @@ body{position:fixed;inset:0;touch-action:manipulation}
 /* ===== TUTORIAL v13 ===== */
 #tutOverlay{position:absolute;inset:0;z-index:500;pointer-events:none;display:none}
 #tutBg{position:absolute;inset:0;background:rgba(4,4,20,.68);opacity:0;transition:opacity .35s;pointer-events:none}
-#tutBubble{position:absolute;left:14px;right:14px;bottom:80px;background:#0c0c28;border:1.5px solid rgba(0,255,204,.6);border-radius:16px;padding:14px 16px 13px;box-shadow:0 12px 36px rgba(0,0,0,.7),0 0 0 1px rgba(0,255,204,.08);z-index:502;pointer-events:none;opacity:0;transition:opacity .25s,transform .25s;transform:translateY(8px)}
+#tutBubble{position:absolute;left:14px;right:14px;bottom:80px;background:#0c0c28;border:1.5px solid rgba(0,255,204,.6);border-radius:16px;padding:14px 16px 13px;box-shadow:0 12px 36px rgba(0,0,0,.7),0 0 0 1px rgba(0,255,204,.08);z-index:502;pointer-events:none;opacity:0;transition:opacity .25s,transform .25s;transform:translateY(8px)}#tutBubble button{pointer-events:auto!important}#tutBubble.has-btn{pointer-events:auto}
 #tutBubble.show{opacity:1;transform:translateY(0)}
 #tutBubble.top{bottom:auto;top:calc(env(safe-area-inset-top,0px) + 70px)}
 #tutPart{font-family:'Orbitron',monospace;font-size:7px;letter-spacing:2.5px;color:#00ffcc;margin-bottom:7px;opacity:.8}
 #tutMsg{font-size:14px;color:#eaf2ff;line-height:1.65;font-weight:600;white-space:pre-line}
 #tutHint{font-family:'Orbitron',monospace;font-size:9px;letter-spacing:1px;color:#00ffcc;margin-top:9px;opacity:.85}
-#tutSkip{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);right:14px;z-index:503;background:transparent;border:1px solid #2a3a5a;color:#4a6088;border-radius:999px;padding:5px 13px;font-family:'Orbitron',monospace;font-size:8px;letter-spacing:1.5px;cursor:pointer;pointer-events:all;display:none}
+#tutSkip{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);left:14px;z-index:503;background:transparent;border:1px solid #2a3a5a;color:#4a6088;border-radius:999px;padding:5px 13px;font-family:'Orbitron',monospace;font-size:8px;letter-spacing:1.5px;cursor:pointer;pointer-events:all;display:none}
 #tutCounter{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 68px);left:50%;transform:translateX(-50%);font-family:'Orbitron',monospace;font-size:7px;letter-spacing:2px;color:#2a3a55;pointer-events:none;z-index:502;white-space:nowrap}
 .tut-glow{box-shadow:0 0 0 2.5px rgba(0,255,204,.9),0 0 20px rgba(0,255,204,.3)!important;position:relative!important;z-index:501!important;border-radius:inherit!important}
+.tut-pulse{animation:tutPulse 1.05s ease-in-out infinite!important;box-shadow:0 0 0 2px rgba(255,210,74,.95),0 0 22px rgba(255,210,74,.42)!important;position:relative!important;z-index:501!important}
+@keyframes tutPulse{0%,100%{filter:brightness(1);transform:scale(1)}50%{filter:brightness(1.28);transform:scale(1.035)}}
+.tut-btn{margin-top:14px;width:100%;height:46px;background:#00ffcc;color:#030f0a;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.3px;pointer-events:auto}
+.tut-btn:active{transform:scale(.97)}
 </style>
 </head>
 <body>
@@ -600,7 +604,7 @@ body{position:fixed;inset:0;touch-action:manipulation}
   <div id="bonusFrameOverlay">
     <iframe id="bonusFrame" src="./bonus.html?v=13-4" title="DOPADO BONUS"></iframe>
   </div>
-  <div class="overlay" id="onboardOverlay">
+  <div class="overlay" id="onboardOverlay" style="display:none!important">
     <div class="popup">
       <div class="popup-head"><span class="popup-title">WELCOME</span></div>
       <div class="popup-body" id="onboardBody" style="padding:20px"></div>
@@ -807,6 +811,7 @@ function normalizeTask(t){
     importantDate:(t&&t.importantDate)||'',
     swipeCycle:Number(t&&t.swipeCycle)||0,
     taskType:'normal',
+    tutorial: !!(t && t.tutorial),
     extras:normalizeTaskExtras(t&&t.extras)
   };
 }
@@ -825,7 +830,8 @@ function normalizeHabit(h){
     habitKind:(h&&h.habitKind)==='avoid'?'avoid':'do',
     createdAt:(h&&h.createdAt)||Date.now(),
     active:h&&Object.prototype.hasOwnProperty.call(h,'active')?Boolean(h.active):true,
-    slot:Number.isInteger(h&&h.slot)?h.slot:null
+    slot:Number.isInteger(h&&h.slot)?h.slot:null,
+    tutorial: !!(h && h.tutorial)
   };
 }
 function normalizeLogs(logs){
@@ -864,7 +870,7 @@ function normalizeState(s){
   expireDailyFlags(out);
   out.habits=[...byId.values()];
   out.habitLogs=normalizeLogs(out.habitLogs);
-  out.chargeTickets=Array.isArray(out.chargeTickets)?out.chargeTickets.filter(Boolean).map(x=>({id:(x&&x.id)||newId(),type:(x&&x.type)||'task',sourceId:(x&&x.sourceId)||'',name:(x&&x.name)||'',force:(x&&x.force)||null,outcome:(x&&x.outcome)||((x&&x.force)||null),createdAt:(x&&x.createdAt)||Date.now()})):[];
+  out.chargeTickets=Array.isArray(out.chargeTickets)?out.chargeTickets.filter(Boolean).map(x=>({id:(x&&x.id)||newId(),type:(x&&x.type)||'task',sourceId:(x&&x.sourceId)||'',name:(x&&x.name)||'',force:(x&&x.force)||null,outcome:(x&&x.outcome)||((x&&x.force)||null),tutorial:!!(x&&x.tutorial),createdAt:(x&&x.createdAt)||Date.now()})):[];
   out.ui=Object.assign({completedOpen:false,mode:'tasks'},(s&&s.ui)||{});
   if(out.ui.mode!=='habits')out.ui.mode='tasks';
   out.version=APP_VERSION;
@@ -933,13 +939,14 @@ function showReward(res,labelOverride){tutHook('reward_shown',res);
   ov.classList.add('show');icon.classList.remove('animate');void icon.offsetWidth;icon.classList.add('animate');
   if(navigator.vibrate){if(res.tier==='gold'||res.tier==='red')navigator.vibrate([60,40,60,40,140]);else navigator.vibrate(50)}
 }
-function closeReward(){tutHook('reward_closed');
+function closeReward(){
   const ov=document.getElementById('rewardOverlay');
   if(ov)ov.classList.remove('show');
   if(rewardUnlockPending){
     rewardUnlockPending=false;
     finishChargeInteraction();
   }
+  requestAnimationFrame(()=>tutHook('reward_closed'));
 }
 
 function renderHeader(){
@@ -967,11 +974,12 @@ function taskExtras(t){if(!t.extras)t.extras=normalizeTaskExtras(null);else t.ex
 function taskHasExtras(t){const ex=taskExtras(t);return ex.subtasks.length>0||String(ex.memo||'').trim().length>0}
 function preferredExtraTab(t){const ex=taskExtras(t);return ex.subtasks.length?'subtasks':(String(ex.memo||'').trim()?'memo':'subtasks')}
 function closeTaskExtras(doRender=false){if(openExtraTaskId||openSubtaskSwipeId||subtaskInputTaskId){openExtraTaskId=null;openSubtaskSwipeId=null;subtaskInputTaskId=null;if(doRender)render();tutHook('extras_close');return true}return false}
-function toggleTaskExtras(id){const t=state.tasks.find(x=>x.id===id);if(!t)return;clearTaskChargePreview(null,false);openSubtaskSwipeId=null;subtaskInputTaskId=null;if(openExtraTaskId===id){openExtraTaskId=null;saveState();render();return}openExtraTaskId=id;openExtraTab=preferredExtraTab(t);saveState();render();tutHook('extras_open',id)}
-function setTaskExtraTab(id,tab){if(openExtraTaskId!==id)return;openExtraTab=tab==='memo'?'memo':'subtasks';openSubtaskSwipeId=null;subtaskInputTaskId=null;render();if(tab==='memo')tutHook('memo_tab')}
+function toggleTaskExtras(id){const t=state.tasks.find(x=>x.id===id);if(!t)return;clearTaskChargePreview(null,false);openSubtaskSwipeId=null;subtaskInputTaskId=null;if(openExtraTaskId===id){openExtraTaskId=null;saveState();render();tutHook('extras_close');return}openExtraTaskId=id;openExtraTab=preferredExtraTab(t);saveState();render();tutHook('extras_open',id)}
+function setTaskExtraTab(id,tab){if(openExtraTaskId!==id)return;openExtraTab=tab==='memo'?'memo':'subtasks';openSubtaskSwipeId=null;subtaskInputTaskId=null;render();if(tut&&tut.active)setTimeout(tutRender,60);if(tab==='memo')tutHook('memo_tab')}
 function startSubtaskInput(id){
   const t=state.tasks.find(x=>x.id===id);if(!t)return;
   openExtraTaskId=id;openExtraTab='subtasks';openSubtaskSwipeId=null;subtaskInputTaskId=id;render();
+  if(tut&&tut.active)setTimeout(tutRender,60);
   setTimeout(()=>{const input=document.querySelector('[data-subtask-input="'+id+'"]');if(input)input.focus({preventScroll:true})},30);
 }
 function commitSubtaskInput(id,value){
@@ -1131,232 +1139,7 @@ async function resetAllData(){
     }
   }catch(e){}
   try{
-    
-/* ================================================================
-   TUTORIAL SYSTEM v13
-   既存機能は一切変更しない。フックで進行するだけ。
-================================================================ */
-const TUT_TITLE_ID='t_tut01';
-
-const TUT_STEPS=[
-  // PART 1: 日常タスク
-  {id:'t_add',   part:'PART 1 · 日常タスク',msg:'まずは今日やることを\n1個入れてみよう',hint:'↓ 入力して ✓ ボタン',pos:'bot'},
-  {id:'t_today', part:'PART 1 · 日常タスク',msg:'今日やるなら\n"今日"にしておこう',hint:'→ 右スワイプ（短く）',pos:'bot'},
-  {id:'t_imp',   part:'PART 1 · 日常タスク',msg:'ここぞのタスクは\n重要にする',hint:'→ もう一度 右スワイプ',pos:'bot'},
-  {id:'t_ext',   part:'PART 1 · 日常タスク',msg:'細かいタスクや\nメモはここに入れられる',hint:'☰ ボタンを押してみよう',pos:'bot'},
-  {id:'t_sub',   part:'PART 1 · 日常タスク',msg:'子タスクを\n1つ追加してみよう',hint:'＋ タスクを追加 を押して入力',pos:'bot'},
-  {id:'t_mtab',  part:'PART 1 · 日常タスク',msg:'次はメモタブに\n切り替えよう',hint:'「メモ」タブをタップ',pos:'bot'},
-  {id:'t_memo',  part:'PART 1 · 日常タスク',msg:'なんでもいいから\n少し入力してみよう',hint:'メモ欄に入力',pos:'bot'},
-  {id:'t_cext',  part:'PART 1 · 日常タスク',msg:'よし。メニューを\n閉じよう',hint:'☰ を再タップ または ✕',pos:'bot'},
-  {id:'t_prep',  part:'PART 1 · 日常タスク',msg:'完了前に、終わった後の\n自分を少し想像する',hint:'完了ボタンを押してみよう',pos:'bot'},
-  {id:'t_done',  part:'PART 1 · 日常タスク',msg:'もう一度押すと完了。\nDOPADOが反応する',hint:'もう一度 完了ボタン',pos:'bot'},
-  // PART 2: チャージ / プロフィール
-  {id:'t_chrg',  part:'PART 2 · 報酬',msg:'タスク完了で\nチャージが走る。見ておこう',hint:'↑ チャージ機',pos:'bot'},
-  {id:'t_rwd',   part:'PART 2 · 報酬',msg:'チュートリアル報酬！\nタップして閉じよう',hint:'報酬ポップアップをタップ',pos:'top'},
-  {id:'t_prof',  part:'PART 2 · 報酬',msg:'獲得したものは\nプロフィールに残る',hint:'↑ 右上をタップ',pos:'bot'},
-  {id:'t_name',  part:'PART 2 · 報酬',msg:'名前を変えて\n自分のDOPADOにしよう',hint:'名前を入力',pos:'top'},
-  {id:'t_pcls',  part:'PART 2 · 報酬',msg:'完了！閉じよう',hint:'✕ を押して閉じる',pos:'top'},
-  // PART 3: 習慣 / BONUS
-  {id:'t_hab',   part:'PART 3 · 習慣 & BONUS',msg:'上のバーをタップして\n習慣画面へ',hint:'↑ バーをタップ',pos:'bot'},
-  {id:'t_cdo',   part:'PART 3 · 習慣 & BONUS',msg:'空きスロットをタップして\n「やること」の習慣を作ろう',hint:'＋ スロットをタップ → 「やること」',pos:'bot'},
-  {id:'t_lpdo',  part:'PART 3 · 習慣 & BONUS',msg:'やることは\n長押しで達成。溜めて離して。',hint:'タイルを長押し',pos:'bot'},
-  {id:'t_cavd',  part:'PART 3 · 習慣 & BONUS',msg:'次は「やらないこと」の\n習慣も作ろう',hint:'＋ スロットをタップ → 「やらないこと」',pos:'bot'},
-  {id:'t_dtap',  part:'PART 3 · 習慣 & BONUS',msg:'ダブルタップで\n裏面へ',hint:'タイルをダブルタップ',pos:'bot'},
-  {id:'t_fail',  part:'PART 3 · 習慣 & BONUS',msg:'失敗した時はここを長押し\n失敗は赤。達成は金。',hint:'「失敗を記録」を長押し',pos:'bot'},
-  {id:'t_bon',   part:'PART 3 · 習慣 & BONUS',msg:'習慣はBONUSの入口になる\n今すぐ体験しよう！',hint:'↑ チャージ機を見ておこう',pos:'bot'},
-  {id:'t_fin',   part:'COMPLETE',msg:'🔴 肩書き「挑戦する」獲得！\n\nこれは最初の一歩。\nよりレアなアイテムを目指せ！！',hint:'',pos:'top'},
-];
-
-let tut={active:false,step:0,taskId:null,habitDoId:null,habitAvoidId:null,bonusFired:false,nameEntered:false};
-
-function tutStart(){
-  tut={active:true,step:0,taskId:null,habitDoId:null,habitAvoidId:null,bonusFired:false,nameEntered:false};
-  const ov=document.getElementById('tutOverlay');
-  ov.style.display='block';
-  document.getElementById('tutSkip').style.display='block';
-  tutRender();
-}
-
-function tutSkip(){
-  tutCleanTemp();
-  tut.active=false;
-  state.onboarded=true;
-  saveState();
-  const ov=document.getElementById('tutOverlay');
-  ov.style.display='none';
-  document.getElementById('tutSkip').style.display='none';
-  tutGlow(null);
-  render();
-}
-
-function tutCleanTemp(){
-  if(tut.taskId){state.tasks=state.tasks.filter(x=>x.id!==tut.taskId)}
-  if(tut.habitDoId){state.habits=state.habits.filter(x=>x.id!==tut.habitDoId);delete state.habitLogs[tut.habitDoId]}
-  if(tut.habitAvoidId){state.habits=state.habits.filter(x=>x.id!==tut.habitAvoidId);delete state.habitLogs[tut.habitAvoidId]}
-  saveState();
-}
-
-function tutComplete(){
-  if(!state.ownedTitles.includes(TUT_TITLE_ID))state.ownedTitles.push(TUT_TITLE_ID);
-  if(!state.profile.titleId)state.profile.titleId=TUT_TITLE_ID;
-  tutCleanTemp();
-  tut.active=false;
-  state.onboarded=true;
-  saveState();
-}
-
-function tutFinish(){
-  tutSetBubble(TUT_STEPS[tut.step]);
-  tutGlow(null);
-  document.getElementById('tutBg').style.opacity='0.82';
-  tutComplete();
-  renderHeader();
-  render();
-  setTimeout(()=>{
-    document.getElementById('tutOverlay').style.display='none';
-    document.getElementById('tutSkip').style.display='none';
-    document.getElementById('tutBg').style.opacity='0';
-    tutGlow(null);
-    showToast('チュートリアル完了！おめでとう！');
-  },4500);
-}
-
-function tutRender(){
-  if(!tut.active)return;
-  const st=TUT_STEPS[tut.step];if(!st)return;
-  if(st.id==='t_fin'){tutFinish();return}
-  // bg
-  const bg=document.getElementById('tutBg');
-  bg.style.opacity=(st.id==='t_chrg'||st.id==='t_bon'||st.id==='t_rwd')?'0':'0.52';
-  tutSetBubble(st);
-  tutGlowForStep(st.id);
-}
-
-function tutSetBubble(st){
-  const bbl=document.getElementById('tutBubble');
-  document.getElementById('tutPart').textContent=st.part||'';
-  document.getElementById('tutMsg').textContent=st.msg||'';
-  document.getElementById('tutHint').textContent=st.hint||'';
-  document.getElementById('tutCounter').textContent=(tut.step+1)+' / '+TUT_STEPS.length;
-  // position
-  bbl.classList.toggle('top',st.pos==='top');
-  bbl.classList.add('show');
-}
-
-function tutGlow(el){
-  document.querySelectorAll('.tut-glow').forEach(x=>x.classList.remove('tut-glow'));
-  if(el)el.classList.add('tut-glow');
-}
-function tutGlowForStep(sid){
-  // render後にDOM確認が必要なのでrAFで
-  requestAnimationFrame(()=>{
-    let el=null;
-    const taskEl=tut.taskId?document.querySelector('[data-id="'+tut.taskId+'"]'):null;
-    const doEl=tut.habitDoId?document.querySelector('.habit-tile[data-id="'+tut.habitDoId+'"]'):null;
-    const avEl=tut.habitAvoidId?document.querySelector('.habit-tile[data-id="'+tut.habitAvoidId+'"]'):null;
-    if(sid==='t_add')el=document.getElementById('mi');
-    else if(sid==='t_today'||sid==='t_imp')el=taskEl;
-    else if(sid==='t_ext'){el=taskEl&&taskEl.querySelector('.task-menu-toggle')}
-    else if(sid==='t_prep'||sid==='t_done'){const btn=taskEl&&taskEl.querySelector('.task-btn');el=btn||taskEl}
-    else if(sid==='t_chrg'||sid==='t_bon')el=document.getElementById('chargeMeter');
-    else if(sid==='t_prof')el=document.querySelector('.identity');
-    else if(sid==='t_name')el=document.getElementById('nameInput');
-    else if(sid==='t_hab')el=document.getElementById('habitRow');
-    else if(sid==='t_lpdo')el=doEl;
-    else if(sid==='t_dtap'||sid==='t_fail')el=avEl;
-    tutGlow(el);
-  });
-}
-
-function tutAdvance(){
-  if(!tut.active)return;
-  tut.step++;
-  if(tut.step>=TUT_STEPS.length){tutFinish();return}
-  tutRender();
-}
-
-// 既存コードから呼ばれるフック関数
-function tutHook(evt,data){
-  if(!tut.active)return;
-  const sid=TUT_STEPS[tut.step]&&TUT_STEPS[tut.step].id;
-  switch(evt){
-    case'task_added':
-      if(sid==='t_add'){tut.taskId=data.id;tutAdvance()}
-      break;
-    case'priority_swiped':
-      if(sid==='t_today'&&data.id===tut.taskId&&isTaskToday(data))tutAdvance();
-      else if(sid==='t_imp'&&data.id===tut.taskId&&isTaskImportant(data))tutAdvance();
-      break;
-    case'extras_open':
-      if(sid==='t_ext'&&data===tut.taskId)tutAdvance();
-      break;
-    case'subtask_saved':
-      if(sid==='t_sub')tutAdvance();
-      break;
-    case'memo_tab':
-      if(sid==='t_mtab')tutAdvance();
-      break;
-    case'memo_input':
-      if(sid==='t_memo')tutAdvance();
-      break;
-    case'extras_close':
-      if(sid==='t_cext')tutAdvance();
-      break;
-    case'task_charging':
-      if(sid==='t_prep'&&data===tut.taskId)tutAdvance();
-      break;
-    case'task_done':
-      if(sid==='t_done'&&data===tut.taskId)tutAdvance();
-      break;
-    case'reward_shown':
-      if(sid==='t_chrg')tutAdvance();
-      else if(sid==='t_bon')tutAdvance();
-      break;
-    case'reward_closed':
-      if(sid==='t_rwd')tutAdvance();
-      break;
-    case'profile_open':
-      if(sid==='t_prof')tutAdvance();
-      break;
-    case'name_changed':
-      if(sid==='t_name'&&!tut.nameEntered){tut.nameEntered=true;tutAdvance()}
-      break;
-    case'profile_close':
-      if(sid==='t_pcls')tutAdvance();
-      break;
-    case'mode_habits':
-      if(sid==='t_hab')tutAdvance();
-      break;
-    case'habit_added':
-      if(sid==='t_cdo'&&data.habitKind==='do'){tut.habitDoId=data.id;tutAdvance()}
-      else if(sid==='t_cavd'&&data.habitKind==='avoid'){tut.habitAvoidId=data.id;tutAdvance()}
-      break;
-    case'habit_done':
-      if(sid==='t_lpdo'&&data===tut.habitDoId)tutAdvance();
-      break;
-    case'habit_flip':
-      if(sid==='t_dtap'&&data===tut.habitAvoidId)tutAdvance();
-      break;
-    case'habit_failed':
-      if(sid==='t_fail'&&data===tut.habitAvoidId){
-        tutAdvance();
-        // 少し待ってBONUSを自動発火
-        setTimeout(()=>{
-          if(tut.active&&!tut.bonusFired&&TUT_STEPS[tut.step]&&TUT_STEPS[tut.step].id==='t_bon'){
-            tut.bonusFired=true;
-            tutRender();
-            setTimeout(()=>{
-              issueChargeTicket({id:'tut_bonus',name:'TUTORIAL BONUS'},{force:'bonus',type:'habit'});
-              setTimeout(()=>startNextChargeTicket(true),120);
-            },700);
-          }
-        },500);
-      }
-      break;
-  }
-}
-
-if('serviceWorker' in navigator){
+    if('serviceWorker' in navigator){
       const regs=await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map(reg=>reg.unregister()));
     }
@@ -1412,9 +1195,12 @@ function openTaskMenu(id=null,kind=null,slot=null){
   const repeatEl=document.getElementById('repeatTypeInput');repeatEl.value='daily';
   menuWeekdays=[];
   renderWeekdayGrid();syncTaskMenuFields();syncTaskMenuToggleUI();
+  // チュートリアル t_cavd: 「やらないこと」を自動選択
+  if (tut && tut.active) { const _cs = tutCurrentStep(); if (_cs && _cs.id === 't_cavd') { const ki = document.getElementById('habitKindInput'); if (ki) ki.value = 'avoid'; } }
   document.getElementById('taskOverlay').classList.add('show');
+  if(tut&&tut.active)setTimeout(tutRender,60);
 }
-function closeTaskMenu(){document.getElementById('taskOverlay').classList.remove('show');editingId=null;editingKind=null;editingHabitSlot=null;taskMenuImportant=false}
+function closeTaskMenu(){document.getElementById('taskOverlay').classList.remove('show');editingId=null;editingKind=null;editingHabitSlot=null;taskMenuImportant=false;if(tut&&tut.active)setTimeout(tutRender,60)}
 function rerenderAfterMenuClose(){render();requestAnimationFrame(()=>render())}
 function syncTaskMenuFields(){
   const isHabit=document.getElementById('taskTypeInput').value==='habit';
@@ -1453,9 +1239,10 @@ function saveTaskMenu(){
   if(cfg.taskType==='habit'){
     cfg.slot=Number.isInteger(editingHabitSlot)?editingHabitSlot:firstEmptyHabitSlot();
     if(cfg.slot===null){showToast('空き習慣スロットがない');return}
-    state.habits.push(createHabit(cfg.name,cfg));
+    const _newHabit=createHabit(cfg.name,cfg);state.habits.push(_newHabit);
     showToast('習慣を追加した');
     spawnPraise('add');
+    tutHook('habit_added',_newHabit);
   }else{
     if(cfg.importantRequested)cfg.dueDate=appDayStr();const t=createTask(cfg.name,cfg);syncTaskDateFlags(t);if(cfg.importantRequested&&!claimImportant(t)){showToast('今日の重要は2つまで');return}state.tasks.unshift(t);maybeAwardSchedulePoint(t,'',t.dueDate);spawnPraise('add');showToast('タスクを追加した');
   }
@@ -1482,7 +1269,7 @@ function doDopa(){const v=vl();if(!v)return;doQuickAdd({silent:false})}
 function deleteTask(id,fromMenu=false){if(openExtraTaskId===id)closeTaskExtras(false);const idx=state.tasks.findIndex(x=>x.id===id);if(idx<0)return;const removed=state.tasks[idx];state.tasks.splice(idx,1);if(currentDopaonTaskId===id||taskChargingId===id)clearTaskChargePreview(null,false);saveState();render();if(fromMenu)closeTaskMenu();showUndo('タスクを削除した',()=>{state.tasks.splice(Math.min(idx,state.tasks.length),0,removed);saveState();render()})}
 function deleteHabit(id,fromMenu=false){const idx=state.habits.findIndex(x=>x.id===id);if(idx<0)return;const removed=state.habits[idx];const logs=state.habitLogs[id];state.habits.splice(idx,1);delete state.habitLogs[id];saveState();render();if(fromMenu)closeTaskMenu();showUndo('習慣を削除した',()=>{state.habits.push(removed);if(logs)state.habitLogs[id]=logs;saveState();render()})}
 function undoTask(id){closeTaskExtras(false);const t=state.tasks.find(x=>x.id===id);if(!t)return;t.state='idle';t.doneAt=null;taskChargingId=null;saveState();render();spawnPraise('add',{t:'戻した！',c:'#00ffcc'});showToast('完了を取り消した。再完了しても再抽選なし')}
-function tap(id){if(appLockedForCompletion())return;closeTaskExtras(false);const t=state.tasks.find(x=>x.id===id);if(!t)return;if(t.state==='idle'){clearTaskChargePreview(id,false);t.state='charging';taskChargingId=id;currentDopaonTaskId=id;currentDopaonMsg=makeDopaonMessage(t.name);saveState();render();tutHook('task_charging',id)}else if(t.state==='charging'){clearInlineDopaon(false);t.state='done';t.doneAt=Date.now();const shouldReward=!t.rewardDone;const forceBonus=isTaskImportant(t);t.rewardDone=true;taskChargingId=null;if(shouldReward)issueChargeTicket(t,{force:forceBonus?'bonus':null,type:forceBonus?'important':'task'});saveState();render();tutHook('task_done',id);setTimeout(()=>spawnPraise('done'),60);if(shouldReward){setTimeout(()=>startNextChargeTicket(true),160)}}}
+function tap(id){if(appLockedForCompletion())return;closeTaskExtras(false);const t=state.tasks.find(x=>x.id===id);if(!t)return;if(t.state==='idle'){clearTaskChargePreview(id,false);t.state='charging';taskChargingId=id;currentDopaonTaskId=id;currentDopaonMsg=makeDopaonMessage(t.name);saveState();render();tutHook('task_charging',id)}else if(t.state==='charging'){clearInlineDopaon(false);t.state='done';t.doneAt=Date.now();const shouldReward=!t.rewardDone;const forceBonus=isTaskImportant(t);t.rewardDone=true;taskChargingId=null;if(shouldReward){if(tutShouldForceWhiteTicket()){issueChargeTicket({id:'tut_white',name:'TUTORIAL'},{force:'white',type:'task',tutorial:true})}else{issueChargeTicket(t,{force:forceBonus?'bonus':null,type:forceBonus?'important':'task'})}}saveState();render();tutHook('task_done',id);setTimeout(()=>spawnPraise('done'),60);if(shouldReward){setTimeout(()=>startNextChargeTicket(true),160)}}}
 function formatDateLabel(s){if(!s)return '';const d=new Date(s+'T00:00:00');if(Number.isNaN(d.getTime()))return s;return (d.getMonth()+1)+'/'+d.getDate()+'('+WEEKDAYS[d.getDay()]+')'}
 function taskMeta(t){const tags=[];const today=appDayStr();if(isTaskToday(t))tags.push({cls:'today',txt:'今日'});if(t.dueDate){const overdue=t.state!=='done'&&t.dueDate<today;tags.push({cls:'due '+(overdue?'warn':''),txt:overdue?'期限超過':formatDateLabel(t.dueDate)})}return tags}
 function sortTasks(list){return list.slice().sort((a,b)=>{const ba=isTaskImportant(a)?0:isTaskToday(a)?1:!a.dueDate?2:3,bb=isTaskImportant(b)?0:isTaskToday(b)?1:!b.dueDate?2:3;if(ba!==bb)return ba-bb;if(ba===3&&a.dueDate!==b.dueDate)return a.dueDate.localeCompare(b.dueDate);return (b.createdAt||0)-(a.createdAt||0)})}
@@ -1640,9 +1427,9 @@ function habitLog(h){return state.habitLogs[h.id]&&state.habitLogs[h.id][habitTa
 function isHabitDone(h){const l=habitLog(h);return !!(l&&l.status==='done')}
 function isHabitFailed(h){const l=habitLog(h);return !!(l&&l.status==='failed')}
 function ensureHabitLogBox(id){if(!state.habitLogs[id])state.habitLogs[id]={};return state.habitLogs[id]}
-function setHabitDone(id){const h=state.habits.find(x=>x.id===id);if(!h)return;const box=ensureHabitLogBox(id),day=habitTargetDate(h);const shouldReward=!(box[day]&&box[day].rewardDone);box[day]={status:'done',checkedAt:Date.now(),rewardDone:true};habitChargingId=null;tutHook('habit_done',id);if(shouldReward)issueChargeTicket({id:h.id,name:h.name},{force:'bonus',type:'habit'});saveState();render();spawnPraise('done');if(shouldReward){setTimeout(()=>startNextChargeTicket(true),160)}}
+function setHabitDone(id){const h=state.habits.find(x=>x.id===id);if(!h)return;const box=ensureHabitLogBox(id),day=habitTargetDate(h);const shouldReward=!(box[day]&&box[day].rewardDone);box[day]={status:'done',checkedAt:Date.now(),rewardDone:true};habitChargingId=null;const suppress=tutShouldSuppressHabitReward(id);tutHook('habit_done',id);if(shouldReward&&!suppress)issueChargeTicket({id:h.id,name:h.name},{force:'bonus',type:'habit'});saveState();render();spawnPraise('done');if(shouldReward&&!suppress){setTimeout(()=>startNextChargeTicket(true),160)}}
 function setHabitFailed(id){const h=state.habits.find(x=>x.id===id);if(!h||h.habitKind!=='avoid')return;const box=ensureHabitLogBox(id),day=habitTargetDate(h);box[day]={status:'failed',checkedAt:Date.now(),rewardDone:false};habitChargingId=null;saveState();render();spawnPraise('add',{t:'記録した',c:'#ff6f8c'});tutHook('habit_failed',id)}
-function undoHabit(id){const h=state.habits.find(x=>x.id===id);if(!h)return;if(state.habitLogs[id])delete state.habitLogs[id][habitTargetDate(h)];habitChargingId=null;saveState();render();showToast('習慣記録を戻した')}
+function undoHabit(id){const h=state.habits.find(x=>x.id===id);if(!h)return;if(state.habitLogs[id])delete state.habitLogs[id][habitTargetDate(h)];habitChargingId=null;saveState();render();showToast('習慣記録を戻した');tutHook('habit_undo',id)}
 function tapHabit(id){if(appLockedForCompletion())return;clearTaskChargePreview(null,false);setHabitDone(id)}
 function habitStreak(h){let count=0,day=habitTargetDate(h);for(let i=0;i<90;i++){const box=state.habitLogs[h.id];if(box&&box[day]&&box[day].status==='done'){count++;day=addDaysStr(day,-1)}else break}return count}
 function habitStats(){const total=state.habits.length,done=state.habits.filter(isHabitDone).length,failed=state.habits.filter(isHabitFailed).length;return{total,done,failed,pending:Math.max(0,total-done-failed)}}
@@ -1667,7 +1454,7 @@ function mkHabitTile(h){
     +((done||failed)?'<button class="mini-btn undo">↩ 記録取消</button>':'')
     +'<button class="mini-btn danger">× 削除</button>';
   el.innerHTML='<div class="habit-tile-inner"><div class="habit-face habit-front"><div class="habit-name">'+escapeHtml(h.name)+'</div><div class="habit-streak">'+habitStreak(h)+'<small>DAY STREAK</small></div><div class="habit-state">'+stateLabel+'</div></div><div class="habit-face habit-back">'+backBtns+'</div></div>';
-  const back=el.querySelector('.habit-back .back');if(back)back.onclick=e=>{e.stopPropagation();flippedHabitId=null;render()};
+  const back=el.querySelector('.habit-back .back');if(back)back.onclick=e=>{e.stopPropagation();flippedHabitId=null;render();tutHook('habit_flip',h.id)};
   const edit=el.querySelector('.habit-back .mini-btn:not(.undo):not(.danger):not(.back):not(.fail)');if(edit)edit.onclick=e=>{e.stopPropagation();openTaskMenu(h.id,'habit')};
   const undo=el.querySelector('.habit-back .undo');if(undo)undo.onclick=e=>{e.stopPropagation();undoHabit(h.id)};
   const del=el.querySelector('.habit-back .danger');if(del)del.onclick=e=>{e.stopPropagation();deleteHabit(h.id)};
@@ -1692,7 +1479,7 @@ function mkHabitTile(h){
   ['mouseup','mouseleave'].forEach(ev=>el.addEventListener(ev,clearPress));
   el.addEventListener('contextmenu',e=>e.preventDefault());
   let clickTimer=null;
-  el.addEventListener('click',e=>{if(e.target.closest('button'))return;e.stopPropagation();if(clickTimer){clearTimeout(clickTimer);clickTimer=null;const _prev=flippedHabitId;flippedHabitId=flippedHabitId===h.id?null:h.id;render();if(flippedHabitId===h.id&&_prev!==h.id)tutHook('habit_flip',h.id);return}clickTimer=setTimeout(()=>{clickTimer=null;if(flippedHabitId&&flippedHabitId!==h.id){flippedHabitId=null;render()}},230)});
+  el.addEventListener('click',e=>{if(e.target.closest('button'))return;e.stopPropagation();if(clickTimer){clearTimeout(clickTimer);clickTimer=null;const _prev=flippedHabitId;flippedHabitId=flippedHabitId===h.id?null:h.id;render();tutHook('habit_flip',h.id);return}clickTimer=setTimeout(()=>{clickTimer=null;if(flippedHabitId&&flippedHabitId!==h.id){flippedHabitId=null;render()}},230)});
   return el;
 }
 function todayTaskStats(){const todayTasks=state.tasks.filter(t=>isTaskToday(t)),done=todayTasks.filter(t=>t.state==='done').length;return{total:todayTasks.length,done,pending:Math.max(0,todayTasks.length-done),important:importantCount(),items:todayTasks}}
@@ -1761,7 +1548,7 @@ function issueChargeTicket(task,opts={}){
   if(!Array.isArray(state.chargeTickets))state.chargeTickets=[];
   // v13.12.2: ハズレもチャージ機に渡して演出させる。
   // ただしロック対象ではないので、他UI操作は止めない。
-  state.chargeTickets.push({id:newId(),type:opts.type||'task',sourceId:task.id,name:task.name,force:outcome,outcome,createdAt:Date.now()});
+  state.chargeTickets.push({id:newId(),type:opts.type||'task',sourceId:task.id,name:task.name,force:outcome,outcome,tutorial:!!opts.tutorial,createdAt:Date.now()});
   return true;
 }
 function chargeFrame(){return document.getElementById('chargeFrame')}
@@ -1828,7 +1615,14 @@ async function handleChargeResult(kind){
     }
     if(kind==='white'||kind==='blue'){
       startChargeInteractionLock();
-      const reward=grantReward(kind);saveState();renderHeader();rewardUnlockPending=true;showReward(reward,kind==='blue'?'Tia青':'Tia白');return;
+      let reward;
+      if(kind==='white'&&tut&&tut.active&&tut.phase==='part2'){
+        // チュートリアルPart2: 白報酬を+3日無料期間に固定
+        state.freeDays+=3;reward={kind:'days',tier:'white',days:3};saveState();renderHeader();
+      }else{
+        reward=grantReward(kind);saveState();renderHeader();
+      }
+      rewardUnlockPending=true;showReward(reward,kind==='blue'?'Tia青':'Tia白');return;
     }
     if(kind==='bonus'){
       startChargeInteractionLock();
@@ -1857,7 +1651,7 @@ function playBonusFrame(){
     const ov=document.getElementById('bonusFrameOverlay'),fr=document.getElementById('bonusFrame');
     if(!ov||!fr){const r=grantReward(rollBonusTier());saveState();renderHeader();resolve(r);return}
     ov.classList.add('show');
-    const send=()=>{try{fr.contentWindow.postMessage({type:'DOPAON_BONUS_START'},'*')}catch(e){const r=grantReward(rollBonusTier());saveState();renderHeader();resolve(r)}};
+    const send=()=>{try{const tutBonus=!!(tut&&tut.active&&tut.bonusFired);fr.contentWindow.postMessage({type:'DOPAON_BONUS_START',tutorial:tutBonus,forceTier:tutBonus?'red':undefined},'*')}catch(e){const r=grantReward(rollBonusTier());saveState();renderHeader();resolve(r)}};
     if(fr.contentWindow)send(); else fr.onload=send;
   })
 }
@@ -1873,8 +1667,17 @@ window.addEventListener('message',e=>{
     return;
   }
   if(d.type==='DOPAON_BONUS_PREPARE_REWARD'){
-    const tier=TIER_ORDER.includes(d.tier)?d.tier:rollBonusTier();
-    const reward=grantReward(tier);bonusPreparedReward=reward;saveState();renderHeader();
+    const isTutFinalBonus=tut&&tut.active&&tut.bonusFired;
+    const tier=TIER_ORDER.includes(d.tier)?d.tier:(isTutFinalBonus?'red':rollBonusTier());
+    let reward;
+    if(isTutFinalBonus){
+      // チュートリアル最終BONUSも、BONUS側が出した結果色と報酬色を必ず一致させる。
+      // 赤肩書き「挑戦する」はBONUS後の完了メッセージで別途付与する。
+      reward=grantReward(tier);
+    }else{
+      reward=grantReward(tier);
+    }
+    bonusPreparedReward=reward;saveState();renderHeader();
     postBonusRewardReady(bonusRewardPayload(reward));
     return;
   }
@@ -1882,6 +1685,8 @@ window.addEventListener('message',e=>{
     const ov=document.getElementById('bonusFrameOverlay');if(ov)ov.classList.remove('show');
     const r=bonusResolve;bonusResolve=null;r&&r(bonusPreparedReward);
     bonusPreparedReward=null;
+    // チュートリアル最終BONUSの完了判定（showRewardが呼ばれない場合の保険）
+    if(tut.active&&tut.bonusFired){const _cs=tutCurrentStep();if(_cs&&_cs.id==='t_bon')setTimeout(tutFinalDone,300);}
     return;
   }
   if(d.type==='DOPAON_BONUS_RESULT'){
@@ -1889,6 +1694,7 @@ window.addEventListener('message',e=>{
     const reward=bonusPreparedReward||grantReward(tier);saveState();renderHeader();
     const ov=document.getElementById('bonusFrameOverlay');if(ov)ov.classList.remove('show');
     const r=bonusResolve;bonusResolve=null;r&&r(reward);bonusPreparedReward=null;
+    if(tut.active&&tut.bonusFired){const _cs=tutCurrentStep();if(_cs&&_cs.id==='t_bon')setTimeout(tutFinalDone,300);}
   }
 });
 
@@ -1899,37 +1705,479 @@ window.addEventListener('orientationchange',()=>{setTimeout(()=>{initBaseViewpor
 window.addEventListener('scroll',lockScroll,{passive:true});
 document.addEventListener('touchmove',e=>{if(e.target.closest('#ta'))return;if(e.target.closest('.popup'))return;e.preventDefault()},{passive:false});
 
+/* ================================================================
+   DOPADO TUTORIAL SYSTEM v2 — グローバルスコープ
+   初回のみ。フックで既存機能を汚染しない。
+   失敗では報酬を出さない。成功のみBONUS。
+================================================================ */
 
-/* ===== onboarding ===== */
-const OB_PAGES=[
-  {icon:'⚡',title:'タスクを完了しよう',body:'タスクを入力して追加。<br>完了ボタンを2回タップするとガチャが回って報酬が手に入る。'},
-  {icon:'🎰',title:'チャージで報酬ゲット',body:'上のバーにあるのがチャージ機。<br>タスクを終わらせるたびに回って、称号・日数・イラストが当たる。'},
-  {icon:'🎁',title:'無料期間って何？',body:'ヘッダーに表示される「+◯日」は、<br>将来の有料機能を無料で使える日数。<br>タスクをこなすほど増えていく。'},
-  {icon:'↕',title:'習慣バーを使おう',body:'上のバー左側をタップすると習慣画面へ。<br>「やる」or「やらない」を毎日記録すると<br>チャージが必ず当たる。'},
-  {icon:'👆',title:'スワイプで操作',body:'右へ引くと今日/重要をプレビュー。<br>離した瞬間に確定。左へ引くと編集・削除メニューが開く。'},
-]
-let _obPage=0;
-function _obRender(){
-  const el=document.getElementById('onboardBody');if(!el)return;
-  const p=OB_PAGES[_obPage],n=OB_PAGES.length;
-  el.innerHTML='<div class="ob-icon">'+p.icon+'</div>'
-    +'<div class="ob-title">'+p.title+'</div>'
-    +'<div class="ob-body">'+p.body.replace(/\n/g,'<br>')+'</div>'
-    +'<div class="ob-dots">'+OB_PAGES.map((_,i)=>'<div class="ob-dot'+(i===_obPage?' on':'')+'" style="width:7px;height:7px;border-radius:50%;background:'+(i===_obPage?'#00ffcc':'#2a3a55')+'"></div>').join('')+'</div>'
-    +'<button class="ob-next" onclick="_obNext()">'+(_obPage<n-1?'次へ →':'はじめる！')+'</button>';
+const TUT_TITLE_ID = 't_tut01'; // "挑戦する" red tier
+
+let tut = {
+  active: false,
+  phase: 'idle',           // 'home' | 'part1' | 'part2' | 'part3'
+  step: 0,
+  taskId: null,
+  habitDoId: null,
+  habitAvoidId: null,
+  bonusFired: false,
+  nameEntered: false,
+  failRecorded: false,
+};
+
+/* ---------- ステップ定義 ---------- */
+const TUT_HOME_STEPS = [
+  { id: 'h_welcome', part: 'WELCOME', bg: true,
+    msg: 'ようこそ、挑戦者。\nDOPADOを触ってくれてありがとう。',
+    hint: '', btn: '次へ' },
+  { id: 'h_home_ios', part: 'ホーム画面に追加', bg: true,
+    msg: 'まずはホーム画面に追加して\nアプリとして使ってね。',
+    hint: '① 共有ボタン □↑ をタップ\n② 「ホーム画面に追加」を選ぶ\n③ 追加したアイコンから開く\n\nAndroidなら自分で頑張って！',
+    btn: 'ホーム画面に追加した / このまま進む' },
+];
+
+const TUT_PART1_STEPS = [
+  { id: 't_add',  part: 'PART 1 · 日常タスク', msg: 'まずは今日やることを\n1個入れてみよう', hint: '↓ 入力して ✓ ボタン' },
+  { id: 't_today',part: 'PART 1 · 日常タスク', msg: '今日やるなら\n"今日"にしておこう',   hint: '→ カードを右スワイプ（短く）' },
+  { id: 't_imp',  part: 'PART 1 · 日常タスク', msg: 'ここぞのタスクは重要にする\n重要は1日2つまで', hint: '→ もう一度 右スワイプ' },
+  { id: 't_ext',  part: 'PART 1 · 日常タスク', msg: '細かいタスクやメモは\nここに入れられる', hint: '☰ ボタンを押してみよう' },
+  { id: 't_sub',  part: 'PART 1 · 日常タスク', msg: '子タスクを1つ\n追加してみよう', hint: '＋ タスクを追加 → 入力してEnter' },
+  { id: 't_mtab', part: 'PART 1 · 日常タスク', msg: '次はメモタブに\n切り替えよう', hint: '「メモ」タブをタップ' },
+  { id: 't_memo', part: 'PART 1 · 日常タスク', msg: 'なんでもいいから\n少し入力してみよう', hint: 'メモ欄に入力' },
+  { id: 't_cext', part: 'PART 1 · 日常タスク', msg: 'よし。メニューを閉じよう', hint: '☰ を再タップ または ✕' },
+  { id: 't_prep', part: 'PART 1 · 日常タスク', msg: '完了前に、終わった後の\n自分を少し想像する', hint: '完了ボタンを押してみよう' },
+  { id: 't_done', part: 'PART 1 · 日常タスク', msg: 'もう一度押すと完了。\nDOPADOが反応する', hint: 'もう一度 完了ボタン' },
+];
+
+const TUT_PART2_STEPS = [
+  { id: 't_chrg', part: 'PART 2 · 報酬',   msg: 'タスク完了でチャージが走る\n見ておこう', hint: '↑ チャージ機' },
+  { id: 't_rwd',  part: 'PART 2 · 報酬',   msg: 'チュートリアル報酬ゲット！\nタップして閉じよう', hint: 'ポップアップをタップ', pos: 'top' },
+  { id: 't_prof', part: 'PART 2 · 報酬',   msg: '獲得したものは\nプロフィールに残る', hint: '↑ 右上をタップ' },
+  { id: 't_name', part: 'PART 2 · 報酬',   msg: '名前を変えて\n自分のDOPADOにしよう', hint: '名前欄に入力', pos: 'top' },
+  { id: 't_pcls', part: 'PART 2 · 報酬',   msg: '完了！閉じよう', hint: '✕ を押して閉じる', pos: 'top' },
+];
+
+const TUT_PART3_STEPS = [
+  { id: 't_hab',   part: 'PART 3 · 習慣 & BONUS', msg: '上のバーをタップして\n習慣画面へ', hint: '↑ バーをタップ' },
+  { id: 't_cdo',   part: 'PART 3 · 習慣 & BONUS', msg: '空きスロットをタップして\n「やること」の習慣を作ろう', hint: '光っている＋スロット → 名前入力 → 習慣を追加', pos: 'top' },
+  { id: 't_lpdo',  part: 'PART 3 · 習慣 & BONUS', msg: 'やることは長押しで達成\n溜めて、離して。', hint: '光っているタイルを長押し（練習）' },
+  { id: 't_cavd',  part: 'PART 3 · 習慣 & BONUS', msg: '次は「やらないこと」も作ろう。\n空きスロットから作成できるよ', hint: '光っている＋スロット → チェック内容を「やらないこと」→ 習慣を追加', pos: 'top' },
+  { id: 't_dtap',  part: 'PART 3 · 習慣 & BONUS', msg: '「やらないこと」は\nダブルタップで裏面へ', hint: '光っているタイルをダブルタップ' },
+  { id: 't_fail',  part: 'PART 3 · 習慣 & BONUS', msg: '破った時はここを長押し\nで失敗を記録できる', hint: '光っている「失敗を記録」を長押し' },
+  { id: 't_failmsg',part:'PART 3 · 習慣 & BONUS', msg: '失敗は赤で残る。\nでも、報酬は出ない。\nDOPADOが光るのは、次に成功した時。', hint: '', btn: '次へ' },
+  { id: 't_lpavd', part: 'PART 3 · 習慣 & BONUS', msg: '次は守れた時の記録。\n表面を長押しして\n「守れた / 達成」を掴もう', hint: '光っているタイルを長押し' },
+  { id: 't_bon',   part: 'PART 3 · 習慣 & BONUS', msg: '成功！！\n習慣の達成はBONUSにつながる', hint: '↑ チャージ機を見ておこう' },
+];
+
+/* ---------- iOS判定 ---------- */
+function isStandalone() {
+  return (window.navigator.standalone === true) ||
+         window.matchMedia('(display-mode: standalone)').matches ||
+         window.matchMedia('(display-mode: fullscreen)').matches;
 }
-function _obNext(){
-  if(_obPage<OB_PAGES.length-1){_obPage++;_obRender();}
-  else{state.onboarded=true;saveState();document.getElementById('onboardOverlay').classList.remove('show');}
+function isIOS() { return /iP(hone|od|ad)/.test(navigator.userAgent); }
+function isSafari() { return isIOS() && /Safari/.test(navigator.userAgent) && !/CriOS|FxiOS|OPiOS|EdgiOS/.test(navigator.userAgent); }
+
+/* ---------- チュートリアル判定: チケットがチュートリアル用か ---------- */
+function tutIsActive() { return !!tut.active; }
+function tutIsTempHabit(id) { return id === tut.habitDoId || id === tut.habitAvoidId; }
+
+/* ---------- 起動 ---------- */
+function tutStart() {
+  const skipHome = isStandalone() || localStorage.getItem('dopado_home_prompt_seen') === '1';
+  tut = { active: true, phase: skipHome ? 'part1' : 'home', step: 0,
+          taskId: null, habitDoId: null, habitAvoidId: null,
+          bonusFired: false, nameEntered: false, failRecorded: false,
+          finalMessagePending: false };
+  _tutFinalCalled = false;
+  const ov = document.getElementById('tutOverlay');
+  if (ov) ov.style.display = 'block';
+  const sk = document.getElementById('tutSkip');
+  if (sk) sk.style.display = 'block';
+  tutRender();
 }
-function checkOnboarding(){if(!state.onboarded){tutStart();}}
+
+/* ---------- スキップ（確認付き） ---------- */
+function tutSkip() {
+  const ok = confirm('重要アイテムを逃します😭\n本当にスキップしますか？');
+  if (!ok) return;
+  tutCleanTemp();
+  _tutFinalCalled = false;
+  tut.finalMessagePending = false;
+  tut.active = false;
+  state.onboarded = true;
+  localStorage.setItem('dopado_tutorial_completed', '1');
+  saveState();
+  // 演出・ロック・オーバーレイを全部強制解除
+  try {
+    chargeBusy = false; chargeCanInterrupt = false;
+    rewardUnlockPending = false; currentChargeTicket = null;
+    stopChargeParticles();
+    resetChargeFrame();
+    setChargeInteractionLocked(false);
+    ['rewardOverlay','goBonusGate'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.classList.remove('show');
+    });
+    const bfo = document.getElementById('bonusFrameOverlay');
+    if (bfo) { bfo.classList.remove('show'); bfo.style.display = ''; }
+    if (bonusResolve) { const r = bonusResolve; bonusResolve = null; try{r(null)}catch(e){} }
+    if (goBonusResolve) { const r = goBonusResolve; goBonusResolve = null; try{r()}catch(e){} }
+    bonusPreparedReward = null;
+    taskChargingId = null; habitChargingId = null;
+    renderChargeMini();
+  } catch(e){}
+  _tutHideOverlay();
+  render();
+}
+
+function _tutHideOverlay() {
+  const ov = document.getElementById('tutOverlay');
+  if (ov) ov.style.display = 'none';
+  const sk = document.getElementById('tutSkip');
+  if (sk) sk.style.display = 'none';
+  const bg = document.getElementById('tutBg');
+  if (bg) bg.style.opacity = '0';
+  const btn = document.getElementById('tutActionBtn');
+  if (btn) btn.remove();
+  tutGlow(null);
+  tutPulse(null);
+}
+
+/* ---------- チュートリアル用チケット判定 ---------- */
+function tutIsTutorialTicket(t) {
+  return !!(t && (
+    t.tutorial ||
+    t.sourceId === 'tut_white' ||
+    t.sourceId === 'tut_bonus' ||
+    t.id === 'tut_white' ||
+    t.id === 'tut_bonus'
+  ));
+}
+
+/* ---------- 一時データ削除 ---------- */
+function tutCleanTemp() {
+  // IDベースの削除
+  if (tut.taskId) state.tasks = state.tasks.filter(x => x.id !== tut.taskId);
+  if (tut.habitDoId) { state.habits = state.habits.filter(x => x.id !== tut.habitDoId); delete state.habitLogs[tut.habitDoId]; }
+  if (tut.habitAvoidId) { state.habits = state.habits.filter(x => x.id !== tut.habitAvoidId); delete state.habitLogs[tut.habitAvoidId]; }
+  // tutorial:trueフラグベースの掃除（リロード後の残留対策）
+  state.tasks = state.tasks.filter(x => !x.tutorial);
+  state.habits.filter(x => x.tutorial).forEach(x => { delete state.habitLogs[x.id]; });
+  state.habits = state.habits.filter(x => !x.tutorial);
+  if (Array.isArray(state.chargeTickets)) {
+    state.chargeTickets = state.chargeTickets.filter(t => !tutIsTutorialTicket(t));
+  }
+  saveState();
+}
+// 起動時のチュートリアル残留データ掃除（リロード復帰対策）
+function cleanStaleTutorialData() {
+  let dirty = false;
+  if (state.tasks.some(x => x.tutorial)) { state.tasks = state.tasks.filter(x => !x.tutorial); dirty = true; }
+  if (state.habits.some(x => x.tutorial)) {
+    state.habits.filter(x => x.tutorial).forEach(x => { delete state.habitLogs[x.id]; });
+    state.habits = state.habits.filter(x => !x.tutorial);
+    dirty = true;
+  }
+  if (Array.isArray(state.chargeTickets) && state.chargeTickets.some(tutIsTutorialTicket)) {
+    state.chargeTickets = state.chargeTickets.filter(t => !tutIsTutorialTicket(t)); dirty = true;
+  }
+  if (dirty) saveState();
+}
+
+/* ---------- 現在ステップ ---------- */
+function tutCurrentStep() {
+  if (tut.phase === 'home') return TUT_HOME_STEPS[tut.step] || null;
+  if (tut.phase === 'part1') return TUT_PART1_STEPS[tut.step] || null;
+  if (tut.phase === 'part2') return TUT_PART2_STEPS[tut.step] || null;
+  if (tut.phase === 'part3') return TUT_PART3_STEPS[tut.step] || null;
+  return null;
+}
+
+/* ---------- 進行 ---------- */
+function tutAdvance() {
+  if (!tut.active) return;
+  tut.step++;
+  if (tut.phase === 'home' && tut.step >= TUT_HOME_STEPS.length) { tut.phase = 'part1'; tut.step = 0; }
+  else if (tut.phase === 'part1' && tut.step >= TUT_PART1_STEPS.length) { tut.phase = 'part2'; tut.step = 0; }
+  else if (tut.phase === 'part2' && tut.step >= TUT_PART2_STEPS.length) { tut.phase = 'part3'; tut.step = 0; }
+  else if (tut.phase === 'part3' && tut.step >= TUT_PART3_STEPS.length) { return; } // t_bonのreward_shownで最終へ
+  tutRender();
+}
+
+/* ---------- 最終: 赤肩書き付与 ---------- */
+let _tutFinalCalled = false;
+function tutFinalDone() {
+  if (_tutFinalCalled) return;
+  _tutFinalCalled = true;
+  // 肩書き「挑戦する」を付与
+  const titleObj = TITLES.find(t => t.id === TUT_TITLE_ID);
+  if (titleObj && !state.ownedTitles.includes(TUT_TITLE_ID)) state.ownedTitles.push(TUT_TITLE_ID);
+  if (!state.profile.titleId) state.profile.titleId = TUT_TITLE_ID;
+  tutCleanTemp();
+  // tut.active はここではまだ落とさない（reward_closedフックが必要なため）
+  tut.finalMessagePending = true;
+  state.onboarded = true;
+  localStorage.setItem('dopado_tutorial_completed', '1');
+  saveState();
+  renderHeader(); render();
+  // 称号はBONUS演出内で既に付与・表示済み。reward popupは呼ばずに最終メッセージへ
+  _tutShowFinalMessage();
+}
+function _tutShowFinalMessage() {
+  tut.active = false;
+  tut.finalMessagePending = false;
+  _tutFinalCalled = false;
+  const st = { id: 't_fin', part: 'COMPLETE',
+    msg: '🔴 肩書き「挑戦する」獲得！！\n\nこれは、最初の一歩を踏み出した証。\nDOPADOには、よりレアなアイテムも眠っている。\n獲得を目指せ！！',
+    hint: '', pos: 'top', bg: true };
+  tutSetBubble(st);
+  tutGlow(null);
+  const bg = document.getElementById('tutBg');
+  if (bg) bg.style.opacity = '0.9';
+  const sk = document.getElementById('tutSkip');
+  if (sk) sk.style.display = 'none';
+  setTimeout(() => { _tutHideOverlay(); showToast('チュートリアル完了！おめでとう！'); }, 5200);
+}
+
+/* ---------- 描画 ---------- */
+function tutRender() {
+  if (!tut.active) return;
+  const st = tutCurrentStep();
+  if (!st) return;
+  if (tut.phase === 'home') {
+    const bg = document.getElementById('tutBg');
+    if (bg) bg.style.opacity = '0.92';
+    tutSetBubble(st);
+    tutGlow(null);
+    return;
+  }
+  const hideBg = st.id === 't_chrg' || st.id === 't_bon' || st.id === 't_rwd';
+  const bg = document.getElementById('tutBg');
+  if (bg) bg.style.opacity = hideBg ? '0' : (st.bg ? '0.88' : '0.5');
+  tutSetBubble(st);
+  tutGlowForStep(st.id);
+}
+
+function tutSetBubble(st) {
+  const bbl = document.getElementById('tutBubble');
+  if (!bbl) return;
+  document.getElementById('tutPart').textContent = st.part || '';
+  document.getElementById('tutMsg').textContent = st.msg || '';
+  document.getElementById('tutHint').textContent = st.hint || '';
+  // カウンター
+  const counter = document.getElementById('tutCounter');
+  if (counter) {
+    if (st.id === 't_fin') { counter.textContent = ''; }
+    else {
+      const phases = ['home','part1','part2','part3'];
+      const lens = [TUT_HOME_STEPS.length, TUT_PART1_STEPS.length, TUT_PART2_STEPS.length, TUT_PART3_STEPS.length];
+      const pIdx = phases.indexOf(tut.phase);
+      const total = lens.reduce((a,b)=>a+b,0);
+      let done = 0; for (let i=0;i<pIdx;i++) done += lens[i];
+      done += tut.step;
+      counter.textContent = (done + 1) + ' / ' + total;
+    }
+  }
+  bbl.classList.toggle('top', st.pos === 'top');
+  // ボタン処理
+  let btn = document.getElementById('tutActionBtn');
+  if (st.btn) {
+    if (!btn) { btn = document.createElement('button'); btn.id = 'tutActionBtn'; btn.className = 'tut-btn'; bbl.appendChild(btn); }
+    btn.textContent = st.btn;
+    btn.onclick = () => {
+      if (st.id === 'h_home_ios') localStorage.setItem('dopado_home_prompt_seen', '1');
+      if (st.id === 't_failmsg' && tut.habitAvoidId) {
+        // 失敗ログを静かに解除（成功長押しをできるようにする）
+        if (state.habitLogs[tut.habitAvoidId]) {
+          delete state.habitLogs[tut.habitAvoidId][habitTargetDate({id:tut.habitAvoidId,habitKind:'avoid'})];
+        }
+        flippedHabitId = null;
+        saveState(); render();
+      }
+      btn.remove();
+      tutAdvance();
+    };
+    bbl.classList.add('has-btn');
+  } else {
+    if (btn) btn.remove();
+    bbl.classList.remove('has-btn');
+  }
+  bbl.classList.add('show');
+}
+
+function tutGlow(el) {
+  document.querySelectorAll('.tut-glow').forEach(x => x.classList.remove('tut-glow'));
+  if (el) el.classList.add('tut-glow');
+}
+function tutPulse(el) {
+  document.querySelectorAll('.tut-pulse').forEach(x => x.classList.remove('tut-pulse'));
+  if (el) el.classList.add('tut-pulse');
+}
+function tutIsTaskOverlayOpen(){const ov=document.getElementById('taskOverlay');return !!(ov&&ov.classList.contains('show'))}
+function tutIsProfileOpen(){const ov=document.getElementById('profileOverlay');return !!(ov&&ov.classList.contains('show'))}
+function tutFirstEmptyHabitTile(){return document.querySelector('.habit-tile.empty')}
+function tutButtonByText(root,selector,text){
+  const list=[...(root||document).querySelectorAll(selector)];
+  return list.find(x=>String(x.textContent||'').includes(text))||null;
+}
+function tutGlowForStep(sid) {
+  requestAnimationFrame(() => {
+    let el = null, pulse = null;
+    const taskEl = tut.taskId ? document.querySelector('[data-id="' + tut.taskId + '"]') : null;
+    const doEl = tut.habitDoId ? document.querySelector('.habit-tile[data-id="' + tut.habitDoId + '"]') : null;
+    const avEl = tut.habitAvoidId ? document.querySelector('.habit-tile[data-id="' + tut.habitAvoidId + '"]') : null;
+    if (sid === 't_add') { el = document.getElementById('mi'); pulse = document.getElementById('db'); }
+    else if (sid === 't_today' || sid === 't_imp') el = taskEl;
+    else if (sid === 't_ext') { el = taskEl && taskEl.querySelector('.task-menu-toggle'); pulse = el; }
+    else if (sid === 't_sub') { el = document.querySelector('.subtask-input') || document.querySelector('.subtask-add'); pulse = document.querySelector('.subtask-add'); }
+    else if (sid === 't_mtab') { el = tutButtonByText(document,'button.task-extra-tab','メモ'); pulse = el; }
+    else if (sid === 't_memo') el = document.querySelector('.task-memo');
+    else if (sid === 't_cext') { el = taskEl && taskEl.querySelector('.task-menu-toggle'); pulse = el; }
+    else if (sid === 't_prep' || sid === 't_done') { const b = taskEl && taskEl.querySelector('.task-btn'); el = b || taskEl; pulse = b; }
+    else if (sid === 't_chrg' || sid === 't_bon') el = document.getElementById('chargeMeter');
+    else if (sid === 't_prof') { el = document.querySelector('.identity'); pulse = el; }
+    else if (sid === 't_name') el = document.getElementById('nameInput');
+    else if (sid === 't_pcls') { el = document.querySelector('#profileOverlay .popup-close'); pulse = el; }
+    else if (sid === 't_hab') { el = document.getElementById('habitRow'); pulse = el; }
+    else if (sid === 't_cdo' || sid === 't_cavd') {
+      if (tutIsTaskOverlayOpen()) {
+        el = sid === 't_cavd' ? document.getElementById('habitKindInput') : document.getElementById('taskNameInput');
+        pulse = document.getElementById('taskSaveBtn');
+      } else {
+        el = tutFirstEmptyHabitTile();
+        pulse = el;
+      }
+    }
+    else if (sid === 't_lpdo') { el = doEl; pulse = doEl; }
+    else if (sid === 't_dtap' || sid === 't_lpavd') { el = avEl; pulse = avEl; }
+    else if (sid === 't_fail') { el = avEl && (avEl.querySelector('.mini-btn.fail') || avEl); pulse = el; }
+    tutGlow(el);
+    tutPulse(pulse);
+  });
+}
+
+/* ---------- チュートリアル中の報酬制御 ----------
+   Part2: 白固定チケットを専用発行（tap側で分岐）
+   Part3: 練習(do習慣/失敗)では報酬を出さない。最後のavoid成功のみBONUS。
+------------------------------------------------ */
+// tapから呼ぶ: このタスク完了時にチュートリアル専用白チケットを使うか
+function tutShouldForceWhiteTicket() {
+  return tut.active && tut.phase === 'part1' && tutCurrentStep() && tutCurrentStep().id === 't_done';
+}
+// 習慣達成時、通常BONUSチケットを抑制すべきか
+function tutShouldSuppressHabitReward(habitId) {
+  // チュートリアル用習慣は常に通常BONUSを抑制
+  // （t_lpavdの最終BONUSはtutHook内で専用チケット1枚のみ）
+  if (!tut.active) return false;
+  return tutIsTempHabit(habitId);
+}
+
+/* ---------- フック ---------- */
+function tutHook(evt, data) {
+  if (!tut.active || tut.phase === 'home') return;
+  const st = tutCurrentStep();
+  if (!st) return;
+  const sid = st.id;
+  switch (evt) {
+    case 'task_added':
+      if (sid === 't_add') { tut.taskId = data.id; data.tutorial = true; tutAdvance(); }
+      break;
+    case 'priority_swiped':
+      if (sid === 't_today' && data.id === tut.taskId && isTaskToday(data)) tutAdvance();
+      else if (sid === 't_imp' && data.id === tut.taskId && isTaskImportant(data)) tutAdvance();
+      break;
+    case 'extras_open':
+      if (sid === 't_ext' && data === tut.taskId) tutAdvance();
+      break;
+    case 'subtask_saved':
+      if (sid === 't_sub') tutAdvance();
+      break;
+    case 'memo_tab':
+      if (sid === 't_mtab') tutAdvance();
+      break;
+    case 'memo_input':
+      if (sid === 't_memo') tutAdvance();
+      break;
+    case 'extras_close':
+      if (sid === 't_cext') tutAdvance();
+      break;
+    case 'task_charging':
+      if (sid === 't_prep' && data === tut.taskId) tutAdvance();
+      break;
+    case 'task_done':
+      if (sid === 't_done' && data === tut.taskId) tutAdvance();
+      break;
+    case 'reward_shown':
+      if (sid === 't_chrg') tutAdvance();
+      else if (sid === 't_bon') { /* BONUS_CLOSE/RESULT経由でtutFinalDoneを呼ぶ */ }
+      break;
+    case 'reward_closed':
+      if (sid === 't_rwd') tutAdvance();
+      break;
+    case 'profile_open':
+      if (sid === 't_prof') tutAdvance();
+      break;
+    case 'name_changed':
+      if (sid === 't_name' && !tut.nameEntered) { tut.nameEntered = true; tutAdvance(); }
+      break;
+    case 'profile_close':
+      if (sid === 't_pcls') tutAdvance();
+      break;
+    case 'mode_habits':
+      if (sid === 't_hab') tutAdvance();
+      break;
+    case 'habit_added':
+      if (sid === 't_cdo' && data.habitKind === 'do') { tut.habitDoId = data.id; data.tutorial = true; tutAdvance(); }
+      else if (sid === 't_cavd' && data.habitKind === 'avoid') { tut.habitAvoidId = data.id; data.tutorial = true; tutAdvance(); }
+      break;
+    case 'habit_done':
+      if (sid === 't_lpdo' && data === tut.habitDoId) tutAdvance();
+      else if (sid === 't_lpavd' && data === tut.habitAvoidId) {
+        tutAdvance(); // → t_bon
+        // 通常BONUSは抑制済み。チュートリアル専用チケット1枚だけ発火
+        setTimeout(() => {
+          if (tut.active && !tut.bonusFired) {
+            const cur = tutCurrentStep();
+            if (cur && cur.id === 't_bon') {
+              tut.bonusFired = true;
+              tutRender();
+              setTimeout(() => {
+                // tutorial専用BONUS。結果色と報酬色はBONUS側の結果に合わせる
+                issueChargeTicket({ id: 'tut_bonus', name: 'TUTORIAL BONUS' }, { force: 'bonus', type: 'habit', tutorial: true });
+                setTimeout(() => startNextChargeTicket(true), 120);
+              }, 800);
+            }
+          }
+        }, 400);
+      }
+      break;
+    case 'habit_flip':
+      if (sid === 't_dtap' && data === tut.habitAvoidId) tutAdvance();
+      break;
+    case 'habit_failed':
+      if (sid === 't_fail' && data === tut.habitAvoidId) { tut.failRecorded = true; tutAdvance(); }
+      break;
+  }
+}
+
+/* ---------- 再実行（開発用） ---------- */
+function tutReplay() {
+  state.onboarded = false;
+  localStorage.removeItem('dopado_tutorial_completed');
+  localStorage.removeItem('dopado_home_prompt_seen');
+  saveState();
+  tutStart();
+}
+
+function checkOnboarding(){if(localStorage.getItem('dopado_tutorial_completed')!=='1'){tutStart();}}
+
 if('serviceWorker' in navigator){
   navigator.serviceWorker.getRegistrations
     ? navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{})
     : navigator.serviceWorker.ready.then(r=>r.unregister()).catch(()=>{});
 }
 oneTimeDataResetForTutorial();
-loadState();initBaseViewport(true);syncViewport();renderHeader();render();renderChargeMini();resetPraiseInput();renderInputPrompt(true);scheduleInputPromptRotation();
+loadState();cleanStaleTutorialData();initBaseViewport(true);syncViewport();renderHeader();render();renderChargeMini();resetPraiseInput();renderInputPrompt(true);scheduleInputPromptRotation();
 checkOnboarding();
 
 </script>

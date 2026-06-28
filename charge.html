@@ -123,24 +123,40 @@ html{width:260px;height:260px;overflow:hidden;background:transparent;}
 }
 
 #meter.peka-slow {
-    animation: pekaSlowFlash 1.35s ease-in-out infinite;
+    animation: pekaSlowFlash 2.05s cubic-bezier(.2,.0,.22,1) infinite;
 }
 
 @keyframes pekaSlowFlash {
-    0%, 100% {
-        filter: brightness(1.08);
+    0%, 14% {
+        filter: brightness(0.42) saturate(0.72);
+        border-color: rgba(0, 229, 188, 0.28);
         box-shadow:
-            0 0 0 1px rgba(0, 229, 188, 0.95),
-            0 0 18px rgba(0, 229, 188, 0.90),
-            0 0 42px rgba(0, 229, 188, 0.55),
-            0 0 72px rgba(0, 200, 165, 0.30);
+            0 0 0 1px rgba(0, 229, 188, 0.10),
+            0 0 3px rgba(0, 229, 188, 0.08);
     }
-    54% {
-        filter: brightness(0.88);
+    34%, 58% {
+        filter: brightness(1.02) saturate(1.05);
+        border-color: rgba(0, 229, 188, 0.86);
         box-shadow:
-            0 0 0 1px rgba(0, 229, 188, 0.40),
-            0 0 8px rgba(0, 229, 188, 0.22),
-            0 0 18px rgba(0, 200, 165, 0.10);
+            0 0 0 1px rgba(0, 229, 188, 0.55),
+            0 0 13px rgba(0, 229, 188, 0.42),
+            0 0 28px rgba(0, 200, 165, 0.22);
+    }
+    72%, 86% {
+        filter: brightness(1.32) saturate(1.24);
+        border-color: rgba(0, 229, 188, 1);
+        box-shadow:
+            0 0 0 1px rgba(0, 229, 188, 1),
+            0 0 24px rgba(0, 229, 188, 0.95),
+            0 0 54px rgba(0, 229, 188, 0.66),
+            0 0 88px rgba(0, 200, 165, 0.36);
+    }
+    100% {
+        filter: brightness(0.42) saturate(0.72);
+        border-color: rgba(0, 229, 188, 0.28);
+        box-shadow:
+            0 0 0 1px rgba(0, 229, 188, 0.10),
+            0 0 3px rgba(0, 229, 188, 0.08);
     }
 }
 
